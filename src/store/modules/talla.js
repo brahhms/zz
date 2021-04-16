@@ -17,20 +17,13 @@ export default {
     nuevaTalla: {
       _id: undefined,
       _rev: undefined,
-      nombre: null,
-      cantidad: 0,
-      unidad: "pares"
+      nombre: null
     },
-    tallas: [],
-    unidades: ["pares",
-      "pares en pliego",
-      "galones"
-    ]
+    tallas: []
   },
   mutations: {
     setTallas(state, data) {
       state.tallas = data;
-      console.log("setTallas");
     },
 
     setNuevaTalla(state, talla) {
@@ -53,22 +46,32 @@ export default {
       const res = await axios.post(`${url}_find`, {
         "selector": {}
       }, credentials.authentication);
-      commit('setTallas', res.data.docs);
+      
+      if(res.statusText=='OK'){
+        commit('setTallas', res.data.docs);
+      }else{
+        console.log('ErrorGET');
+      }
     },
 
     async updateTalla({
       commit,
       state
     }) {
-      await axios.put(`${url}${state.nuevaTalla._id}/`, state.nuevaTalla, {
+      let res = await axios.put(`${url}${state.nuevaTalla._id}/`, state.nuevaTalla, {
         params: {
           "rev": state.nuevaTalla._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
-      const response = await getAll();
-      commit('setTallas', response.data.docs);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setTallas', response.data.docs);
+      }else{
+        console.log('errorUPDATE');
+      }
+      return res.data.ok
     },
 
     async saveTalla({
@@ -80,11 +83,12 @@ export default {
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
       if (res.data.ok) {
-        console.log("ok");
         const response = await getAll();
         commit('setTallas', response.data.docs);
+      }else{
+        console.log('errorSAVE');
       }
-
+      return res.data.ok
 
     },
 
@@ -92,7 +96,7 @@ export default {
       commit,
       state
     }) {
-      await axios.delete(`${url}${state.nuevaTalla._id}`, {
+      let res = await axios.delete(`${url}${state.nuevaTalla._id}`, {
         params: {
           "rev": state.nuevaTalla._rev
         },
@@ -100,13 +104,17 @@ export default {
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
-      const response = await getAll();
-      commit('setTallas', response.data.docs);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setTallas', response.data.docs);
+      }else{
+        console.log('errorDelete');
+      }
+      return res.data.ok
     }
   },
   getters: {
     tallas: state => state.tallas,
-    unidades: state => state.unidades,
 
     nuevaTalla: state => state.nuevaTalla
   }

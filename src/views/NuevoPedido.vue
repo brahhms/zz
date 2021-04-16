@@ -95,22 +95,14 @@
       </v-stepper-items>
     </v-stepper>
 
-    <v-snackbar v-model="snackbar.show" :timeout="snackbar.timeout">
-      {{ snackbar.msj }}
-
-      <template v-slot:action="{ attrs }">
-        <v-btn color="blue" text v-bind="attrs" @click="snackbar.show = false">
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
+    
   </div>
 </template>
 <script>
 import DetallePedido from "../components/DetallePedido.vue";
 import DetalleCliente from "../components/DetalleCliente.vue";
-import { createNamespacedHelpers, mapState } from "vuex";
-const { mapGetters, mapMutations, mapActions } = createNamespacedHelpers(
+import { createNamespacedHelpers,mapMutations } from "vuex";
+const { mapGetters, mapMutations:mapMutationsPedido, mapActions } = createNamespacedHelpers(
   "pedido"
 );
 
@@ -188,7 +180,8 @@ export default {
   },
   methods: {
     ...mapActions(["savePedido", "iniciarDetalle"]),
-    ...mapMutations(["addDetalle", "validarPedido"]),
+    ...mapMutationsPedido(["addDetalle", "validarPedido"]),
+        ...mapMutations(["mostrarMsj"]),
     async loadData() {
       await this.iniciarDetalle();
       this.loading1 = false;
@@ -205,16 +198,10 @@ export default {
         this.mostrarMsj("Pedido guardado!");
         this.e1=1;
       }
-    },
-    mostrarMsj(msj) {
-      this.snackbar.msj = msj;
-      this.snackbar.show = true;
-      
-    },
+    }
   },
 
   computed: {
-    ...mapState(["snackbar"]),
     ...mapGetters([
       "cliente",
       "detalles",

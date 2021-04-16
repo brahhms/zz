@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-materiales/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-      "selector": {}
+    "selector": {}
   }, credentials.authentication);
   return response;
 }
@@ -14,12 +14,32 @@ async function getAll() {
 export default {
   namespaced: true,
   state: {
+    nuevoMaterial: {
+      _id: undefined,
+      _rev: undefined,
+      nombre: null,
+      defaultColor: null,
+      colores: []
+    },
     materiales: []
   },
   mutations: {
     setMateriales(state, data) {
       state.materiales = data;
-      console.log("setMateriales");
+    },
+
+    setNuevoMaterial(state, material) {
+      state.nuevoMaterial = material;
+    },
+
+    iniciarMaterial(state) {
+      state.nuevoMaterial = {
+        _id: undefined,
+        _rev: undefined,
+        nombre: null,
+        defaultColor: null,
+        colores: []
+      };
     }
 
   },
@@ -30,49 +50,76 @@ export default {
       const res = await axios.post(`${url}_find`, {
         "selector": {}
       }, credentials.authentication);
-      commit('setMateriales', res.data.docs);
+
+      if (res.statusText == 'OK') {
+        commit('setMateriales', res.data.docs);
+      } else {
+        console.log('ErrorGET');
+      }
     },
 
     async updateMaterial({
-      commit
-    }, material) {
-       await axios.put(`${url}${material._id}/`, material, {
+      commit,
+      state
+    }) {
+      let res = await axios.put(`${url}${state.nuevoMaterial._id}/`, state.nuevoMaterial, {
         params: {
-          "rev": material._rev
+          "rev": state.nuevoMaterial._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
-      const response = await getAll();
-      commit('setMateriales', response.data.docs);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setMateriales', response.data.docs);
+      } else {
+        console.log('errorUPDATE');
+      }
+      return res.data.ok
     },
 
     async saveMaterial({
-      commit
-    }, material) {
-      await axios.post(`${url}`, material, {
+      commit,
+      state
+    }) {
+      let res = await axios.post(`${url}`, state.nuevoMaterial, {
+        "auth": credentials.authentication.auth,
+        "headers": credentials.authentication.headers,
+      }, credentials.authentication);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setMateriales', response.data.docs);
+      } else {
+        console.log('errorSAVE');
+      }
+      return res.data.ok
+
+    },
+
+    async deleteMaterial({
+      commit,
+      state
+    }) {
+      let res = await axios.delete(`${url}${state.nuevoMaterial._id}`, {
+        params: {
+          "rev": state.nuevoMaterial._rev
+        },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
-      const response = await getAll();
-      commit('setMateriales', response.data.docs);
-    },
-
-    async deleteMaterial({commit}, material){
-      await axios.delete(`${url}${material._id}`, {
-          params: {
-              "rev": material._rev
-          },
-          "auth": credentials.authentication.auth,
-          "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-      
-      const response = await getAll();
-      commit('setMateriales', response.data.docs);
-  }
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setMateriales', response.data.docs);
+      } else {
+        console.log('errorDelete');
+      }
+      return res.data.ok
+    }
   },
   getters: {
-    materiales: state => state.materiales
+    materiales: state => state.materiales,
+
+    nuevoMaterial: state => state.nuevoMaterial
   }
 }

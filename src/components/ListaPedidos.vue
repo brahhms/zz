@@ -9,8 +9,13 @@
         <v-icon left>mdi-clipboard-check </v-icon>
         Lista de Compras
       </v-tab>
+      <v-tab>
+        Suelas
+      </v-tab>
 
       <v-tab-item>
+        <v-btn @click="generatePDF" color="primary">imprimir</v-btn>
+
         <v-card flat>
           <v-card-text>
             <draggable
@@ -108,7 +113,6 @@
               <template v-slot:top>
                 <v-toolbar flat>
                   <v-toolbar-title>Adornos</v-toolbar-title>
-                  
                 </v-toolbar>
               </template>
 
@@ -152,6 +156,42 @@
                 <v-btn color="primary"> Reset </v-btn>
               </template>
             </v-data-table>
+            
+          </v-card-text>
+        </v-card>
+      </v-tab-item>
+      <v-tab-item>
+        <v-card flat>
+          <v-card-text v-if="semanaSeleccionada.listaDeCompras != null">
+            
+            <v-data-table
+              v-for="suela in semanaSeleccionada.listaDeCompras.suelas"
+              :key="suela.nombre"
+             
+              class="elevation-1"
+              disable-pagination
+              hide-default-footer
+            >
+              <template v-slot:top>
+                <v-toolbar flat>
+                  <v-toolbar-title>{{suela.nombre}} {{suela.color}}</v-toolbar-title>
+                </v-toolbar>
+              </template>
+
+              <template v-slot:body>
+                <tbody>
+                <tr>
+                  <td>
+                    <span  v-for="detalle in positivos(suela.detalle)" :key="detalle.nombre"><v-chip>{{detalle.cantidad}}/{{detalle.nombre}}</v-chip> </span>
+                  </td>
+                </tr>
+                </tbody>
+              </template>
+
+              <template v-slot:no-data>
+                <v-btn color="primary"> Reset </v-btn>
+              </template>
+            </v-data-table>
           </v-card-text>
         </v-card>
       </v-tab-item>
@@ -162,6 +202,8 @@
 
 <script>
 import draggable from "vuedraggable";
+import { jsPDF } from "jspdf";
+require("jspdf-autotable");
 
 import { createNamespacedHelpers } from "vuex";
 
@@ -177,44 +219,51 @@ export default {
   data: () => ({
     oldIndex: "",
     newIndex: "",
-    headers:[{
-          text: 'Cantidad',
-          align: 'end',
-          sortable: false,
-          value: 'cantidad',
-          width:1
-        },{
-          text: '',
-          align: 'start',
-          sortable: false,
-          value: 'unidad',
-          width:2
-        },
-        {
-          text: 'Nombre',
-          align: 'start',
-          sortable: false,
-          value: 'nombre',
-        }],
-        materialesHeaders:[{
-          text: 'Cantidad',
-          align: 'end',
-          sortable: false,
-          value: 'cantidad',
-          width:1
-        },{
-          text: '',
-          align: 'Nombre',
-          sortable: false,
-          value: 'nombre',
-          width:3
-        },
-        {
-          text: 'Color',
-          align: 'start',
-          sortable: false,
-          value: 'color',
-        }]
+    headers: [
+      {
+        text: "Cantidad",
+        align: "end",
+        sortable: false,
+        value: "cantidad",
+        width: 1,
+      },
+      {
+        text: "Unidad",
+        align: "start",
+        sortable: false,
+        value: "unidad",
+        width: 2,
+      },
+      {
+        text: "Nombre",
+        align: "start",
+        sortable: false,
+        value: "nombre",
+      },
+    ],
+    materialesHeaders: [
+      {
+        text: "Cantidad",
+        align: "end",
+        sortable: false,
+        value: "cantidad",
+        width: 1,
+      },
+      {
+        text: "Nombre",
+        align: "Nombre",
+        sortable: false,
+        value: "nombre",
+        width: 3,
+      },
+      {
+        text: "Color",
+        align: "start",
+        sortable: false,
+        value: "color",
+      },
+    ],
+
   }),
   mounted() {},
   methods: {
@@ -230,9 +279,91 @@ export default {
       });
       return sum;
     },
+    generatePDF() {
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "in",
+        format: "legal",
+      });
+
+      const columns = [
+        { title: "Codigo", dataKey: "codigo" },
+        { title: "Material", dataKey: "material" },
+        { title: "Tallas", dataKey: "tallas" },
+        { title: "Horma", dataKey: "horma" },
+        { title: "Forro", dataKey: "forro" },
+        { title: "Suela", dataKey: "suela" },
+      ];
+
+      doc
+        .setFontSize(12)
+        .text(
+          "Semana " +
+            this.semanaSeleccionada.semana +
+            " " +
+            this.semanaSeleccionada.ano,
+          0.5,
+          0.8
+        );
+
+      this.semanaSeleccionada.pedidos.forEach((pedido) => {
+        let items = pedido.detalle.map((detalle) => {
+          let tall = "";
+          detalle.detalleTallas.forEach((t) => {
+            if (t.cantidad > 0) {
+              tall = tall + t.cantidad + "/" + t.talla.nombre + ",";
+            }
+          });
+          tall = tall.substring(0, tall.length - 1);
+          return [
+            detalle.estilo.linea.nombre + detalle.estilo.correlativo,
+            detalle.detalleMaterial.material.nombre +" "+detalle.detalleMaterial.color,
+            tall,
+            detalle.horma.nombre,
+            detalle.detalleForro.forro.nombre+" "+detalle.detalleForro.color,
+            detalle.detalleSuela.suela.nombre
+          ];
+        });
+
+        // text is placed using x, y coordinates
+        //doc.setFontSize(16).text(pedido.cliente.nombre, 0.5, 1.0);
+
+        // Using autoTable plugin
+
+        let head = [
+          [
+            {
+              content: pedido.cliente.nombre,
+              colSpan: 5,
+              styles: { halign: "left" },
+            },
+          ],
+          [
+            { title: "Codigo", dataKey: "codigo" },
+            { title: "Material", dataKey: "material" },
+            { title: "Tallas", dataKey: "tallas" },
+            { title: "Horma", dataKey: "horma" },
+            { title: "Forro", dataKey: "forro" },
+          ],
+        ];
+
+        doc.autoTable({
+          head,
+          body: items,
+          margin: { top: 1 },
+        });
+      });
+
+      // Creating footer and saving file
+      doc.save(`${this.heading}.pdf`);
+    },
+    positivos(lista){
+      return lista.filter(item=>item.cantidad>0)
+    }
   },
   computed: {
     ...mapGettersPedido(["semanaSeleccionada"]),
+    
   },
 };
 </script>

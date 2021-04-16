@@ -16,7 +16,8 @@ import avilloStore from './modules/avillo'
 import credentials from "./modules/credentials";
 
 Vue.use(Vuex)
-axios.defaults.baseURL = "http://localhost:5984"
+//axios.defaults.baseURL = "http://localhost:5984"
+var qs = require('qs');
 
 export default new Vuex.Store({
   state: {
@@ -32,20 +33,20 @@ export default new Vuex.Store({
   mutations: {
     ocultarBarra(state) {
       state.showBar = false;
-    }
+    },
+    mostrarMsj(state,msj) {
+      state.snackbar.msj = msj;
+      state.snackbar.show = true;
+    },
   },
   actions: {
 
-    async auth(){
-      const res = await axios.post(`http://localhost:5984/_session`, {
-        "name":"admin",
-        "password":"admin"
-      }, credentials.authentication);
-      
-      res.ok
-    
+    async auth() {
+     
+
+
     }
-    
+
 
   },
   modules: {

@@ -32,8 +32,6 @@
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
-  
-
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -82,8 +80,12 @@
 
 
 <script>
-import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers("talla");
+import { createNamespacedHelpers, mapMutations } from "vuex";
+const {
+  mapGetters,
+  mapActions,
+  mapMutations: mapMutationsTalla,
+} = createNamespacedHelpers("talla");
 export default {
   data: () => ({
     dialog: false,
@@ -95,7 +97,7 @@ export default {
         sortable: false,
         value: "nombre",
       },
- 
+
       { text: "Acciones", value: "actions", sortable: false },
     ],
     editedIndex: -1,
@@ -105,7 +107,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Nueva" : "Editar";
     },
-    ...mapGetters(["tallas","nuevaTalla"]),
+    ...mapGetters(["tallas", "nuevaTalla"]),
     allTallas: {
       set(tallas) {
         return tallas;
@@ -140,10 +142,10 @@ export default {
 
   methods: {
     ...mapActions(["getTallas", "updateTalla", "saveTalla", "deleteTalla"]),
-    ...mapMutations(["iniciarTalla","setNuevaTalla"]),
+    ...mapMutationsTalla(["iniciarTalla", "setNuevaTalla"]),
+    ...mapMutations(["mostrarMsj"]),
     async initialize() {
       await this.getTallas();
-
     },
 
     editItem(item) {
@@ -158,8 +160,11 @@ export default {
       this.dialogDelete = true;
     },
 
-    deleteItemConfirm() {
-      this.deleteTalla();
+    async deleteItemConfirm() {
+      let res = await this.deleteTalla();
+      if (res) {
+          this.mostrarMsj("Talla eliminada!");
+        }
       this.closeDelete();
     },
 
@@ -182,10 +187,16 @@ export default {
     async save() {
       if (this.editedIndex > -1) {
         //editar
-        await this.updateTalla();
+        let res = await this.updateTalla();
+        if (res) {
+          this.mostrarMsj("Talla modificada!");
+        }
       } else {
         //guardar
-        await this.saveTalla();
+        let res = await this.saveTalla();
+        if (res) {
+          this.mostrarMsj("Talla guardada!");
+        }
       }
       this.close();
     },

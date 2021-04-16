@@ -2,7 +2,7 @@
   <div class="horma">
     <v-data-table
       :headers="headers"
-      :items="items"
+      :items="allHormas"
       class="elevation-1"
       disable-pagination
       hide-default-footer
@@ -28,7 +28,7 @@
                   <v-row>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.nombre"
+                        v-model="nueva.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
@@ -73,13 +73,6 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
-      <template v-slot:item.colores="{ item }">
-        <div v-if="item.colores">
-          <v-chip v-for="color in item.colores" :key="color">{{
-            color
-          }}</v-chip>
-        </div>
-      </template>
     </v-data-table>
   </div>
 </template>
@@ -87,8 +80,12 @@
 
 
 <script>
-import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("horma");
+import { createNamespacedHelpers, mapMutations } from "vuex";
+const {
+  mapGetters,
+  mapActions,
+  mapMutations: mapMutationsHorma,
+} = createNamespacedHelpers("horma");
 export default {
   data: () => ({
     dialog: false,
@@ -100,23 +97,34 @@ export default {
         sortable: false,
         value: "nombre",
       },
+
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    items: [],
     editedIndex: -1,
-    editedItem: {
-      nombre: "",
-    },
-    defaultItem: {
-      nombre: "",
-    },
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Nuevo" : "Editar";
+      return this.editedIndex === -1 ? "Nueva" : "Editar";
     },
-    ...mapGetters(["hormas"]),
+    ...mapGetters(["hormas", "nuevaHorma"]),
+    allHormas: {
+      set(hormas) {
+        return hormas;
+      },
+      get() {
+        return this.hormas;
+      },
+    },
+    nueva: {
+      set(horma) {
+        this.setNuevaHorma(horma);
+        return horma;
+      },
+      get() {
+        return this.nuevaHorma;
+      },
+    },
   },
 
   watch: {
@@ -129,47 +137,41 @@ export default {
   },
 
   created() {
-    this.cargarDatos();
+    this.initialize();
   },
 
   methods: {
     ...mapActions(["getHormas", "updateHorma", "saveHorma", "deleteHorma"]),
-    async cargarDatos() {
+    ...mapMutationsHorma(["iniciarHorma", "setNuevaHorma"]),
+    ...mapMutations(["mostrarMsj"]),
+    async initialize() {
       await this.getHormas();
-      this.initialize();
-    },
-    initialize() {
-      this.items = this.hormas.map((horma) => {
-        return {
-          _id: horma._id,
-          _rev: horma._rev,
-          nombre: horma.nombre,
-        };
-      });
     },
 
     editItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.hormas.indexOf(item);
+      this.nueva = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.hormas.indexOf(item);
+      this.nueva = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
-    deleteItemConfirm() {
-      this.deleteHorma(this.editedItem);
-      this.items.splice(this.editedIndex, 1);
+    async deleteItemConfirm() {
+      let res = await this.deleteHorma();
+      if (res) {
+          this.mostrarMsj("Horma eliminada!");
+        }
       this.closeDelete();
     },
 
     close() {
       this.dialog = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarHorma();
         this.editedIndex = -1;
       });
     },
@@ -177,21 +179,24 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarHorma();
         this.editedIndex = -1;
       });
     },
 
-    save() {
+    async save() {
       if (this.editedIndex > -1) {
         //editar
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateHorma(this.editedItem);
+        let res = await this.updateHorma();
+        if (res) {
+          this.mostrarMsj("Horma modificada!");
+        }
       } else {
         //guardar
-        this.items.push(this.editedItem);
-        console.log(this.editedItem);
-        this.saveHorma(this.editedItem);
+        let res = await this.saveHorma();
+        if (res) {
+          this.mostrarMsj("Horma guardada!");
+        }
       }
       this.close();
     },

@@ -52,6 +52,15 @@
           </v-list>
         </v-navigation-drawer>
         <!--fffffff-->
+        <v-snackbar v-model="snackbar.show" :timeout="snackbar.timeout">
+      {{ snackbar.msj }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="snackbar.show = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
       </v-container>
     </v-main>
   </v-app>
@@ -81,13 +90,14 @@ export default {
     ],
   }),
   computed: {
-    ...mapState(["showBar"]),
+    ...mapState(["showBar","snackbar"]),
   },
   methods: {
     ...mapActions(["auth"]),
   },
   created() {
     this.auth();
+    
   },
 };
 </script>

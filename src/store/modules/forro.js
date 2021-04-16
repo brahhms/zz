@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-forros/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-      "selector": {}
+    "selector": {}
   }, credentials.authentication);
   return response;
 }
@@ -14,12 +14,32 @@ async function getAll() {
 export default {
   namespaced: true,
   state: {
+    nuevoForro: {
+      _id: undefined,
+      _rev: undefined,
+      nombre: null,
+      defaultColor: null,
+      colores: []
+    },
     forros: []
   },
   mutations: {
     setForros(state, data) {
       state.forros = data;
-      console.log("setForros");
+    },
+
+    setNuevoForro(state, forro) {
+      state.nuevoForro = forro;
+    },
+
+    iniciarForro(state) {
+      state.nuevoForro = {
+        _id: undefined,
+        _rev: undefined,
+        nombre: null,
+        defaultColor: null,
+        colores: []
+      };
     }
 
   },
@@ -30,49 +50,76 @@ export default {
       const res = await axios.post(`${url}_find`, {
         "selector": {}
       }, credentials.authentication);
-      commit('setForros', res.data.docs);
+
+      if (res.statusText == 'OK') {
+        commit('setForros', res.data.docs);
+      } else {
+        console.log('ErrorGET');
+      }
     },
 
     async updateForro({
-      commit
-    }, forro) {
-       await axios.put(`${url}${forro._id}/`, forro, {
+      commit,
+      state
+    }) {
+      let res = await axios.put(`${url}${state.nuevoForro._id}/`, state.nuevoForro, {
         params: {
-          "rev": forro._rev
+          "rev": state.nuevoForro._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
-      const response = await getAll();
-      commit('setForros', response.data.docs);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setForros', response.data.docs);
+      } else {
+        console.log('errorUPDATE');
+      }
+      return res.data.ok
     },
 
     async saveForro({
-      commit
-    }, forro) {
-      await axios.post(`${url}`, forro, {
+      commit,
+      state
+    }) {
+      let res = await axios.post(`${url}`, state.nuevoForro, {
+        "auth": credentials.authentication.auth,
+        "headers": credentials.authentication.headers,
+      }, credentials.authentication);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setForros', response.data.docs);
+      } else {
+        console.log('errorSAVE');
+      }
+      return res.data.ok
+
+    },
+
+    async deleteForro({
+      commit,
+      state
+    }) {
+      let res = await axios.delete(`${url}${state.nuevoForro._id}`, {
+        params: {
+          "rev": state.nuevoForro._rev
+        },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
-      const response = await getAll();
-      commit('setForros', response.data.docs);
-    },
-
-    async deleteForro({commit}, forro){
-      await axios.delete(`${url}${forro._id}`, {
-          params: {
-              "rev": forro._rev
-          },
-          "auth": credentials.authentication.auth,
-          "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-      
-      const response = await getAll();
-      commit('setForros', response.data.docs);
-  }
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setForros', response.data.docs);
+      } else {
+        console.log('errorDelete');
+      }
+      return res.data.ok
+    }
   },
   getters: {
-    forros: state => state.forros
+    forros: state => state.forros,
+
+    nuevoForro: state => state.nuevoForro
   }
 }

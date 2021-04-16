@@ -5,8 +5,7 @@ const authentication = {
     },
     headers:{'Content-Type': 'application/json; charset=utf-8'}
 };
-
-
+ 
 export default {
     authentication,
 }

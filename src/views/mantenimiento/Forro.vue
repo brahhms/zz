@@ -2,7 +2,7 @@
   <div class="forro">
     <v-data-table
       :headers="headers"
-      :items="items"
+      :items="forros"
       class="elevation-1"
       disable-pagination
       hide-default-footer
@@ -28,13 +28,13 @@
                   <v-row>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.nombre"
+                        v-model="nuevo.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
                       <v-combobox
-                        v-model="editedItem.colores"
+                        v-model="nuevo.colores"
                         :items="colores"
                         label="Colores"
                         multiple
@@ -44,9 +44,9 @@
 
                     <v-col cols="12">
                       <v-select
-                        v-if="editedItem.colores"
-                        :items="editedItem.colores"
-                        v-model="editedItem.defaultColor"
+                        v-if="nuevo.colores"
+                        :items="nuevo.colores"
+                        v-model="nuevo.defaultColor"
                         label="Color default"
                       ></v-select>
                     </v-col>
@@ -105,8 +105,8 @@
 
 
 <script>
-import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("forro");
+import { createNamespacedHelpers, mapMutations } from "vuex";
+const { mapGetters, mapActions, mapMutations:mapMutationsForro } = createNamespacedHelpers("forro");
 export default {
   data: () => ({
     dialog: false,
@@ -132,36 +132,35 @@ export default {
       },
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    items: [],
     editedIndex: -1,
-    editedItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    defaultItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    colores: [
-      "azul",
-      "verde",
-      "rojo",
-      "cafe",
+    colores:[
       "negro",
-      "blanco",
-      "morado",
-      "celeste",
-      "gris",
-    ],
+      "gun"
+    ]
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["forros"]),
+    ...mapGetters(["forros", "nuevoForro"]),
+    allForros: {
+      set(forros) {
+        return forros;
+      },
+      get() {
+        return this.forros;
+      },
+    },
+    nuevo: {
+      set(forro) {
+        this.setNuevoForro(forro);
+        return forro;
+      },
+      get() {
+        return this.nuevoForro;
+      },
+    },
   },
 
   watch: {
@@ -174,49 +173,40 @@ export default {
   },
 
   created() {
-    this.cargarDatos();
+    this.initialize();
   },
 
   methods: {
     ...mapActions(["getForros", "updateForro", "saveForro", "deleteForro"]),
-    async cargarDatos() {
+    ...mapMutationsForro(["iniciarForro", "setNuevoForro"]),
+    ...mapMutations(["mostrarMsj"]),
+    async initialize() {
       await this.getForros();
-      this.initialize();
     },
-    initialize() {
-      this.items = this.forros.map((forro) => {
-        return {
-          _id: forro._id,
-          _rev: forro._rev,
-          nombre: forro.nombre,
-          defaultColor: forro.defaultColor,
-          colores: forro.colores,
-        };
-      });
-    },
-
     editItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.forros.indexOf(item);
+      this.nuevo = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.forros.indexOf(item);
+      this.nuevo = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
-    deleteItemConfirm() {
-      this.deleteForro(this.editedItem);
-      this.items.splice(this.editedIndex, 1);
+    async deleteItemConfirm() {
+      let res = await this.deleteForro();
+      if (res) {
+          this.mostrarMsj("Forro eliminado!");
+        }
       this.closeDelete();
     },
 
     close() {
       this.dialog = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarForro();
         this.editedIndex = -1;
       });
     },
@@ -224,7 +214,7 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarForro();
         this.editedIndex = -1;
       });
     },
@@ -232,13 +222,17 @@ export default {
     save() {
       if (this.editedIndex > -1) {
         //editar
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateForro(this.editedItem);
+        let res = this.updateForro();
+        if (res) {
+          this.mostrarMsj("Forro modificado!");
+        }
       } else {
         //guardar
-        this.items.push(this.editedItem);
-        console.log(this.editedItem);
-        this.saveForro(this.editedItem);
+
+        let res = this.saveForro();
+        if (res) {
+          this.mostrarMsj("Forro guardado!");
+        }
       }
       this.close();
     },

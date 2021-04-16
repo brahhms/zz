@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-suelas/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-      "selector": {}
+    "selector": {}
   }, credentials.authentication);
   return response;
 }
@@ -14,12 +14,32 @@ async function getAll() {
 export default {
   namespaced: true,
   state: {
+    nuevaSuela: {
+      _id: undefined,
+      _rev: undefined,
+      nombre: null,
+      defaultColor: null,
+      colores: []
+    },
     suelas: []
   },
   mutations: {
     setSuelas(state, data) {
       state.suelas = data;
-      console.log("setSuelas");
+    },
+
+    setNuevaSuela(state, suela) {
+      state.nuevaSuela = suela;
+    },
+
+    iniciarSuela(state) {
+      state.nuevaSuela = {
+        _id: undefined,
+        _rev: undefined,
+        nombre: null,
+        defaultColor: null,
+        colores: []
+      };
     }
 
   },
@@ -30,49 +50,76 @@ export default {
       const res = await axios.post(`${url}_find`, {
         "selector": {}
       }, credentials.authentication);
-      commit('setSuelas', res.data.docs);
+
+      if (res.statusText == 'OK') {
+        commit('setSuelas', res.data.docs);
+      } else {
+        console.log('ErrorGET');
+      }
     },
 
     async updateSuela({
-      commit
-    }, suela) {
-       await axios.put(`${url}${suela._id}/`, suela, {
+      commit,
+      state
+    }) {
+      let res = await axios.put(`${url}${state.nuevaSuela._id}/`, state.nuevaSuela, {
         params: {
-          "rev": suela._rev
+          "rev": state.nuevaSuela._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
-      const response = await getAll();
-      commit('setSuelas', response.data.docs);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setSuelas', response.data.docs);
+      } else {
+        console.log('errorUPDATE');
+      }
+      return res.data.ok
     },
 
     async saveSuela({
-      commit
-    }, suela) {
-      await axios.post(`${url}`, suela, {
+      commit,
+      state
+    }) {
+      let res = await axios.post(`${url}`, state.nuevaSuela, {
+        "auth": credentials.authentication.auth,
+        "headers": credentials.authentication.headers,
+      }, credentials.authentication);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setSuelas', response.data.docs);
+      } else {
+        console.log('errorSAVE');
+      }
+      return res.data.ok
+
+    },
+
+    async deleteSuela({
+      commit,
+      state
+    }) {
+      let res = await axios.delete(`${url}${state.nuevaSuela._id}`, {
+        params: {
+          "rev": state.nuevaSuela._rev
+        },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
-      const response = await getAll();
-      commit('setSuelas', response.data.docs);
-    },
-
-    async deleteSuela({commit}, suela){
-      await axios.delete(`${url}${suela._id}`, {
-          params: {
-              "rev": suela._rev
-          },
-          "auth": credentials.authentication.auth,
-          "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-      
-      const response = await getAll();
-      commit('setSuelas', response.data.docs);
-  }
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setSuelas', response.data.docs);
+      } else {
+        console.log('errorDelete');
+      }
+      return res.data.ok
+    }
   },
   getters: {
-    suelas: state => state.suelas
+    suelas: state => state.suelas,
+
+    nuevaSuela: state => state.nuevaSuela
   }
 }

@@ -2,14 +2,14 @@
   <div class="material">
     <v-data-table
       :headers="headers"
-      :items="items"
+      :items="materiales"
       class="elevation-1"
       disable-pagination
       hide-default-footer
     >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>MATERIALES</v-toolbar-title>
+          <v-toolbar-title>MATERIAL</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog persistent v-model="dialog" max-width="500px">
@@ -28,13 +28,13 @@
                   <v-row>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.nombre"
+                        v-model="nuevo.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
                       <v-combobox
-                        v-model="editedItem.colores"
+                        v-model="nuevo.colores"
                         :items="colores"
                         label="Colores"
                         multiple
@@ -44,9 +44,9 @@
 
                     <v-col cols="12">
                       <v-select
-                        v-if="editedItem.colores"
-                        :items="editedItem.colores"
-                        v-model="editedItem.defaultColor"
+                        v-if="nuevo.colores"
+                        :items="nuevo.colores"
+                        v-model="nuevo.defaultColor"
                         label="Color default"
                       ></v-select>
                     </v-col>
@@ -105,8 +105,8 @@
 
 
 <script>
-import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("material");
+import { createNamespacedHelpers, mapMutations } from "vuex";
+const { mapGetters, mapActions, mapMutations:mapMutationsMaterial } = createNamespacedHelpers("material");
 export default {
   data: () => ({
     dialog: false,
@@ -132,40 +132,35 @@ export default {
       },
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    items: [],
     editedIndex: -1,
-    editedItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    defaultItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    colores: [
-      "gena",
+    colores:[
       "negro",
-      "piel",
-      "rosa vieja",
-      "azul",
-      "rojo",
-      "corinto",
-      "uva",
-      "durasno",
-      "beige",
-      "blanco",
-      "mostaza",
-      "",
-    ],
+      "gun"
+    ]
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["materiales"]),
+    ...mapGetters(["materiales", "nuevoMaterial"]),
+    allMateriales: {
+      set(materiales) {
+        return materiales;
+      },
+      get() {
+        return this.materiales;
+      },
+    },
+    nuevo: {
+      set(material) {
+        this.setNuevoMaterial(material);
+        return material;
+      },
+      get() {
+        return this.nuevoMaterial;
+      },
+    },
   },
 
   watch: {
@@ -178,54 +173,40 @@ export default {
   },
 
   created() {
-    this.cargarDatos();
+    this.initialize();
   },
 
   methods: {
-    ...mapActions([
-      "getMateriales",
-      "updateMaterial",
-      "saveMaterial",
-      "deleteMaterial",
-    ]),
-    async cargarDatos() {
+    ...mapActions(["getMateriales", "updateMaterial", "saveMaterial", "deleteMaterial"]),
+    ...mapMutationsMaterial(["iniciarMaterial", "setNuevoMaterial"]),
+    ...mapMutations(["mostrarMsj"]),
+    async initialize() {
       await this.getMateriales();
-      this.initialize();
     },
-    initialize() {
-      this.items = this.materiales.map((material) => {
-        return {
-          _id: material._id,
-          _rev: material._rev,
-          nombre: material.nombre,
-          defaultColor: material.defaultColor,
-          colores: material.colores,
-        };
-      });
-    },
-
     editItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.materiales.indexOf(item);
+      this.nuevo = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.materiales.indexOf(item);
+      this.nuevo = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
-    deleteItemConfirm() {
-      this.deleteMaterial(this.editedItem);
-      this.items.splice(this.editedIndex, 1);
+    async deleteItemConfirm() {
+      let res = await this.deleteMaterial();
+      if (res) {
+          this.mostrarMsj("Material eliminado!");
+        }
       this.closeDelete();
     },
 
     close() {
       this.dialog = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarMaterial();
         this.editedIndex = -1;
       });
     },
@@ -233,7 +214,7 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarMaterial();
         this.editedIndex = -1;
       });
     },
@@ -241,13 +222,17 @@ export default {
     save() {
       if (this.editedIndex > -1) {
         //editar
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateMaterial(this.editedItem);
+        let res = this.updateMaterial();
+        if (res) {
+          this.mostrarMsj("Material modificado!");
+        }
       } else {
         //guardar
-        this.items.push(this.editedItem);
-        console.log(this.editedItem);
-        this.saveMaterial(this.editedItem);
+
+        let res = this.saveMaterial();
+        if (res) {
+          this.mostrarMsj("Material guardado!");
+        }
       }
       this.close();
     },

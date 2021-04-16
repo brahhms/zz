@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-hormas/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-      "selector": {}
+    "selector": {}
   }, credentials.authentication);
   return response;
 }
@@ -14,12 +14,28 @@ async function getAll() {
 export default {
   namespaced: true,
   state: {
+    nuevaHorma: {
+      _id: undefined,
+      _rev: undefined,
+      nombre: null
+    },
     hormas: []
   },
   mutations: {
     setHormas(state, data) {
       state.hormas = data;
-      console.log("setHormas");
+    },
+
+    setNuevaHorma(state, horma) {
+      state.nuevaHorma = horma;
+    },
+
+    iniciarHorma(state) {
+      state.nuevaHorma = {
+        _id: undefined,
+        _rev: undefined,
+        nombre: null
+      };
     }
 
   },
@@ -30,49 +46,76 @@ export default {
       const res = await axios.post(`${url}_find`, {
         "selector": {}
       }, credentials.authentication);
-      commit('setHormas', res.data.docs);
+      
+      if(res.statusText=='OK'){
+        commit('setHormas', res.data.docs);
+      }else{
+        console.log('ErrorGET');
+      }
     },
 
     async updateHorma({
-      commit
-    }, horma) {
-       await axios.put(`${url}${horma._id}/`, horma, {
+      commit,
+      state
+    }) {
+      let res = await axios.put(`${url}${state.nuevaHorma._id}/`, state.nuevaHorma, {
         params: {
-          "rev": horma._rev
+          "rev": state.nuevaHorma._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
-      const response = await getAll();
-      commit('setHormas', response.data.docs);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setHormas', response.data.docs);
+      }else{
+        console.log('errorUPDATE');
+      }
+      return res.data.ok
     },
 
     async saveHorma({
-      commit
-    }, horma) {
-      await axios.post(`${url}`, horma, {
+      commit,
+      state
+    }) {
+      let res = await axios.post(`${url}`, state.nuevaHorma, {
+        "auth": credentials.authentication.auth,
+        "headers": credentials.authentication.headers,
+      }, credentials.authentication);
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setHormas', response.data.docs);
+      }else{
+        console.log('errorSAVE');
+      }
+      return res.data.ok
+
+    },
+
+    async deleteHorma({
+      commit,
+      state
+    }) {
+      let res = await axios.delete(`${url}${state.nuevaHorma._id}`, {
+        params: {
+          "rev": state.nuevaHorma._rev
+        },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
-      const response = await getAll();
-      commit('setHormas', response.data.docs);
-    },
-
-    async deleteHorma({commit}, horma){
-      await axios.delete(`${url}${horma._id}`, {
-          params: {
-              "rev": horma._rev
-          },
-          "auth": credentials.authentication.auth,
-          "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-      
-      const response = await getAll();
-      commit('setHormas', response.data.docs);
-  }
+      if (res.data.ok) {
+        const response = await getAll();
+        commit('setHormas', response.data.docs);
+      }else{
+        console.log('errorDelete');
+      }
+      return res.data.ok
+    }
   },
   getters: {
-    hormas: state => state.hormas
+    hormas: state => state.hormas,
+
+    nuevaHorma: state => state.nuevaHorma
   }
 }

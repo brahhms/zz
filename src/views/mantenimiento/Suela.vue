@@ -2,7 +2,7 @@
   <div class="suela">
     <v-data-table
       :headers="headers"
-      :items="items"
+      :items="suelas"
       class="elevation-1"
       disable-pagination
       hide-default-footer
@@ -28,13 +28,13 @@
                   <v-row>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.nombre"
+                        v-model="nueva.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
                       <v-combobox
-                        v-model="editedItem.colores"
+                        v-model="nueva.colores"
                         :items="colores"
                         label="Colores"
                         multiple
@@ -44,9 +44,9 @@
 
                     <v-col cols="12">
                       <v-select
-                        v-if="editedItem.colores"
-                        :items="editedItem.colores"
-                        v-model="editedItem.defaultColor"
+                        v-if="nueva.colores"
+                        :items="nueva.colores"
+                        v-model="nueva.defaultColor"
                         label="Color default"
                       ></v-select>
                     </v-col>
@@ -105,8 +105,8 @@
 
 
 <script>
-import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("suela");
+import { createNamespacedHelpers, mapMutations } from "vuex";
+const { mapGetters, mapActions, mapMutations:mapMutationsSuela } = createNamespacedHelpers("suela");
 export default {
   data: () => ({
     dialog: false,
@@ -132,36 +132,35 @@ export default {
       },
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    items: [],
     editedIndex: -1,
-    editedItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    defaultItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    colores: [
-      "azul",
-      "verde",
-      "rojo",
-      "cafe",
+    colores:[
       "negro",
-      "blanco",
-      "morado",
-      "celeste",
-      "gris",
-    ],
+      "gun"
+    ]
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Nuevo" : "Editar";
+      return this.editedIndex === -1 ? "Nueva" : "Editar";
     },
-    ...mapGetters(["suelas"]),
+    ...mapGetters(["suelas", "nuevaSuela"]),
+    allSuelas: {
+      set(suelas) {
+        return suelas;
+      },
+      get() {
+        return this.suelas;
+      },
+    },
+    nueva: {
+      set(suela) {
+        this.setNuevaSuela(suela);
+        return suela;
+      },
+      get() {
+        return this.nuevaSuela;
+      },
+    },
   },
 
   watch: {
@@ -174,49 +173,40 @@ export default {
   },
 
   created() {
-    this.cargarDatos();
+    this.initialize();
   },
 
   methods: {
     ...mapActions(["getSuelas", "updateSuela", "saveSuela", "deleteSuela"]),
-    async cargarDatos() {
+    ...mapMutationsSuela(["iniciarSuela", "setNuevaSuela"]),
+    ...mapMutations(["mostrarMsj"]),
+    async initialize() {
       await this.getSuelas();
-      this.initialize();
     },
-    initialize() {
-      this.items = this.suelas.map((suela) => {
-        return {
-          _id: suela._id,
-          _rev: suela._rev,
-          nombre: suela.nombre,
-          defaultColor: suela.defaultColor,
-          colores: suela.colores,
-        };
-      });
-    },
-
     editItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.suelas.indexOf(item);
+      this.nueva = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.suelas.indexOf(item);
+      this.nueva = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
-    deleteItemConfirm() {
-      this.deleteSuela(this.editedItem);
-      this.items.splice(this.editedIndex, 1);
+    async deleteItemConfirm() {
+      let res = await this.deleteSuela();
+      if (res) {
+          this.mostrarMsj("Suela eliminada!");
+        }
       this.closeDelete();
     },
 
     close() {
       this.dialog = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarSuela();
         this.editedIndex = -1;
       });
     },
@@ -224,7 +214,7 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarSuela();
         this.editedIndex = -1;
       });
     },
@@ -232,13 +222,17 @@ export default {
     save() {
       if (this.editedIndex > -1) {
         //editar
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateSuela(this.editedItem);
+        let res = this.updateSuela();
+        if (res) {
+          this.mostrarMsj("Suela modificada!");
+        }
       } else {
         //guardar
-        this.items.push(this.editedItem);
-        console.log(this.editedItem);
-        this.saveSuela(this.editedItem);
+
+        let res = this.saveSuela();
+        if (res) {
+          this.mostrarMsj("Suela guardada!");
+        }
       }
       this.close();
     },
