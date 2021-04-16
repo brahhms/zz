@@ -23,9 +23,11 @@ export default {
       cliente: null,
       ano: new Date().getFullYear(),
       semana: new Date().getWeekNumber(),
-      detalle: []
+      detalle: [],
+      total:0
     },
 
+    
     semanaSeleccionada: null,
 
 
@@ -123,6 +125,7 @@ export default {
           suela: null,
           color: null,
         },
+        resumen:[],
         subtotal: 0,
       };
       detalleDefault.detalleTallas = state.tallas.map((t) => {
@@ -165,7 +168,8 @@ export default {
         cliente: null,
         ano: state.pedido.ano,
         semana: state.pedido.semana,
-        detalle: []
+        detalle: [],
+        total:0
       }
 
     },
@@ -315,8 +319,7 @@ export default {
         commit('setRevSemana',res.data.rev);
       }
 
-    }
-
+    },
 
   },
   getters: {
@@ -339,7 +342,9 @@ export default {
     semanaSeleccionada: state => state.semanaSeleccionada || {
       semana: null,
       ano: null
-    }
+    },
+
+  
   }
 
 }
