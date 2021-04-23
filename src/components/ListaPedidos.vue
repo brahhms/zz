@@ -152,7 +152,7 @@
           <v-card-text v-if="semanaSeleccionada.listaDeCompras != null">
             <v-data-table
               v-for="suela in semanaSeleccionada.listaDeCompras.suelas"
-              :key="suela.nombre"
+              :key="suela.index"
               class="elevation-1 mb-4"
               disable-pagination
               hide-default-footer
@@ -322,7 +322,9 @@ export default {
       });
 
       // Creating footer and saving file
-      doc.save(`${this.heading}.pdf`);
+      doc.save(
+        `pedidos S${this.semanaSeleccionada.semana}A${this.semanaSeleccionada.ano}.pdf`
+      );
     },
     generarListaPDF() {
       const doc = new jsPDF({
@@ -331,8 +333,18 @@ export default {
         format: "legal",
       });
 
+      doc
+        .setFontSize(12)
+        .text(
+          "Semana " +
+            this.semanaSeleccionada.semana +
+            " " +
+            this.semanaSeleccionada.ano,
+          0.5,
+          0.8
+        );
 
-//ADORNOS
+      //ADORNOS
       let head = [
         [
           {
@@ -347,8 +359,8 @@ export default {
           { title: "Nombre", dataKey: "nombre" },
         ],
       ];
-      let items = this.semanaSeleccionada.listaDeCompras.adornos.map(item=>{
-        return [item.cantidad,item.unidad,item.nombre]
+      let items = this.semanaSeleccionada.listaDeCompras.adornos.map((item) => {
+        return [item.cantidad, item.unidad, item.nombre];
       });
 
       doc.autoTable({
@@ -356,9 +368,9 @@ export default {
         body: items,
         margin: { top: 1 },
       });
-//adornos
-//AVILLOS
-       head = [
+      //adornos
+      //AVILLOS
+      head = [
         [
           {
             content: "Avillos",
@@ -372,8 +384,8 @@ export default {
           { title: "Nombre", dataKey: "nombre" },
         ],
       ];
-       items = this.semanaSeleccionada.listaDeCompras.avillos.map(item=>{
-        return [item.cantidad,item.unidad,item.nombre]
+      items = this.semanaSeleccionada.listaDeCompras.avillos.map((item) => {
+        return [item.cantidad, item.unidad, item.nombre];
       });
 
       doc.autoTable({
@@ -381,9 +393,9 @@ export default {
         body: items,
         margin: { top: 1 },
       });
-//avillos
-//MATERIALES
-       head = [
+      //avillos
+      //MATERIALES
+      head = [
         [
           {
             content: "Materiales",
@@ -397,8 +409,8 @@ export default {
           { title: "Color", dataKey: "color" },
         ],
       ];
-       items = this.semanaSeleccionada.listaDeCompras.materiales.map(item=>{
-        return [item.cantidad,item.nombre,item.color]
+      items = this.semanaSeleccionada.listaDeCompras.materiales.map((item) => {
+        return [item.cantidad, item.nombre, item.color];
       });
 
       doc.autoTable({
@@ -406,10 +418,12 @@ export default {
         body: items,
         margin: { top: 1 },
       });
-//materiales
+      //materiales
 
       //saving file
-      doc.save(`${this.heading}.pdf`);
+      doc.save(
+        `lista S${this.semanaSeleccionada.semana}A${this.semanaSeleccionada.ano}.pdf`
+      );
     },
     generarSuelasPDF() {
       const doc = new jsPDF({
@@ -429,31 +443,16 @@ export default {
           0.8
         );
 
-      this.semanaSeleccionada.pedidos.forEach((pedido) => {
-        let items = pedido.detalle.map((detalle) => {
-          return detalle.resumen;
+      this.semanaSeleccionada.listaDeCompras.suelas.forEach((suela) => {
+        let talls = "";
+        suela.detalle.forEach((detalle) => {
+          talls = talls+ detalle.cantidad + "/" + detalle.nombre + ", ";
         });
-        items.push(["", "", "", "", "", "Total:", pedido.total]);
+        talls = talls.substring(0, talls.length - 2);
+        let items= [[talls]];
+       
 
-        let head = [
-          [
-            {
-              content: pedido.cliente.nombre,
-              colSpan: 7,
-              styles: { halign: "left" },
-            },
-          ],
-          [
-            { title: "Codigo", dataKey: "codigo" },
-            { title: "Material", dataKey: "material" },
-            { title: "Tallas", dataKey: "tallas" },
-            { title: "Horma", dataKey: "horma" },
-            { title: "Forro", dataKey: "forro" },
-            { title: "Suela", dataKey: "suela" },
-            { title: "Subtotal", dataKey: "subtotal" },
-          ],
-        ];
-
+        let head = [[ suela.nombre +' '+suela.color ]];
         doc.autoTable({
           head,
           body: items,
@@ -462,7 +461,9 @@ export default {
       });
 
       // Creating footer and saving file
-      doc.save(`${this.heading}.pdf`);
+      doc.save(
+        `suelas S${this.semanaSeleccionada.semana}A${this.semanaSeleccionada.ano}.pdf`
+      );
     },
     positivos(lista) {
       return lista.filter((item) => item.cantidad > 0);

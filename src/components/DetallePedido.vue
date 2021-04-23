@@ -83,7 +83,7 @@
     </td>
 
     <!--material tacon-->
-    <td>
+    <td v-if="detalle.estilo != null && detalle.estilo.linea.tacon">
       <v-edit-dialog>
         <span v-if="detalle.detalleTacon.material != null">{{
           detalle.detalleTacon.material.nombre
@@ -262,6 +262,18 @@
               <template v-slot:selection="{ item }">
                 {{ item.nombre }}
               </template>
+            </v-autocomplete>
+            <v-autocomplete
+              :rules="notNull"
+              v-model="detalle.detalleSuela.color"
+              label="color"
+              :items="detalle.detalleSuela.suela.colores"
+              clearable
+              dense
+              filled
+              rounded
+            >
+            
             </v-autocomplete>
           </v-container>
         </template>

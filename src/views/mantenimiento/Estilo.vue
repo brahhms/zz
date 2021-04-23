@@ -205,7 +205,7 @@
             </template>
             <template v-slot:item.tacon="{ item }">
               <v-simple-checkbox
-                v-model="item.tacon"
+                v-model="item.linea.tacon"
                 disabled
               ></v-simple-checkbox>
             </template>
