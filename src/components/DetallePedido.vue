@@ -83,8 +83,9 @@
     </td>
 
     <!--material tacon-->
-    <td v-if="detalle.estilo != null && detalle.estilo.linea.tacon">
-      <v-edit-dialog>
+
+    <td>
+      <v-edit-dialog v-if="isTacon">
         <span v-if="detalle.detalleTacon.material != null">{{
           detalle.detalleTacon.material.nombre
         }}</span>
@@ -130,6 +131,8 @@
         </template>
       </v-edit-dialog>
     </td>
+
+
 
     <!--tallas-->
     <td>
@@ -402,7 +405,17 @@ export default {
       deep: true,
     },
   },
-  computed: {},
+  computed: {
+    isTacon(){
+      if (this.detalle.estilo != null) {
+        return this.detalle.estilo.linea.tacon
+      }else{
+        this.detalle.detalleTacon.material = null;
+        this.detalle.detalleTacon.color = null;
+        return false
+      }
+    }
+  },
 
   created() {
     this.detalle;

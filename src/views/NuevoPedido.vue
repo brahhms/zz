@@ -70,6 +70,7 @@
                       :hormas="hormas"
                     ></detalle-pedido>
                   </template>
+                  
                 </v-data-table>
               </v-form>
             </div>

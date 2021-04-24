@@ -25,8 +25,6 @@
             <v-btn color="primary" depressed dark class="mb-2"> Imgs </v-btn>
           </template>
           <v-card>
-
-
             <v-toolbar dark color="primary">
               <v-btn icon dark @click="close">
                 <v-icon>mdi-close</v-icon>
@@ -49,7 +47,7 @@
                       return-object
                       label="linea de estilo"
                       v-model="nuevo.linea"
-                      @change="generarCorrelativo(nuevo.linea)"
+                      @change="generarCorrelativo(nuevo.linea.nombre)"
                     ></v-autocomplete>
                   </v-col>
                   <v-col cols="10">
@@ -151,7 +149,6 @@
                 </v-row>
               </v-container>
             </v-card-text>
-
           </v-card>
         </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
@@ -234,7 +231,6 @@
         </v-tab-item>
       </v-tabs-items>
     </v-card>
-    {{ tab }}
   </div>
 </template>
 
@@ -306,7 +302,7 @@ export default {
       "updateEstilo",
       "getEstilos",
       "deleteEstilo",
-      "generarCorrelativo"
+      "generarCorrelativo",
     ]),
     ...mapMutations(["setNuevoEstilo"]),
     async save() {
@@ -353,6 +349,7 @@ export default {
     },
     async initialize() {
       await this.getEstilos();
+
       this.iniciarEstilo();
 
       this.cards = this.estilos.map((item) => {
@@ -381,13 +378,16 @@ export default {
         return estilos;
       },
       get() {
-        let estilos = [];
+        let styles = [];
         this.estilos.forEach((estilo) => {
-          if (estilo.linea._id == this.lineas[this.tab]._id) {
-            estilos.push(estilo);
+       
+          if (estilo.linea != undefined) {
+            if (estilo.linea._id == this.lineas[this.tab]._id) {
+              styles.push(estilo);
+            }
           }
         });
-        return estilos;
+        return styles;
       },
     },
     formTitle() {

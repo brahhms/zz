@@ -45,7 +45,6 @@ export default {
       correlativo: null,
       rendimientoPorYarda: null,
       capeyada: null,
-      tacon: true,
       avillos: [],
       adornos: [],
       _attachments: undefined
@@ -54,7 +53,7 @@ export default {
     lineas: [],
   },
   mutations: {
-    initialize(state){
+    initialize(state) {
       state.nuevoEstilo = {
         _id: undefined,
         _rev: undefined,
@@ -62,7 +61,6 @@ export default {
         correlativo: null,
         rendimientoPorYarda: null,
         capeyada: null,
-        tacon: true,
         avillos: [],
         adornos: [],
         _attachments: undefined
@@ -70,8 +68,9 @@ export default {
     },
 
     setCorrelativo(state, correlativo) {
-      state.nuevoEstilo.correlativo = correlativo;
+      state.nuevoEstilo.correlativo = Number(correlativo);
     },
+
 
     setEstilos(state, data) {
       state.estilos = data;
@@ -92,15 +91,33 @@ export default {
   },
   actions: {
 
-    generarCorrelativo({ commit }, numeros) {
-      let n = 1;
-      numeros.correlativos.forEach(i => {
-        if (i==n) {
-          n++;
+    async generarCorrelativo({ commit }, linea) {
+
+      if (linea != undefined && linea != null) {
+        const res = await axios.post(`${url}_design/correlativosExistentes/_view/correlativosExistentes?reduce=true&key=%22${linea}%22`, {}, credentials.authentication);
+
+        console.log();
+        let correlativos = [];
+
+
+        if (res.data.rows.length > 0) {
+          res.data.rows[0].value.forEach(element => {
+            correlativos = correlativos.concat(element);
+          });
         }
-      });
-      commit('setCorrelativo', n);
-      console.log(n);
+        console.log(correlativos);
+
+        let n = 1;
+        correlativos.sort();
+        correlativos.forEach(i => {
+          if (i == n) {
+            n++;
+          }
+        });
+
+        commit('setCorrelativo', n);
+      }
+
     },
 
     async getEstilos({
@@ -129,9 +146,7 @@ export default {
         await createAttachment(att, res.data.id, res.data.rev);
       }
 
-      if (res.data.ok) {
-        console.log("ok");
-      }
+
 
       const response = await getAll();
       commit('setEstilos', response.data.docs);
@@ -151,24 +166,6 @@ export default {
         await createAttachment(att, res.data.id, res.data.rev);
       }
 
-      //agregarCorrelativo
-      if (res.data.ok) {
-        let linea = state.nuevoEstilo.linea;
-        linea.correlativos.push(state.nuevoEstilo.correlativo);
-        const res2 = await axios.put(`http://localhost:5984/zapp-lineas/${linea._id}/`, linea, {
-          params: {
-            "rev": linea._rev
-          },
-          "auth": credentials.authentication.auth,
-          "headers": credentials.authentication.headers,
-        }, credentials.authentication);
-        if (res2.data.ok) {
-          console.log("correlativo agregado " + state.nuevoEstilo.correlativo);
-        }
-        commit('initialize');
-        const data = await iniciarEstilo();
-        commit('setData', data);
-      }
 
       const response = await getAll();
       commit('setEstilos', response.data.docs);
@@ -193,6 +190,7 @@ export default {
     async iniciarEstilo({
       commit
     }) {
+      commit('initialize');
       const data = await iniciarEstilo();
       commit('setData', data);
     }
