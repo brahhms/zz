@@ -9,8 +9,6 @@ Date.prototype.getWeekNumber = function () {
   return Math.ceil(((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7 + 1) / 7);
 };
 
-//const url = "http://localhost:5984/zapp-pedidos/";
-
 const urlSemana = "http://localhost:5984/zapp-semanas/";
 
 
@@ -24,10 +22,10 @@ export default {
       ano: new Date().getFullYear(),
       semana: new Date().getWeekNumber(),
       detalle: [],
-      total:0
+      total: 0
     },
 
-    
+
     semanaSeleccionada: null,
 
 
@@ -44,8 +42,8 @@ export default {
     isValid: false
   },
   mutations: {
-    setRevSemana(state,rev){
-      state.semanaSeleccionada._rev=rev;
+    setRevSemana(state, rev) {
+      state.semanaSeleccionada._rev = rev;
     },
     actualizarPedidos(state, pedidos) {
       state.semanaSeleccionada.pedidos = pedidos;
@@ -67,9 +65,7 @@ export default {
       }
 
     },
-    setDetalle(state, detalle) {
-      state.pedido.detalle = detalle;
-    },
+
     pushDetalle(state, detalle) {
       state.pedido.detalle.push(detalle);
     },
@@ -89,9 +85,17 @@ export default {
             deta.detalleForro.forro == null ||
             deta.detalleSuela.suela == null ||
             deta.horma == null ||
-            deta.subtotal <= 0) {
+            deta.subtotal <= 0
+            ) {
             errores++;
             console.log("elemento vacio");
+          }else if (deta.estilo != null) {
+            if (deta.estilo.linea.tacon) {
+              if (deta.detalleTacon.material == null) {
+                errores++;
+                console.log("material tacon vacio");
+              }
+            }
           }
 
         });
@@ -125,7 +129,7 @@ export default {
           suela: null,
           color: null,
         },
-        resumen:[],
+        resumen: [],
         subtotal: 0,
       };
       detalleDefault.detalleTallas = state.tallas.map((t) => {
@@ -169,7 +173,7 @@ export default {
         ano: state.pedido.ano,
         semana: state.pedido.semana,
         detalle: [],
-        total:0
+        total: 0
       }
 
     },
@@ -184,6 +188,10 @@ export default {
       detalle.detalleMaterial = {
         ...item.detalleMaterial
       };
+      detalle.detalleTacon = {
+        ...item.detalleTacon
+      };
+
       detalle.detalleForro = {
         ...item.detalleForro
       };
@@ -221,7 +229,9 @@ export default {
             ano: state.pedido.ano
           });
         }
-        console.log(res.statusText);
+        return true
+      }else{
+        return false
       }
 
     },
@@ -295,16 +305,25 @@ export default {
           "selector": {}
         }, credentials.authentication)
       ]);
-      commit('setData', data);
 
-      commit('setDetalle', []);
-
-      commit('addDetalle');
+      let valido=true;
+      data.forEach(d => {
+        if (d.statusText != 'OK') {
+          valido=false
+        }
+        console.log(d);
+      });
+      if (valido) {
+        commit('setData', data);
+        return true
+      }else{
+        return false
+      }
 
     },
 
     async actualizarSemana({
-      state,commit
+      state, commit
     }) {
       const res = await axios.put(`http://localhost:5984/zapp-semanas/${state.semanaSeleccionada._id}/`, state.semanaSeleccionada, {
         params: {
@@ -316,7 +335,7 @@ export default {
 
       if (res.data.ok) {
         console.log("actualizada");
-        commit('setRevSemana',res.data.rev);
+        commit('setRevSemana', res.data.rev);
       }
 
     },
@@ -325,6 +344,7 @@ export default {
   getters: {
     detalles: state => state.pedido.detalle,
     cliente: state => state.pedido.cliente,
+    isEditing: state=> {state.pedido.detalle.length> 0 && state.pedido.cliente!=null},
 
 
     estilos: state => state.estilos,
@@ -344,7 +364,7 @@ export default {
       ano: null
     },
 
-  
+
   }
 
 }

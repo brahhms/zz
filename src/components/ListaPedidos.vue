@@ -15,6 +15,7 @@
         <v-card flat>
           <v-container>
             <v-row>
+           
               <v-btn @click="generarPedidosPDF" color="primary">
                 Descargar
               </v-btn>
@@ -446,13 +447,12 @@ export default {
       this.semanaSeleccionada.listaDeCompras.suelas.forEach((suela) => {
         let talls = "";
         suela.detalle.forEach((detalle) => {
-          talls = talls+ detalle.cantidad + "/" + detalle.nombre + ", ";
+          talls = talls + detalle.cantidad + "/" + detalle.nombre + ", ";
         });
         talls = talls.substring(0, talls.length - 2);
-        let items= [[talls]];
-       
+        let items = [[talls, suela.total]];
 
-        let head = [[ suela.nombre +' '+suela.color ]];
+        let head = [[suela.nombre + " " + suela.color, "Total"]];
         doc.autoTable({
           head,
           body: items,

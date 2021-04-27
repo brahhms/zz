@@ -12,6 +12,7 @@ import Horma from "../views/mantenimiento/Horma.vue";
 import Adorno from "../views/mantenimiento/Adorno.vue";
 import Avillo from "../views/mantenimiento/Avillo.vue";
 import Talla from "../views/mantenimiento/Talla.vue";
+import Linea from "../views/mantenimiento/Linea.vue";
 
 import VistaPrevia from '../components/VistaPrevia.vue'
 
@@ -77,6 +78,11 @@ const routes = [
     path: '/Talla',
     name: 'Talla',
     component: Talla
+  },
+  {
+    path: '/Linea',
+    name: 'Linea',
+    component: Linea
   },
   {
     path: '/vistaPrevia',

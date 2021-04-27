@@ -48,7 +48,7 @@
         hide-overlay
         transition="dialog-bottom-transition"
       >
-        <v-card :loading="loading">
+        <v-card :loading="loading1">
           <v-toolbar dark color="primary">
             <v-btn icon dark @click="dialog = false">
               <v-icon>mdi-close</v-icon>
@@ -66,8 +66,8 @@
           </v-toolbar>
 
           <v-divider></v-divider>
-
-          <lista-pedidos></lista-pedidos>
+          <v-progress-linear v-if="loading1" indeterminate color="cyan"></v-progress-linear>
+          <lista-pedidos v-else></lista-pedidos>
         </v-card>
       </v-dialog>
     </v-col>
@@ -101,13 +101,17 @@ export default {
     focus: "",
     type: "month",
     weekdays: [0, 1, 2, 3, 4, 5, 6],
-    loading: true,
+    loading1: true,
   }),
   mounted() {
     this.$refs.calendar.checkChange();
   },
   methods: {
-     ...mapMutationsPedido(["setSemanaPedido", "setAnoPedido","actualizarPedidos"]),
+    ...mapMutationsPedido([
+      "setSemanaPedido",
+      "setAnoPedido",
+      "actualizarPedidos",
+    ]),
     ...mapActionsPedido(["getSemana"]),
     updateRange({ start, end }) {
       console.log("//" + start.date + "--" + end.date);
@@ -125,8 +129,12 @@ export default {
       this.dialog = true;
       this.setSemanaPedido(semana);
       this.setAnoPedido(ano);
-      await this.getSemana();
-      this.loading = false;
+      const existeSemana = await this.getSemana();
+      if (existeSemana) {
+        this.loading1 = false;
+      } else {
+        this.loading1 = true;
+      }
     },
 
     semanaDelAno(year, mes, dia) {

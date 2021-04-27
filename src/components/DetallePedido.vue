@@ -11,6 +11,7 @@
           <v-container class="mt-3">
             <v-autocomplete
               v-model="detalle.estilo"
+              item-text="codigo"
               required
               :rules="notNull"
               label="codigo"

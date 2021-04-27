@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import axios from 'axios'
 import pedidoStore from './modules/pedido'
 import clienteStore from './modules/cliente'
 import estiloStore from './modules/estilo'
@@ -11,13 +10,12 @@ import suelaStore from './modules/suela'
 import hormaStore from './modules/horma'
 import adornoStore from './modules/adorno'
 import avilloStore from './modules/avillo'
+import lineaStore from "./modules/linea";
 
 
-import credentials from "./modules/credentials";
 
 Vue.use(Vuex)
-//axios.defaults.baseURL = "http://localhost:5984"
-var qs = require('qs');
+
 
 export default new Vuex.Store({
   state: {
@@ -59,6 +57,7 @@ export default new Vuex.Store({
     suela: suelaStore,
     horma: hormaStore,
     adorno: adornoStore,
-    avillo: avilloStore
+    avillo: avilloStore,
+    linea: lineaStore
   }
 })

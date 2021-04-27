@@ -40,6 +40,15 @@
           <v-divider></v-divider>
 
           <v-list dense>
+            <v-list-item v-if="isEditing" link :to="{ name: 'NuevoPedido'}">
+              <v-list-item-icon>
+                <v-icon></v-icon>
+              </v-list-item-icon>
+
+              <v-list-item-content>
+                <v-list-item-title>Pedido</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item v-for="item in items" :key="item.title" link :to="{ name: item.name }">
               <v-list-item-icon>
                 <v-icon>{{ item.icon }}</v-icon>
@@ -67,7 +76,8 @@
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
+import { createNamespacedHelpers, mapActions, mapState  } from "vuex";
+const { mapGetters } = createNamespacedHelpers("pedido");
 export default {
   name: "App",
 
@@ -85,12 +95,14 @@ export default {
       { name: "Horma", title:"Hormas", icon: "mdi-shoe-formal" },
       { name: "Adorno", title:"Adornos", icon: "mdi-scatter-plot" },
       { name: "Avillo", title:"Avillos", icon: "mdi-scatter-plot-outline" },
-      { name: "Talla", title:"Tallas", icon: "mdi-equal" },
+      { name: "Talla", title:"Tallas", icon: "mdi-format-list-numbered" },
+       { name: "Linea", title:"Lineas", icon: "mdi-equal" },
 
     ],
   }),
   computed: {
     ...mapState(["showBar","snackbar"]),
+    ...mapGetters(["isEditing"])
   },
   methods: {
     ...mapActions(["auth"]),

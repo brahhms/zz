@@ -2,37 +2,56 @@
   <div class="nuevoPedido">
     <v-stepper v-model="e1">
       <v-stepper-header>
-        <v-stepper-step :complete="e1 > 1" step="1" >
+        <v-stepper-step :complete="e1 > 1" step="1">
           Agregar Cliente
         </v-stepper-step>
 
         <v-divider></v-divider>
 
-        <v-stepper-step :complete="e1 > 2" step="2" >
+        <v-stepper-step :complete="e1 > 2" step="2">
           Agregar Detalle de Pedido
         </v-stepper-step>
 
         <v-divider></v-divider>
-
       </v-stepper-header>
 
       <v-stepper-items>
         <v-stepper-content step="1">
-          <v-card class="mb-12 paso-contenido" flat :loading="loading1">
-            <detalle-cliente v-if="clientes != null"></detalle-cliente>
+          <v-card class="mb-12 mx-auto" max-width="500" flat>
+            <v-card class="mb-12 paso-contenido" flat :loading="loading1">
+              <v-card-text>
+                <v-autocomplete
+                  clearable
+                  label="Cliente"
+                  :items="clientes"
+                  v-model="clienteSeleccionado"
+                  item-text="nombre"
+                  required
+                  return-object
+                  v-if="clientes != null"
+                >
+                  <v-icon slot="prepend" color="primary"> mdi-account </v-icon>
+                </v-autocomplete>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+
+                <v-btn v-if="loading1" color="primary" @click="loadData">
+                  Reset
+                </v-btn>
+                <v-btn
+                  v-else
+                  color="primary"
+                  :disabled="clienteSeleccionado == null"
+                  depressed
+                  x-large
+                  @click="e1 = 2"
+                >
+                  Continuar
+                </v-btn>
+              </v-card-actions>
+            </v-card>
           </v-card>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="primary"
-              :disabled="clienteSeleccionado == null"
-              depressed
-              x-large
-              @click="e1 = 2"
-            >
-              Continuar
-            </v-btn>
-          </v-card-actions>
         </v-stepper-content>
 
         <v-stepper-content step="2">
@@ -46,10 +65,9 @@
                   clienteSeleccionado.nombre
                 }}</v-toolbar-title>
                 <v-spacer></v-spacer>
-                
-                Semana {{semana}}
+                Semana {{ semana }}
                 <v-spacer></v-spacer>
-                <v-btn icon @click="addDetalle()">
+                <v-btn outlined  color="primary" icon @click="addDetalle()">
                   <v-icon>mdi-plus</v-icon>
                 </v-btn>
               </v-app-bar>
@@ -70,11 +88,11 @@
                       :hormas="hormas"
                     ></detalle-pedido>
                   </template>
-                  
                 </v-data-table>
               </v-form>
             </div>
           </v-card>
+
           <v-card-actions>
             <v-btn color="primary" depressed x-large @click="e1--">
               Regresar
@@ -84,33 +102,29 @@
               color="primary"
               depressed
               x-large
-              @click="guardarPedido();"
+              @click="guardarPedido()"
               :disabled="!isPedidoValid"
             >
               Guardar
             </v-btn>
           </v-card-actions>
         </v-stepper-content>
-
-
       </v-stepper-items>
     </v-stepper>
-
-    
   </div>
 </template>
 <script>
 import DetallePedido from "../components/DetallePedido.vue";
-import DetalleCliente from "../components/DetalleCliente.vue";
-import { createNamespacedHelpers,mapMutations } from "vuex";
-const { mapGetters, mapMutations:mapMutationsPedido, mapActions } = createNamespacedHelpers(
-  "pedido"
-);
+import { createNamespacedHelpers, mapMutations } from "vuex";
+const {
+  mapGetters,
+  mapMutations: mapMutationsPedido,
+  mapActions,
+} = createNamespacedHelpers("pedido");
 
 export default {
   components: {
     DetallePedido,
-    DetalleCliente,
   },
   data() {
     return {
@@ -122,7 +136,6 @@ export default {
           align: "center",
           sortable: false,
           value: "estilo",
-         
         },
         {
           text: "Material",
@@ -147,7 +160,6 @@ export default {
           align: "center",
           sortable: false,
           value: "horma",
-         
         },
         {
           text: "Forro",
@@ -176,18 +188,23 @@ export default {
           width: 3,
         },
       ],
-     
     };
   },
   methods: {
-    ...mapActions(["savePedido", "iniciarDetalle"]),
-    ...mapMutationsPedido(["addDetalle", "validarPedido"]),
-        ...mapMutations(["mostrarMsj"]),
+    ...mapActions(["savePedido", "iniciarDetalle", "saveCliente"]),
+    ...mapMutationsPedido(["addDetalle", "validarPedido", "setCliente"]),
+    ...mapMutations(["mostrarMsj"]),
     async loadData() {
-      await this.iniciarDetalle();
-      this.loading1 = false;
-    },
+      const valido = await this.iniciarDetalle();
 
+      if (valido) {
+        this.loading1 = false;
+      } else {
+        this.loading1 = true;
+      }
+
+      if (this.isEditing) this.e1 = 2;
+    },
 
     async guardarPedido() {
       this.validarPedido();
@@ -197,9 +214,9 @@ export default {
       const res = await this.savePedido();
       if (res.status == 201 || res.status == 200) {
         this.mostrarMsj("Pedido guardado!");
-        this.e1=1;
+        this.e1 = 1;
       }
-    }
+    },
   },
 
   computed: {
@@ -214,17 +231,19 @@ export default {
       "hormas",
       "clientes",
       "isPedidoValid",
-      "semana"
+      "semana",
+      "isEditing",
     ]),
 
-    clienteSeleccionado:{
-      get(){
+    clienteSeleccionado: {
+      get() {
         return this.cliente;
       },
-      set(newCliente){
-        return newCliente;
-      }
-    }
+      set(cliente) {
+        this.setCliente(cliente);
+        return cliente;
+      },
+    },
   },
 
   mounted() {

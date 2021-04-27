@@ -43,6 +43,7 @@ export default {
       _rev: undefined,
       linea: null,
       correlativo: null,
+      codigo:null,
       rendimientoPorYarda: null,
       capeyada: null,
       avillos: [],
@@ -59,6 +60,7 @@ export default {
         _rev: undefined,
         linea: null,
         correlativo: null,
+        codigo:null,
         rendimientoPorYarda: null,
         capeyada: null,
         avillos: [],
@@ -69,6 +71,7 @@ export default {
 
     setCorrelativo(state, correlativo) {
       state.nuevoEstilo.correlativo = Number(correlativo);
+      state.nuevoEstilo.codigo = state.nuevoEstilo.linea.nombre+correlativo;
     },
 
 
