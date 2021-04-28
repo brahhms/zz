@@ -68,7 +68,6 @@ export default {
 
     setAvillosDeLinea(state, avillos) {
       state.nuevoEstilo.avillos = avillos;
-      console.log(avillos);
     },
 
 
@@ -86,7 +85,6 @@ export default {
     setData(state, data) {
       state.lineas = data[0].data.docs;
       state.nuevoEstilo.adornos = data[1].data.docs;
-      console.log(state.nuevoEstilo);
     },
 
     setNuevoEstilo(state, estilo) {
@@ -101,7 +99,7 @@ export default {
       if (linea != undefined && linea != null) {
         const res = await axios.post(`${url}_design/correlativosExistentes/_view/correlativosExistentes?reduce=true&key=%22${linea}%22`, {}, credentials.authentication);
 
-        console.log();
+
         let correlativos = [];
 
 
@@ -203,20 +201,25 @@ export default {
 
     async actualizarAvillos({
       commit
-    }, avillosDeLinea) {
+    }, linea) {
+
+      let condiciones = [
+        {
+          "nombre": {
+            "$in":
+            linea.avillos.map(x=>{return x.nombre})
+          }
+        },
+        {
+          "predeterminado": true
+        }
+      ];
+      if (linea.tacon) {
+        condiciones.push({"paraTacon":true});
+      }
       const res = await axios.post('http://localhost:5984/zapp-avillos/_find', {
         "selector": {
-          "$or": [
-            {
-              "nombre": {
-                "$in":
-                  avillosDeLinea
-              }
-            },
-            {
-              "predeterminado": true
-            }
-          ]
+          "$or": condiciones
         }
       }, credentials.authentication);
 

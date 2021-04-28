@@ -45,6 +45,12 @@
                         v-model="nuevo.predeterminado"
                       ></v-checkbox>
                     </v-col>
+                    <v-col cols="12">
+                      <v-checkbox
+                        label="Para Tacon?"
+                        v-model="nuevo.paraTacon"
+                      ></v-checkbox>
+                    </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>

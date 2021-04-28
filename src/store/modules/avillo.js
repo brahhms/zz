@@ -20,7 +20,8 @@ export default {
       nombre: null,
       cantidad: 0,
       unidad: "pares",
-      predeterminado:false
+      predeterminado:false,
+      paraTacon:false
     },
     avillos: [],
     unidades: ["pares",
@@ -45,7 +46,8 @@ export default {
         nombre: null,
         cantidad: 0,
         unidad: "pares",
-        predeterminado:false
+        predeterminado:false,
+        paraTacon:false
       };
     }
 

@@ -308,7 +308,7 @@ export default {
     ...mapMutations(["setNuevoEstilo"]),
     changeLinea(linea){
       this.generarCorrelativo(linea.nombre);
-      this.actualizarAvillos(linea.avillos.map(x=>{return x.nombre}));
+      this.actualizarAvillos(linea);
     },
     async save() {
       if (this.editedIndex > -1) {
