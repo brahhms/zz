@@ -47,7 +47,7 @@
                       return-object
                       label="linea de estilo"
                       v-model="nuevo.linea"
-                      @change="generarCorrelativo(nuevo.linea.nombre)"
+                      @change="changeLinea(nuevo.linea)"
                     ></v-autocomplete>
                   </v-col>
                   <v-col cols="10">
@@ -303,8 +303,13 @@ export default {
       "getEstilos",
       "deleteEstilo",
       "generarCorrelativo",
+      "actualizarAvillos"
     ]),
     ...mapMutations(["setNuevoEstilo"]),
+    changeLinea(linea){
+      this.generarCorrelativo(linea.nombre);
+      this.actualizarAvillos(linea.avillos.map(x=>{return x.nombre}));
+    },
     async save() {
       if (this.editedIndex > -1) {
         //editar

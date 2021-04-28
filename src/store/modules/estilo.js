@@ -24,9 +24,6 @@ async function iniciarEstilo() {
     axios.post(`http://localhost:5984/zapp-lineas/_find`, {
       "selector": {}
     }, credentials.authentication),
-    axios.post('http://localhost:5984/zapp-avillos/_find', {
-      "selector": {}
-    }, credentials.authentication),
     axios.post('http://localhost:5984/zapp-adornos/_find', {
       "selector": {}
     }, credentials.authentication),
@@ -43,7 +40,7 @@ export default {
       _rev: undefined,
       linea: null,
       correlativo: null,
-      codigo:null,
+      codigo: null,
       rendimientoPorYarda: null,
       capeyada: null,
       avillos: [],
@@ -51,7 +48,7 @@ export default {
       _attachments: undefined
     },
     estilos: [],
-    lineas: [],
+    lineas: []
   },
   mutations: {
     initialize(state) {
@@ -60,7 +57,7 @@ export default {
         _rev: undefined,
         linea: null,
         correlativo: null,
-        codigo:null,
+        codigo: null,
         rendimientoPorYarda: null,
         capeyada: null,
         avillos: [],
@@ -69,9 +66,15 @@ export default {
       };
     },
 
+    setAvillosDeLinea(state, avillos) {
+      state.nuevoEstilo.avillos = avillos;
+      console.log(avillos);
+    },
+
+
     setCorrelativo(state, correlativo) {
       state.nuevoEstilo.correlativo = Number(correlativo);
-      state.nuevoEstilo.codigo = state.nuevoEstilo.linea.nombre+correlativo;
+      state.nuevoEstilo.codigo = state.nuevoEstilo.linea.nombre + correlativo;
     },
 
 
@@ -82,9 +85,8 @@ export default {
 
     setData(state, data) {
       state.lineas = data[0].data.docs;
-      state.nuevoEstilo.avillos = data[1].data.docs;
-      state.nuevoEstilo.adornos = data[2].data.docs;
-
+      state.nuevoEstilo.adornos = data[1].data.docs;
+      console.log(state.nuevoEstilo);
     },
 
     setNuevoEstilo(state, estilo) {
@@ -191,17 +193,34 @@ export default {
     },
 
     async iniciarEstilo({
-      commit
+      commit, state
     }) {
       commit('initialize');
       const data = await iniciarEstilo();
       commit('setData', data);
+    },
+
+
+    async actualizarAvillos({
+      commit
+    }, avillosDeLinea) {
+      const res = await axios.post('http://localhost:5984/zapp-avillos/_find', {
+        "selector": {
+          "nombre": {
+            "$in": avillosDeLinea
+          }
+        }
+      }, credentials.authentication);
+
+      if (res.statusText == 'OK') {
+        commit('setAvillosDeLinea', res.data.docs);
+      }
+
     }
 
   },
   getters: {
     estilos: state => state.estilos,
-
 
     lineas: state => state.lineas,
     nuevoEstilo: state => state.nuevoEstilo
