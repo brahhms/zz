@@ -19,7 +19,8 @@ export default {
       _rev: undefined,
       nombre: null,
       cantidad: 0,
-      unidad: "pares"
+      unidad: "pares",
+      predeterminado:false
     },
     avillos: [],
     unidades: ["pares",
@@ -43,7 +44,8 @@ export default {
         _rev: undefined,
         nombre: null,
         cantidad: 0,
-        unidad: "pares"
+        unidad: "pares",
+        predeterminado:false
       };
     }
 

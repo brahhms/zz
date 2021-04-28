@@ -17,7 +17,8 @@ export default {
     nuevaHorma: {
       _id: undefined,
       _rev: undefined,
-      nombre: null
+      nombre: null,
+      paraTacon:false
     },
     hormas: []
   },
@@ -34,7 +35,8 @@ export default {
       state.nuevaHorma = {
         _id: undefined,
         _rev: undefined,
-        nombre: null
+        nombre: null,
+        paraTacon:false
       };
     }
 

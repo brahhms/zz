@@ -36,10 +36,15 @@
                       <v-autocomplete
                         v-model="nuevo.unidad"
                         :items="unidades"
-                        label="Unidades" 
+                        label="Unidades"
                       ></v-autocomplete>
                     </v-col>
-
+                    <v-col cols="12">
+                      <v-checkbox
+                        label="Predeterminado"
+                        v-model="nuevo.predeterminado"
+                      ></v-checkbox>
+                    </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -89,7 +94,9 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers("avillo");
+const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers(
+  "avillo"
+);
 export default {
   data: () => ({
     dialog: false,
@@ -116,7 +123,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["avillos", "unidades","nuevoAvillo"]),
+    ...mapGetters(["avillos", "unidades", "nuevoAvillo"]),
     allAvillos: {
       set(avillos) {
         return avillos;
@@ -151,10 +158,9 @@ export default {
 
   methods: {
     ...mapActions(["getAvillos", "updateAvillo", "saveAvillo", "deleteAvillo"]),
-    ...mapMutations(["iniciarAvillo","setNuevoAvillo"]),
+    ...mapMutations(["iniciarAvillo", "setNuevoAvillo"]),
     async initialize() {
       await this.getAvillos();
-
     },
 
     editItem(item) {

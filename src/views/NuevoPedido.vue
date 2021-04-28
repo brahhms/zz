@@ -85,7 +85,6 @@
                       :tallas="tallas"
                       :forros="forros"
                       :suelas="suelas"
-                      :hormas="hormas"
                     ></detalle-pedido>
                   </template>
                 </v-data-table>
@@ -228,7 +227,6 @@ export default {
       "tallas",
       "forros",
       "suelas",
-      "hormas",
       "clientes",
       "isPedidoValid",
       "semana",

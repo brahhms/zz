@@ -206,9 +206,17 @@ export default {
     }, avillosDeLinea) {
       const res = await axios.post('http://localhost:5984/zapp-avillos/_find', {
         "selector": {
-          "nombre": {
-            "$in": avillosDeLinea
-          }
+          "$or": [
+            {
+              "nombre": {
+                "$in":
+                  avillosDeLinea
+              }
+            },
+            {
+              "predeterminado": true
+            }
+          ]
         }
       }, credentials.authentication);
 

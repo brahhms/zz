@@ -35,7 +35,6 @@ export default {
     tallas: null,
     forros: null,
     suelas: null,
-    hormas: null,
     clientes: null,
 
     //var
@@ -86,10 +85,10 @@ export default {
             deta.detalleSuela.suela == null ||
             deta.horma == null ||
             deta.subtotal <= 0
-            ) {
+          ) {
             errores++;
             console.log("elemento vacio");
-          }else if (deta.estilo != null) {
+          } else if (deta.estilo != null) {
             if (deta.estilo.linea.tacon) {
               if (deta.detalleTacon.material == null) {
                 errores++;
@@ -147,7 +146,7 @@ export default {
       detalleDefault.detalleForro.color = state.forros[0].defaultColor;
       detalleDefault.detalleSuela.suela = state.suelas[0];
       detalleDefault.detalleSuela.color = state.suelas[0].defaultColor;
-      detalleDefault.horma = state.hormas[0];
+     
 
       state.pedido.detalle.push(detalleDefault);
 
@@ -161,8 +160,7 @@ export default {
       state.tallas = data[2].data.docs;
       state.forros = data[3].data.docs;
       state.suelas = data[4].data.docs;
-      state.hormas = data[5].data.docs;
-      state.clientes = data[6].data.docs;
+      state.clientes = data[5].data.docs;
 
     },
     clearPedido(state) {
@@ -230,7 +228,7 @@ export default {
           });
         }
         return true
-      }else{
+      } else {
         return false
       }
 
@@ -298,25 +296,22 @@ export default {
         axios.post('http://localhost:5984/zapp-suelas/_find', {
           "selector": {}
         }, credentials.authentication),
-        axios.post('http://localhost:5984/zapp-hormas/_find', {
-          "selector": {}
-        }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-clientes/_find', {
           "selector": {}
         }, credentials.authentication)
       ]);
 
-      let valido=true;
+      let valido = true;
       data.forEach(d => {
         if (d.statusText != 'OK') {
-          valido=false
+          valido = false
         }
-        console.log(d);
+
       });
       if (valido) {
         commit('setData', data);
         return true
-      }else{
+      } else {
         return false
       }
 
@@ -340,11 +335,26 @@ export default {
 
     },
 
+    async actualizarHormas({},paraTacon) {
+      const res = await axios.post('http://localhost:5984/zapp-hormas/_find', {
+        "selector": {
+          "paraTacon": paraTacon
+        }
+      }, credentials.authentication);
+
+      if (res.statusText == 'OK') {
+        return res.data.docs;
+
+      }else{
+        return []
+      }
+
+    }
   },
   getters: {
     detalles: state => state.pedido.detalle,
     cliente: state => state.pedido.cliente,
-    isEditing: state=> {state.pedido.detalle.length> 0 && state.pedido.cliente!=null},
+    isEditing: state => { return (state.pedido.detalle.length > 0 && state.pedido.cliente != null) },
 
 
     estilos: state => state.estilos,
@@ -352,7 +362,6 @@ export default {
     tallas: state => state.tallas,
     forros: state => state.forros,
     suelas: state => state.suelas,
-    hormas: state => state.hormas,
     clientes: state => state.clientes,
 
     isPedidoValid: state => state.isValid,

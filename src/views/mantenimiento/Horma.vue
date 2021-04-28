@@ -32,6 +32,12 @@
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
+                                        <v-col>
+                      <v-checkbox
+                        label="Horma para tacon?"
+                        v-model="nueva.paraTacon"
+                      ></v-checkbox>
+                    </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>

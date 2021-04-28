@@ -21,7 +21,7 @@
               filled
               rounded
               return-object
-              @change="validarPedido()"
+              @change="changeEstilo()"
             >
               <template v-slot:selection="data">
                 {{ data.item.linea.nombre }}{{ data.item.correlativo }}
@@ -132,8 +132,6 @@
         </template>
       </v-edit-dialog>
     </td>
-
-
 
     <!--tallas-->
     <td>
@@ -277,7 +275,6 @@
               filled
               rounded
             >
-            
             </v-autocomplete>
           </v-container>
         </template>
@@ -303,18 +300,10 @@
 <script>
 import SelectorTalla from "../components/SelectorTalla.vue";
 import { createNamespacedHelpers } from "vuex";
-const { mapMutations } = createNamespacedHelpers("pedido");
+const { mapMutations, mapActions } = createNamespacedHelpers("pedido");
 
 export default {
-  props: [
-    "detalle",
-    "estilos",
-    "materiales",
-    "tallas",
-    "forros",
-    "suelas",
-    "hormas",
-  ],
+  props: ["detalle", "estilos", "materiales", "tallas", "forros", "suelas"],
   components: {
     SelectorTalla,
   },
@@ -323,9 +312,15 @@ export default {
     selected: {
       estilo: null,
     },
+    hormas:[]
   }),
   methods: {
     ...mapMutations(["validarPedido", "removeDetalle", "duplicateDetalle"]),
+    ...mapActions(["actualizarHormas"]),
+    async changeEstilo() {
+      await this.validarPedido();
+       this.hormas =  await this.actualizarHormas(this.detalle.estilo.linea.tacon);
+    },
   },
 
   watch: {
@@ -407,19 +402,21 @@ export default {
     },
   },
   computed: {
-    isTacon(){
+    isTacon() {
       if (this.detalle.estilo != null) {
-        return this.detalle.estilo.linea.tacon
-      }else{
+       
+        return this.detalle.estilo.linea.tacon;
+      } else {
         this.detalle.detalleTacon.material = null;
         this.detalle.detalleTacon.color = null;
-        return false
+        return false;
       }
-    }
+    },
+
   },
 
   created() {
-    this.detalle;
+    //this.detalle;
   },
 };
 </script>
