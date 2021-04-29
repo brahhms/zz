@@ -196,14 +196,18 @@ export default {
       detalle.detalleSuela = {
         ...item.detalleSuela
       };
+
+  
+
       detalle.detalleTallas = item.detalleTallas.map(item => {
         return {
           ...item
         }
       });
 
-      let index = state.pedido.detalle.indexOf(detalle);
+     let index = state.pedido.detalle.indexOf(detalle);
       state.pedido.detalle.splice(index, 0, detalle);
+      return item
     }
 
   },

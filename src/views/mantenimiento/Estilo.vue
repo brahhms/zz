@@ -60,16 +60,16 @@
                 <v-row>
                   <v-col cols="12">
                     <v-text-field
-                      label="rendimiento por yarda"
-                      v-model="nuevo.rendimientoPorYarda"
+                      label="Pares en yarda de Material"
+                      v-model="nuevo.rendimientoMaterial"
                     ></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12">
                     <v-text-field
-                      label="capeyada"
-                      v-model="nuevo.capeyada"
+                      label="Pares en yarda de Forro"
+                      v-model="nuevo.rendimientoForro"
                     ></v-text-field>
                   </v-col>
                 </v-row>

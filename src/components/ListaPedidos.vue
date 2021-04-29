@@ -15,7 +15,6 @@
         <v-card flat>
           <v-container>
             <v-row>
-           
               <v-btn @click="generarPedidosPDF" color="primary">
                 Descargar
               </v-btn>
@@ -134,6 +133,32 @@
                 </v-toolbar>
               </template>
 
+              <template v-slot:item.cantidad="{ item }">
+                {{ item.cantidad }} yardas
+              </template>
+
+              <template v-slot:no-data>
+                <v-btn color="primary"> Reset </v-btn>
+              </template>
+            </v-data-table>
+            <br />
+            <v-data-table
+              :headers="materialesHeaders"
+              :items="semanaSeleccionada.listaDeCompras.forros"
+              class="elevation-1"
+              disable-pagination
+              hide-default-footer
+            >
+              <template v-slot:top>
+                <v-toolbar dense color="primary" dark flat>
+                  <v-toolbar-title>Forros</v-toolbar-title>
+                </v-toolbar>
+              </template>
+
+              <template v-slot:item.cantidad="{ item }">
+                {{ item.cantidad }} yardas
+              </template>
+
               <template v-slot:no-data>
                 <v-btn color="primary"> Reset </v-btn>
               </template>
@@ -216,17 +241,17 @@ export default {
     headers: [
       {
         text: "Cantidad",
-        align: "end",
+        align: "start",
         sortable: false,
         value: "cantidad",
-        width: 1,
+        width:'10%'
       },
       {
         text: "Unidad",
         align: "start",
         sortable: false,
         value: "unidad",
-        width: 2,
+        width:'20%'
       },
       {
         text: "Nombre",
@@ -238,17 +263,17 @@ export default {
     materialesHeaders: [
       {
         text: "Cantidad",
-        align: "end",
+        align: "start",
         sortable: false,
         value: "cantidad",
-        width: 1,
+        width:'10%'
       },
       {
         text: "Nombre",
-        align: "Nombre",
+        align: "start",
         sortable: false,
         value: "nombre",
-        width: 3,
+        width:'20%'
       },
       {
         text: "Color",

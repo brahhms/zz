@@ -41,8 +41,8 @@ export default {
       linea: null,
       correlativo: null,
       codigo: null,
-      rendimientoPorYarda: null,
-      capeyada: null,
+      rendimientoMaterial: null,
+      rendimientoForro: null,
       avillos: [],
       adornos: [],
       _attachments: undefined
@@ -60,8 +60,8 @@ export default {
         linea: null,
         correlativo: null,
         codigo: null,
-        rendimientoPorYarda: null,
-        capeyada: null,
+        rendimientoMaterial: null,
+        rendimientoForro: null,
         avillos: [],
         adornos: [],
         _attachments: undefined
@@ -142,6 +142,8 @@ export default {
       commit,
       state
     }) {
+      state.nuevoEstilo.rendimientoForro = 1/Number(state.nuevoEstilo.rendimientoForro );
+      state.nuevoEstilo.rendimientoMaterial = 1/Number(state.nuevoEstilo.rendimientoMaterial );
       state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => a.cantidad > 0);
       state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => a.cantidad > 0);
       const res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
@@ -167,6 +169,8 @@ export default {
       commit,
       state
     }) {
+      state.nuevoEstilo.rendimientoForro = 1/Number(state.nuevoEstilo.rendimientoForro );
+      state.nuevoEstilo.rendimientoMaterial = 1/Number(state.nuevoEstilo.rendimientoMaterial );
       const res = await axios.post(`${url}`, state.nuevoEstilo, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers

@@ -312,14 +312,16 @@ export default {
     selected: {
       estilo: null,
     },
-    hormas:[]
+    hormas: [],
   }),
   methods: {
     ...mapMutations(["validarPedido", "removeDetalle", "duplicateDetalle"]),
     ...mapActions(["actualizarHormas"]),
     async changeEstilo() {
       await this.validarPedido();
-       this.hormas =  await this.actualizarHormas(this.detalle.estilo.linea.tacon);
+      this.hormas = await this.actualizarHormas(
+        this.detalle.estilo.linea.tacon
+      );
     },
   },
 
@@ -402,9 +404,11 @@ export default {
     },
   },
   computed: {
-    isTacon() {
+    async isTacon() {
       if (this.detalle.estilo != null) {
-       
+        this.hormas = await this.actualizarHormas(
+          this.detalle.estilo.linea.tacon
+        );
         return this.detalle.estilo.linea.tacon;
       } else {
         this.detalle.detalleTacon.material = null;
@@ -412,11 +416,8 @@ export default {
         return false;
       }
     },
-
   },
 
-  created() {
-    //this.detalle;
-  },
+  created() {},
 };
 </script>
