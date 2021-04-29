@@ -303,12 +303,14 @@ export default {
       "getEstilos",
       "deleteEstilo",
       "generarCorrelativo",
-      "actualizarAvillos"
+      "actualizarAvillos",
+      "actualizarAdornos"
     ]),
-    ...mapMutations(["setNuevoEstilo"]),
-    changeLinea(linea){
-      this.generarCorrelativo(linea.nombre);
-      this.actualizarAvillos(linea);
+    ...mapMutations(["setNuevoEstilo","resetAvillos"]),
+    changeLinea(){
+      this.resetAvillos();
+      this.generarCorrelativo();
+      this.actualizarAvillos();
     },
     async save() {
       if (this.editedIndex > -1) {
@@ -346,10 +348,8 @@ export default {
       this.closeDelete();
     },
     editItem(item) {
-      console.log(item.linea.nombre);
       this.editedIndex = this.estilos.indexOf(item);
       this.nuevo = item;
-      console.log(this.nuevo.linea);
       this.dialog = true;
     },
     async initialize() {
@@ -371,7 +371,10 @@ export default {
     ...mapGetters(["nuevoEstilo", "lineas", "estilos"]),
     nuevo: {
       set(estilo) {
+        estilo.linea = this.lineas.filter(l=>l._id==estilo.linea._id)[0];
         this.setNuevoEstilo(estilo);
+        this.actualizarAdornos();
+        this.actualizarAvillos();
         return estilo;
       },
       get() {

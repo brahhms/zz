@@ -47,8 +47,10 @@ export default {
       adornos: [],
       _attachments: undefined
     },
+
     estilos: [],
-    lineas: []
+    lineas: [],
+
   },
   mutations: {
     initialize(state) {
@@ -66,16 +68,22 @@ export default {
       };
     },
 
-    setAvillosDeLinea(state, avillos) {
-      state.nuevoEstilo.avillos = avillos;
+    resetAvillos(state){
+      state.nuevoEstilo.avillos=[];
     },
 
+    addAdornos(state, adornos) {
+      state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.concat(adornos);
+    },
+
+    setAvillosDeLinea(state, avillos) {
+      state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.concat(avillos);
+    },
 
     setCorrelativo(state, correlativo) {
       state.nuevoEstilo.correlativo = Number(correlativo);
       state.nuevoEstilo.codigo = state.nuevoEstilo.linea.nombre + correlativo;
     },
-
 
     setEstilos(state, data) {
       state.estilos = data;
@@ -94,14 +102,12 @@ export default {
   },
   actions: {
 
-    async generarCorrelativo({ commit }, linea) {
+    async generarCorrelativo({ commit, state }) {
 
-      if (linea != undefined && linea != null) {
-        const res = await axios.post(`${url}_design/correlativosExistentes/_view/correlativosExistentes?reduce=true&key=%22${linea}%22`, {}, credentials.authentication);
-
+      if (state.nuevoEstilo.linea != undefined && state.nuevoEstilo.linea != null) {
+        const res = await axios.post(`${url}_design/correlativosExistentes/_view/correlativosExistentes?reduce=true&key=%22${state.nuevoEstilo.linea.nombre}%22`, {}, credentials.authentication);
 
         let correlativos = [];
-
 
         if (res.data.rows.length > 0) {
           res.data.rows[0].value.forEach(element => {
@@ -136,6 +142,8 @@ export default {
       commit,
       state
     }) {
+      state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => a.cantidad > 0);
+      state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => a.cantidad > 0);
       const res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
         params: {
           "rev": state.nuevoEstilo._rev
@@ -191,7 +199,7 @@ export default {
     },
 
     async iniciarEstilo({
-      commit, state
+      commit
     }) {
       commit('initialize');
       const data = await iniciarEstilo();
@@ -200,34 +208,55 @@ export default {
 
 
     async actualizarAvillos({
-      commit
-    }, linea) {
+      commit, state
+    }) {
 
       let condiciones = [
         {
           "nombre": {
             "$in":
-            linea.avillos.map(x=>{return x.nombre})
+              state.nuevoEstilo.linea.avillos.map(x => { return x.nombre }),
           }
         },
         {
           "predeterminado": true
         }
       ];
-      if (linea.tacon) {
-        condiciones.push({"paraTacon":true});
+      if (state.nuevoEstilo.linea.tacon) {
+        condiciones.push({ "paraTacon": true });
       }
       const res = await axios.post('http://localhost:5984/zapp-avillos/_find', {
         "selector": {
-          "$or": condiciones
+          "$or": condiciones,
+          "nombre": {
+            "$nin": state.nuevoEstilo.avillos.map(x => { return x.nombre })
+          }
         }
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {
+        console.log(res.data.docs);
         commit('setAvillosDeLinea', res.data.docs);
       }
 
-    }
+    },
+
+    async actualizarAdornos({
+      commit, state
+    }) {
+      const res = await axios.post('http://localhost:5984/zapp-adornos/_find', {
+        "selector": {
+          "nombre": {
+            "$nor": state.nuevoEstilo.adornos.map(x => { return x.nombre })
+          }
+        }
+      }, credentials.authentication);
+
+      if (res.statusText == 'OK') {
+        commit('addAdornos', res.data.docs);
+      }
+
+    },
 
   },
   getters: {
