@@ -116,7 +116,7 @@
                     </v-data-table>
                   </v-col>
 
-                  <v-col cols="6">
+                  <v-col cols="12">
                     <v-data-table
                       :headers="adornoHeaders"
                       :items="nuevo.adornos"
@@ -133,10 +133,34 @@
                       </template>
 
                       <template v-slot:item.cantidad="{ item }">
-                        <v-text-field
-                          type="number"
-                          v-model="item.cantidad"
-                        ></v-text-field>
+                        <v-row>
+                          <v-col cols="4">
+                            <v-text-field
+                              type="number"
+                              v-model="item.cantidadInicial"
+                              value="0"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="4">
+                            <v-autocomplete
+                              item-text="nombre"
+                              :items="item.unidad.conversiones"
+                              return-object
+                              label="unidad de entrada"
+                              v-model="item.unidadConversion"
+                            ></v-autocomplete>
+                          </v-col>
+                          <v-col cols="4">
+                            <v-text-field
+                              disabled
+                              v-model="item.cantidad"
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </template>
+
+                      <template v-slot:item.unidad="{ item }">
+                        {{ item.unidad.nombre }}
                       </template>
 
                       <template v-slot:no-data>
@@ -260,10 +284,10 @@ export default {
           align: "start",
           sortable: false,
           value: "cantidad",
-          width: 2,
+          width: "35%",
         },
         {
-          text: "Unidad",
+          text: "Unidad de Compra",
           align: "start",
           sortable: false,
           value: "unidad",
@@ -304,10 +328,10 @@ export default {
       "deleteEstilo",
       "generarCorrelativo",
       "actualizarAvillos",
-      "actualizarAdornos"
+      "actualizarAdornos",
     ]),
-    ...mapMutations(["setNuevoEstilo","resetAvillos"]),
-    changeLinea(){
+    ...mapMutations(["setNuevoEstilo", "resetAvillos"]),
+    changeLinea() {
       this.resetAvillos();
       this.generarCorrelativo();
       this.actualizarAvillos();
@@ -371,7 +395,7 @@ export default {
     ...mapGetters(["nuevoEstilo", "lineas", "estilos"]),
     nuevo: {
       set(estilo) {
-        estilo.linea = this.lineas.filter(l=>l._id==estilo.linea._id)[0];
+        estilo.linea = this.lineas.filter((l) => l._id == estilo.linea._id)[0];
         this.setNuevoEstilo(estilo);
         this.actualizarAdornos();
         this.actualizarAvillos();
@@ -388,7 +412,6 @@ export default {
       get() {
         let styles = [];
         this.estilos.forEach((estilo) => {
-       
           if (estilo.linea != undefined) {
             if (estilo.linea._id == this.lineas[this.tab]._id) {
               styles.push(estilo);
@@ -403,6 +426,17 @@ export default {
     },
   },
 
+  watch: {
+    "nuevo.adornos": {
+      handler(newVal) {
+        newVal.forEach((e) => {
+          console.log(e.unidadConversion.nombre + e.unidadConversion.constante);
+          e.cantidad = Math.round10(Number(e.cantidadInicial) * Number(e.unidadConversion.constante),-1);
+        });
+      },
+      deep: true,
+    },
+  },
   created() {
     this.initialize();
   },

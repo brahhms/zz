@@ -97,6 +97,11 @@
                 </v-toolbar>
               </template>
 
+              <template v-slot:item.unidad="{ item }">
+                {{ item.unidad.nombre }} 
+              </template>
+
+
               <template v-slot:no-data>
                 <v-btn color="primary"> Reset </v-btn>
               </template>

@@ -36,10 +36,11 @@
                       <v-autocomplete
                         v-model="nuevo.unidad"
                         :items="unidades"
-                        label="Unidades" 
+                        label="Unidades"
+                        item-text="nombre"
+                        return-object
                       ></v-autocomplete>
                     </v-col>
-
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -81,6 +82,10 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
+
+      <template v-slot:item.unidad={item}>
+        {{item.unidad.nombre}}
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -89,7 +94,9 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers("adorno");
+const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers(
+  "adorno"
+);
 export default {
   data: () => ({
     dialog: false,
@@ -102,7 +109,7 @@ export default {
         value: "nombre",
       },
       {
-        text: "Unidad",
+        text: "Unidad de Compra",
         align: "start",
         sortable: false,
         value: "unidad",
@@ -116,7 +123,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["adornos", "unidades","nuevoAdorno"]),
+    ...mapGetters(["adornos", "unidades", "nuevoAdorno"]),
     allAdornos: {
       set(adornos) {
         return adornos;
@@ -151,10 +158,9 @@ export default {
 
   methods: {
     ...mapActions(["getAdornos", "updateAdorno", "saveAdorno", "deleteAdorno"]),
-    ...mapMutations(["iniciarAdorno","setNuevoAdorno"]),
+    ...mapMutations(["iniciarAdorno", "setNuevoAdorno"]),
     async initialize() {
       await this.getAdornos();
-
     },
 
     editItem(item) {
