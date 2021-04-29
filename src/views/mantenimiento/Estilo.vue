@@ -373,6 +373,8 @@ export default {
     },
     editItem(item) {
       this.editedIndex = this.estilos.indexOf(item);
+      item.rendimientoForro = Number(1/item.rendimientoForro);
+       item.rendimientoMaterial = Number(1/item.rendimientoMaterial);
       this.nuevo = item;
       this.dialog = true;
     },
@@ -430,8 +432,11 @@ export default {
     "nuevo.adornos": {
       handler(newVal) {
         newVal.forEach((e) => {
-          console.log(e.unidadConversion.nombre + e.unidadConversion.constante);
-          e.cantidad = Math.round10(Number(e.cantidadInicial) * Number(e.unidadConversion.constante),-1);
+          if (e.cantidadInicial!=null) {
+            let numero = Number(e.cantidadInicial) * Number(e.unidadConversion.constante);
+            e.cantidad = numero.toFixed(4);
+          }
+          
         });
       },
       deep: true,
