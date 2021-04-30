@@ -66,7 +66,7 @@
                           {{ detalle.detalleMaterial.material.nombre }}
                           {{ detalle.detalleMaterial.color }}
                         </td>
-                        <td v-if="detalle.detalleTacon != null">
+                        <td v-if="detalle.detalleTacon.material != null">
                           {{ detalle.detalleTacon.material.nombre }}
                           {{ detalle.detalleTacon.color }}
                         </td>

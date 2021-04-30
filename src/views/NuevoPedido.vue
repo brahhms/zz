@@ -80,11 +80,6 @@
                   <template v-slot:item="{ item }">
                     <detalle-pedido
                       :detalle="item"
-                      :estilos="estilos"
-                      :materiales="materiales"
-                      :tallas="tallas"
-                      :forros="forros"
-                      :suelas="suelas"
                     ></detalle-pedido>
                   </template>
                 </v-data-table>
@@ -236,11 +231,6 @@ export default {
     ...mapGetters([
       "cliente",
       "detalles",
-      "estilos",
-      "materiales",
-      "tallas",
-      "forros",
-      "suelas",
       "clientes",
       "isPedidoValid",
       "semana",

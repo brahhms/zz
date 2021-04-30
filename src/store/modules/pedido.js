@@ -138,7 +138,7 @@ export default {
           cantidad: 0,
         };
       });
-      detalleDefault.estilo = null;
+      detalleDefault.estilo = state.estilos[0];
       detalleDefault.detalleMaterial.material = state.materiales[0];
       detalleDefault.detalleTacon.material = state.materiales[0];
       detalleDefault.detalleMaterial.color = state.materiales[0].defaultColor;
@@ -147,6 +147,7 @@ export default {
       detalleDefault.detalleForro.color = state.forros[0].defaultColor;
       detalleDefault.detalleSuela.suela = state.suelas[0];
       detalleDefault.detalleSuela.color = state.suelas[0].defaultColor;
+      detalleDefault.horma = state.hormas.filter(h=>state.estilos[0].linea.tacon == h.paraTacon)[0];
 
 
       state.pedido.detalle.push(detalleDefault);
@@ -199,6 +200,8 @@ export default {
       detalle.detalleSuela = {
         ...item.detalleSuela
       };
+
+      //detalle.horma=state.hormas.filter(h=>detalle.estilo.linea.tacon == h.paraTacon)[0];
 
 
       detalle.detalleTallas = item.detalleTallas.map(item => {

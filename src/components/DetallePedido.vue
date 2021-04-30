@@ -51,8 +51,7 @@
               v-model="detalle.detalleMaterial.material"
               required
               label="material"
-              :items="materiales"
-              clearable
+              :items="materiales"   
               dense
               filled
               rounded
@@ -72,7 +71,6 @@
               v-model="detalle.detalleMaterial.color"
               label="color"
               :items="detalle.detalleMaterial.material.colores"
-              clearable
               dense
               filled
               rounded
@@ -102,7 +100,6 @@
               required
               label="material"
               :items="materiales"
-              clearable
               dense
               filled
               rounded
@@ -122,7 +119,7 @@
               v-model="detalle.detalleTacon.color"
               label="color"
               :items="detalle.detalleTacon.material.colores"
-              clearable
+             
               dense
               filled
               rounded
@@ -168,7 +165,6 @@
               v-model="detalle.horma"
               label="horma"
               :items="allHormas"
-              clearable
               dense
               filled
               rounded
@@ -187,6 +183,7 @@
       </v-edit-dialog>
     </td>
 
+<!--forro-->
     <td>
       <v-edit-dialog>
         <span v-if="detalle.detalleForro.forro != null">{{
@@ -204,7 +201,6 @@
               v-model="detalle.detalleForro.forro"
               label="forro"
               :items="forros"
-              clearable
               dense
               filled
               rounded
@@ -223,7 +219,6 @@
               v-model="detalle.detalleForro.color"
               label="color"
               :items="detalle.detalleForro.forro.colores"
-              clearable
               dense
               filled
               rounded
@@ -234,6 +229,7 @@
       </v-edit-dialog>
     </td>
 
+<!--suela-->
     <td>
       <v-edit-dialog>
         <span v-if="detalle.detalleSuela.suela != null">
@@ -251,7 +247,6 @@
               v-model="detalle.detalleSuela.suela"
               label="suela"
               :items="suelas"
-              clearable
               dense
               filled
               rounded
@@ -270,7 +265,6 @@
               v-model="detalle.detalleSuela.color"
               label="color"
               :items="detalle.detalleSuela.suela.colores"
-              clearable
               dense
               filled
               rounded
@@ -305,7 +299,7 @@ const { mapMutations, mapActions, mapGetters } = createNamespacedHelpers(
 );
 
 export default {
-  props: ["detalle", "estilos", "materiales", "tallas", "forros", "suelas"],
+  props: ["detalle"],
   components: {
     SelectorTalla,
   },
@@ -325,6 +319,7 @@ export default {
         this.hormasSegunTacon = await this.actualizarHormas(
           this.detalle.estilo.linea.tacon
         );
+        this.detalle.horma = this.hormasSegunTacon[0];
       }
     },
   },
@@ -350,6 +345,18 @@ export default {
       }
       if (newVal == null) {
         this.detalle.detalleMaterial.color = null;
+      }
+    },
+    "detalle.detalleTacon.material"(newVal, oldVal) {
+      try {
+        if (newVal._id != oldVal._id) {
+          this.detalle.detalleTacon.color = newVal.defaultColor;
+        }
+      } catch (error) {
+        console.log("tacon null");
+      }
+      if (newVal == null) {
+        this.detalle.detalleTacon.color = null;
       }
     },
 
@@ -390,6 +397,13 @@ export default {
             newVal.detalleMaterial.material.defaultColor;
         }
         if (
+          newVal.detalleTacon.color == null &&
+          newVal.detalleTacon.material != null
+        ) {
+          this.detalle.detalleTacon.color =
+            newVal.detalleTacon.material.defaultColor;
+        }
+        if (
           newVal.detalleForro.color == null &&
           newVal.detalleForro.forro != null
         ) {
@@ -408,7 +422,14 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["hormas"]),
+    ...mapGetters([
+      "hormas",
+      "estilos",
+      "materiales",
+      "suelas",
+      "tallas",
+      "forros",
+    ]),
     isTacon() {
       if (this.detalle.estilo != null) {
         return this.detalle.estilo.linea.tacon;
@@ -421,12 +442,13 @@ export default {
     allHormas() {
       if (this.hormasSegunTacon.length > 0) {
         return this.hormasSegunTacon;
-      }else if (this.detalle.estilo!=null) {
-        return this.hormas.filter(h=> h.paraTacon == this.detalle.estilo.linea.tacon);
-      }else{
+      } else if (this.detalle.estilo != null) {
+        return this.hormas.filter(
+          (h) => h.paraTacon == this.detalle.estilo.linea.tacon
+        );
+      } else {
         return this.hormas;
       }
-      
     },
   },
 
