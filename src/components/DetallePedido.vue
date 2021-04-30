@@ -167,7 +167,7 @@
               :rules="notNull"
               v-model="detalle.horma"
               label="horma"
-              :items="hormas"
+              :items="allHormas"
               clearable
               dense
               filled
@@ -300,7 +300,9 @@
 <script>
 import SelectorTalla from "../components/SelectorTalla.vue";
 import { createNamespacedHelpers } from "vuex";
-const { mapMutations, mapActions } = createNamespacedHelpers("pedido");
+const { mapMutations, mapActions, mapGetters } = createNamespacedHelpers(
+  "pedido"
+);
 
 export default {
   props: ["detalle", "estilos", "materiales", "tallas", "forros", "suelas"],
@@ -312,7 +314,7 @@ export default {
     selected: {
       estilo: null,
     },
-    hormas: [],
+    hormasSegunTacon: [],
   }),
   methods: {
     ...mapMutations(["validarPedido", "removeDetalle", "duplicateDetalle"]),
@@ -320,16 +322,14 @@ export default {
     async changeEstilo() {
       await this.validarPedido();
       if (this.detalle.estilo != null) {
-        this.hormas = await this.actualizarHormas(
+        this.hormasSegunTacon = await this.actualizarHormas(
           this.detalle.estilo.linea.tacon
         );
       }
     },
-
   },
 
   watch: {
-
     "detalle.detalleTallas": {
       handler(newVal) {
         let subtotal = 0;
@@ -352,18 +352,7 @@ export default {
         this.detalle.detalleMaterial.color = null;
       }
     },
-    "detalle.detalleTacon.tacon"(newVal, oldVal) {
-      try {
-        if (newVal._id != oldVal._id) {
-          this.detalle.detalleTacon.color = newVal.defaultColor;
-        }
-      } catch (error) {
-        console.log("material null");
-      }
-      if (newVal == null) {
-        this.detalle.detalleTacon.color = null;
-      }
-    },
+
     "detalle.detalleForro.forro"(newVal, oldVal) {
       try {
         if (newVal._id != oldVal._id) {
@@ -392,7 +381,7 @@ export default {
     detalle: {
       handler(newVal) {
         this.validarPedido();
-        
+
         if (
           newVal.detalleMaterial.color == null &&
           newVal.detalleMaterial.material != null
@@ -419,6 +408,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(["hormas"]),
     isTacon() {
       if (this.detalle.estilo != null) {
         return this.detalle.estilo.linea.tacon;
@@ -428,10 +418,18 @@ export default {
         return false;
       }
     },
+    allHormas() {
+      if (this.hormasSegunTacon.length > 0) {
+        return this.hormasSegunTacon;
+      }else if (this.detalle.estilo!=null) {
+        return this.hormas.filter(h=> h.paraTacon == this.detalle.estilo.linea.tacon);
+      }else{
+        return this.hormas;
+      }
+      
+    },
   },
 
-  mounted() {
-
-  },
+  mounted() {},
 };
 </script>

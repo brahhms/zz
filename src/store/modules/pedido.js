@@ -34,6 +34,7 @@ export default {
     forros: null,
     suelas: null,
     clientes: null,
+    hormas:[],
 
     //var
     isValid: false
@@ -161,6 +162,7 @@ export default {
       state.forros = data[3].data.docs;
       state.suelas = data[4].data.docs;
       state.clientes = data[5].data.docs;
+      state.hormas=data[6].data.docs;
 
     },
     clearPedido(state) {
@@ -183,7 +185,7 @@ export default {
 
     duplicateDetalle(state, item) {
       let detalle = Object.assign({}, item);
-      detalle.estilo=null;
+      
       detalle.detalleMaterial = {
         ...item.detalleMaterial
       };
@@ -307,6 +309,9 @@ export default {
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-clientes/_find', {
           "selector": {}
+        }, credentials.authentication),
+        axios.post('http://localhost:5984/zapp-hormas/_find', {
+          "selector": {}
         }, credentials.authentication)
       ]);
 
@@ -374,6 +379,7 @@ export default {
     forros: state => state.forros,
     suelas: state => state.suelas,
     clientes: state => state.clientes,
+    hormas:state => state.hormas,
 
     isPedidoValid: state => state.isValid,
     semana: state => state.pedido.semana,
