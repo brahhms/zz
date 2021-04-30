@@ -66,9 +66,11 @@
                           {{ detalle.detalleMaterial.material.nombre }}
                           {{ detalle.detalleMaterial.color }}
                         </td>
-                        <td v-if="detalle.detalleTacon.material != null">
-                          {{ detalle.detalleTacon.material.nombre }}
-                          {{ detalle.detalleTacon.color }}
+                        <td>
+                          <div v-if="detalle.detalleTacon.material != null">
+                            {{ detalle.detalleTacon.material.nombre }}
+                            {{ detalle.detalleTacon.color }}
+                          </div>
                         </td>
                         <td>
                           <v-row>
@@ -78,7 +80,9 @@
                               )"
                               :key="t.index"
                             >
-                              <v-chip>{{ t.cantidad }}/{{ t.talla.nombre }}</v-chip>
+                              <v-chip
+                                >{{ t.cantidad }}/{{ t.talla.nombre }}</v-chip
+                              >
                             </div>
                           </v-row>
                         </td>
