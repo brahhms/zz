@@ -319,13 +319,17 @@ export default {
     ...mapActions(["actualizarHormas"]),
     async changeEstilo() {
       await this.validarPedido();
-      this.hormas = await this.actualizarHormas(
-        this.detalle.estilo.linea.tacon
-      );
+      if (this.detalle.estilo != null) {
+        this.hormas = await this.actualizarHormas(
+          this.detalle.estilo.linea.tacon
+        );
+      }
     },
+
   },
 
   watch: {
+
     "detalle.detalleTallas": {
       handler(newVal) {
         let subtotal = 0;
@@ -336,7 +340,6 @@ export default {
       },
       deep: true,
     },
-
     "detalle.detalleMaterial.material"(newVal, oldVal) {
       try {
         if (newVal._id != oldVal._id) {
@@ -347,6 +350,18 @@ export default {
       }
       if (newVal == null) {
         this.detalle.detalleMaterial.color = null;
+      }
+    },
+    "detalle.detalleTacon.tacon"(newVal, oldVal) {
+      try {
+        if (newVal._id != oldVal._id) {
+          this.detalle.detalleTacon.color = newVal.defaultColor;
+        }
+      } catch (error) {
+        console.log("material null");
+      }
+      if (newVal == null) {
+        this.detalle.detalleTacon.color = null;
       }
     },
     "detalle.detalleForro.forro"(newVal, oldVal) {
@@ -377,7 +392,7 @@ export default {
     detalle: {
       handler(newVal) {
         this.validarPedido();
-
+        
         if (
           newVal.detalleMaterial.color == null &&
           newVal.detalleMaterial.material != null
@@ -404,11 +419,8 @@ export default {
     },
   },
   computed: {
-    async isTacon() {
+    isTacon() {
       if (this.detalle.estilo != null) {
-        this.hormas = await this.actualizarHormas(
-          this.detalle.estilo.linea.tacon
-        );
         return this.detalle.estilo.linea.tacon;
       } else {
         this.detalle.detalleTacon.material = null;
@@ -418,6 +430,8 @@ export default {
     },
   },
 
-  created() {},
+  mounted() {
+
+  },
 };
 </script>

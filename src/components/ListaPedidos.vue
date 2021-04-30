@@ -16,7 +16,7 @@
           <v-container>
             <v-row>
               <v-btn @click="generarPedidosPDF" color="primary">
-                Descargar
+                Descargar pdf
               </v-btn>
             </v-row>
           </v-container>
@@ -40,26 +40,62 @@
                       <v-toolbar-title>{{
                         pedido.cliente.nombre
                       }}</v-toolbar-title>
+
+                      <v-spacer></v-spacer>
+                      <v-toolbar-items>
+                        <v-btn dark text @click="editar(pedido, pedido.index)">
+                          <v-icon dark> mdi-clipboard-edit-outline </v-icon
+                          >Editar
+                        </v-btn>
+                      </v-toolbar-items>
                     </v-toolbar>
                   </template>
 
                   <template v-slot:body>
                     <tbody>
-                      <th colspan="6"></th>
+                      <th colspan="7"></th>
                       <th style="text-align: left">subtotal</th>
                       <tr
                         v-for="detalle in pedido.detalle"
                         :key="detalle.index"
                       >
-                        <td
-                          v-for="resumen in detalle.resumen"
-                          :key="resumen.index"
-                        >
-                          {{ resumen }}
+                        <td>
+                          {{ detalle.estilo.codigo }}
+                        </td>
+                        <td>
+                          {{ detalle.detalleMaterial.material.nombre }}
+                          {{ detalle.detalleMaterial.color }}
+                        </td>
+                        <td v-if="detalle.detalleTacon != null">
+                          {{ detalle.detalleTacon.material.nombre }}
+                          {{ detalle.detalleTacon.color }}
+                        </td>
+                        <td>
+                          <v-row>
+                            <div
+                              v-for="t in detalle.detalleTallas.filter(
+                                (x) => x.cantidad > 0
+                              )"
+                              :key="t.index"
+                            >
+                              <v-chip>{{ t.cantidad }}/{{ t.talla.nombre }}</v-chip>
+                            </div>
+                          </v-row>
+                        </td>
+                        <td>
+                          {{ detalle.horma.nombre }}
+                        </td>
+                        <td>
+                          {{ detalle.detalleForro.forro.nombre }}
+                          {{ detalle.detalleForro.color }}
+                        </td>
+                        <td>
+                          {{ detalle.detalleSuela.suela.nombre }}
+                          {{ detalle.detalleSuela.color }}
                         </td>
                       </tr>
                       <tr>
-                        <td colspan="5"></td>
+                        <td colspan="6"></td>
                         <td><b>Total:</b></td>
                         <td>
                           <b>{{ pedido.total }}</b>
@@ -98,9 +134,8 @@
               </template>
 
               <template v-slot:item.unidad="{ item }">
-                {{ item.unidad.nombre }} 
+                {{ item.unidad.nombre }}
               </template>
-
 
               <template v-slot:no-data>
                 <v-btn color="primary"> Reset </v-btn>
@@ -249,14 +284,14 @@ export default {
         align: "start",
         sortable: false,
         value: "cantidad",
-        width:'10%'
+        width: "10%",
       },
       {
         text: "Unidad",
         align: "start",
         sortable: false,
         value: "unidad",
-        width:'20%'
+        width: "20%",
       },
       {
         text: "Nombre",
@@ -271,14 +306,14 @@ export default {
         align: "start",
         sortable: false,
         value: "cantidad",
-        width:'10%'
+        width: "10%",
       },
       {
         text: "Nombre",
         align: "start",
         sortable: false,
         value: "nombre",
-        width:'20%'
+        width: "20%",
       },
       {
         text: "Color",
@@ -290,7 +325,11 @@ export default {
   }),
   mounted() {},
   methods: {
-    ...mapActionsPedido(["actualizarSemana"]),
+    ...mapActionsPedido(["actualizarSemana", "edit"]),
+    editar(pedido) {
+      this.edit(pedido);
+      this.$router.push({ name: "NuevoPedido" });
+    },
     onEnd() {
       this.actualizarSemana();
     },

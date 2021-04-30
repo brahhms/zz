@@ -25,9 +25,7 @@ export default {
       total: 0
     },
 
-
     semanaSeleccionada: null,
-
 
     //database
     estilos: null,
@@ -41,6 +39,9 @@ export default {
     isValid: false
   },
   mutations: {
+    setPedido(state, pedido) {
+      state.pedido = pedido;
+    },
     setRevSemana(state, rev) {
       state.semanaSeleccionada._rev = rev;
     },
@@ -128,7 +129,6 @@ export default {
           suela: null,
           color: null,
         },
-        resumen: [],
         subtotal: 0,
       };
       detalleDefault.detalleTallas = state.tallas.map((t) => {
@@ -146,7 +146,7 @@ export default {
       detalleDefault.detalleForro.color = state.forros[0].defaultColor;
       detalleDefault.detalleSuela.suela = state.suelas[0];
       detalleDefault.detalleSuela.color = state.suelas[0].defaultColor;
-     
+
 
       state.pedido.detalle.push(detalleDefault);
 
@@ -183,6 +183,7 @@ export default {
 
     duplicateDetalle(state, item) {
       let detalle = Object.assign({}, item);
+      detalle.estilo=null;
       detalle.detalleMaterial = {
         ...item.detalleMaterial
       };
@@ -197,7 +198,6 @@ export default {
         ...item.detalleSuela
       };
 
-  
 
       detalle.detalleTallas = item.detalleTallas.map(item => {
         return {
@@ -205,13 +205,18 @@ export default {
         }
       });
 
-     let index = state.pedido.detalle.indexOf(detalle);
+      let index = state.pedido.detalle.indexOf(detalle);
       state.pedido.detalle.splice(index, 0, detalle);
       return item
     }
 
   },
   actions: {
+
+    edit({ commit }, pedido) {
+      commit("setPedido", pedido);
+    },
+
     async getSemana({
       commit,
       state
@@ -324,6 +329,7 @@ export default {
     async actualizarSemana({
       state, commit
     }) {
+
       const res = await axios.put(`http://localhost:5984/zapp-semanas/${state.semanaSeleccionada._id}/`, state.semanaSeleccionada, {
         params: {
           "rev": state.semanaSeleccionada._rev
@@ -336,10 +342,11 @@ export default {
         console.log("actualizada");
         commit('setRevSemana', res.data.rev);
       }
+      return res
 
     },
 
-    async actualizarHormas({},paraTacon) {
+    async actualizarHormas({ }, paraTacon) {
       const res = await axios.post('http://localhost:5984/zapp-hormas/_find', {
         "selector": {
           "paraTacon": paraTacon
@@ -349,7 +356,7 @@ export default {
       if (res.statusText == 'OK') {
         return res.data.docs;
 
-      }else{
+      } else {
         return []
       }
 

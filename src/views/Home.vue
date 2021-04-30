@@ -59,14 +59,18 @@
             >
             <v-spacer></v-spacer>
             <v-toolbar-items>
-              <v-btn dark text :to="{ name: 'NuevoPedido' }">
+              <v-btn dark text @click="crearPedido">
                 Nuevo Pedido
               </v-btn>
             </v-toolbar-items>
           </v-toolbar>
 
           <v-divider></v-divider>
-          <v-progress-linear v-if="loading1" indeterminate color="cyan"></v-progress-linear>
+          <v-progress-linear
+            v-if="loading1"
+            indeterminate
+            color="cyan"
+          ></v-progress-linear>
           <lista-pedidos v-else></lista-pedidos>
         </v-card>
       </v-dialog>
@@ -111,6 +115,7 @@ export default {
       "setSemanaPedido",
       "setAnoPedido",
       "actualizarPedidos",
+      "clearPedido"
     ]),
     ...mapActionsPedido(["getSemana"]),
     updateRange({ start, end }) {
@@ -143,6 +148,10 @@ export default {
       let fech = new Date(year, mes, dia);
       //console.log(fech);
       return fech.getWeekNumber();
+    },
+    crearPedido() {
+      this.clearPedido();
+      this.$router.push({ name: "NuevoPedido" });
     },
   },
   computed: {

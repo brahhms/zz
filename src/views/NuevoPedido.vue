@@ -67,7 +67,7 @@
                 <v-spacer></v-spacer>
                 Semana {{ semana }}
                 <v-spacer></v-spacer>
-                <v-btn outlined  color="primary" icon @click="addDetalle()">
+                <v-btn outlined color="primary" icon @click="addDetalle()">
                   <v-icon>mdi-plus</v-icon>
                 </v-btn>
               </v-app-bar>
@@ -190,7 +190,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["savePedido", "iniciarDetalle", "saveCliente"]),
+    ...mapActions(["savePedido", "iniciarDetalle","actualizarSemana"]),
     ...mapMutationsPedido(["addDetalle", "validarPedido", "setCliente"]),
     ...mapMutations(["mostrarMsj"]),
     async loadData() {
@@ -202,7 +202,11 @@ export default {
         this.loading1 = true;
       }
 
-      if (this.isEditing) this.e1 = 2;
+      if (this.isEditing) {
+        this.e1 = 2;
+      } else {
+        this.addDetalle();
+      }
     },
 
     async guardarPedido() {
@@ -210,9 +214,19 @@ export default {
 
       if (!this.isPedidoValid) return;
 
-      const res = await this.savePedido();
+      let res={status:0};
+      let msj="";
+
+      if (this.semanaSeleccionada._id != undefined) {
+        res = await this.actualizarSemana();
+        msj = "actualizado";
+      } else {
+        res = await this.savePedido();
+        msj = "guardado";
+      }
+
       if (res.status == 201 || res.status == 200) {
-        this.mostrarMsj("Pedido guardado!");
+        this.mostrarMsj("Pedido "+msj);
         this.e1 = 1;
       }
     },
@@ -231,6 +245,7 @@ export default {
       "isPedidoValid",
       "semana",
       "isEditing",
+      "semanaSeleccionada",
     ]),
 
     clienteSeleccionado: {
