@@ -177,9 +177,11 @@ export default {
       commit,
       state
     }) {
-      await axios.put(`${url}${state.nuevoAdorno._id}/`, state.nuevoAdorno, {
+      let update = state.nuevoAdorno;
+      update.unidadConversion = update.unidad.conversiones[0];
+      await axios.put(`${url}${update._id}/`, update, {
         params: {
-          "rev": state.nuevoAdorno._rev
+          "rev": update._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
@@ -192,7 +194,9 @@ export default {
       commit,
       state
     }) {
-      let res = await axios.post(`${url}`, state.nuevoAdorno, {
+      let nuevo = state.nuevoAdorno;
+      nuevo.unidadConversion = nuevo.unidad.conversiones[0];
+      let res = await axios.post(`${url}`, nuevo, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);

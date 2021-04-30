@@ -175,7 +175,8 @@ export default {
         semana: state.pedido.semana,
         detalle: [],
         total: 0
-      }
+      };
+      state.semanaSeleccionada=null;
 
     },
 

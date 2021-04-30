@@ -85,7 +85,7 @@
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="6">
+                  <v-col cols="12">
                     <v-data-table
                       :headers="adornoHeaders"
                       :items="nuevo.avillos"
@@ -102,10 +102,34 @@
                       </template>
 
                       <template v-slot:item.cantidad="{ item }">
-                        <v-text-field
-                          type="number"
-                          v-model="item.cantidad"
-                        ></v-text-field>
+                        <v-row>
+                          <v-col cols="3">
+                            <v-text-field
+                              type="number"
+                              v-model="item.cantidadInicial"
+                              value="0"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="6">
+                            <v-autocomplete
+                              item-text="nombre"
+                              :items="item.unidad.conversiones"
+                              return-object
+                              label="unidad de entrada"
+                              v-model="item.unidadConversion"
+                            ></v-autocomplete>
+                          </v-col>
+                          <v-col cols="3">
+                            <v-text-field
+                              disabled
+                              v-model="item.cantidad"
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </template>
+
+                      <template v-slot:item.unidad="{ item }">
+                        {{ item.unidad.nombre }}
                       </template>
 
                       <template v-slot:no-data>
@@ -134,14 +158,14 @@
 
                       <template v-slot:item.cantidad="{ item }">
                         <v-row>
-                          <v-col cols="4">
+                          <v-col cols="3">
                             <v-text-field
                               type="number"
                               v-model="item.cantidadInicial"
                               value="0"
                             ></v-text-field>
                           </v-col>
-                          <v-col cols="4">
+                          <v-col cols="6">
                             <v-autocomplete
                               item-text="nombre"
                               :items="item.unidad.conversiones"
@@ -150,7 +174,7 @@
                               v-model="item.unidadConversion"
                             ></v-autocomplete>
                           </v-col>
-                          <v-col cols="4">
+                          <v-col cols="3">
                             <v-text-field
                               disabled
                               v-model="item.cantidad"
@@ -284,7 +308,7 @@ export default {
           align: "start",
           sortable: false,
           value: "cantidad",
-          width: "35%",
+          width: "50%",
         },
         {
           text: "Unidad de Compra",
@@ -373,8 +397,8 @@ export default {
     },
     editItem(item) {
       this.editedIndex = this.estilos.indexOf(item);
-      item.rendimientoForro = Number(1/item.rendimientoForro);
-       item.rendimientoMaterial = Number(1/item.rendimientoMaterial);
+      item.rendimientoForro = Number(1 / item.rendimientoForro);
+      item.rendimientoMaterial = Number(1 / item.rendimientoMaterial);
       this.nuevo = item;
       this.dialog = true;
     },
@@ -432,11 +456,30 @@ export default {
     "nuevo.adornos": {
       handler(newVal) {
         newVal.forEach((e) => {
-          if (e.cantidadInicial!=null) {
-            let numero = Number(e.cantidadInicial) * Number(e.unidadConversion.constante);
+          if (e.cantidadInicial != null) {
+            let numero =
+              Number(e.cantidadInicial) * Number(e.unidadConversion.constante);
             e.cantidad = numero.toFixed(4);
           }
-          
+        });
+      },
+      deep: true,
+    },
+    "nuevo.avillos": {
+      handler(newVal) {
+        newVal.forEach((e) => {
+          if (e.cantidadInicial != null) {
+            let numero = 0;
+            if (e.unidadConversion.constante == null) {
+              numero = Number(1 / e.cantidadInicial);
+            } else {
+              numero =
+                Number(e.cantidadInicial) *
+                Number(e.unidadConversion.constante);
+            }
+
+            e.cantidad = numero.toFixed(4);
+          }
         });
       },
       deep: true,

@@ -30,7 +30,7 @@
                 <v-data-table
                   disable-pagination
                   hide-default-footer
-                  dense
+                  
                   class="pedido sorteable"
                   v-for="pedido in semanaSeleccionada.pedidos"
                   :key="pedido._id"

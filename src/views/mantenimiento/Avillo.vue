@@ -7,6 +7,12 @@
       disable-pagination
       hide-default-footer
     >
+
+  
+      <template v-slot:item.unidad={item}>
+        {{item.unidad.nombre}}
+      </template>
+
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title>AVILLOS</v-toolbar-title>
@@ -37,6 +43,8 @@
                         v-model="nuevo.unidad"
                         :items="unidades"
                         label="Unidades"
+                        item-text="nombre"
+                        return-object
                       ></v-autocomplete>
                     </v-col>
                     <v-col cols="12">
@@ -85,6 +93,7 @@
           </v-dialog>
         </v-toolbar>
       </template>
+
       <template v-slot:item.actions="{ item }">
         <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
         <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
@@ -115,7 +124,7 @@ export default {
         value: "nombre",
       },
       {
-        text: "Unidad",
+        text: "Unidad de Compra",
         align: "start",
         sortable: false,
         value: "unidad",

@@ -19,14 +19,130 @@ export default {
       _rev: undefined,
       nombre: null,
       cantidad: 0,
-      unidad: "pares",
-      predeterminado:false,
-      paraTacon:false
+      unidad: {
+        nombre: "pares",
+        conversiones: [
+          {
+            nombre: "pares",
+            constante: Number(1)
+          }
+        ]
+      },
+      unidadConversion: {
+        nombre: "pares en pliego",
+        constante: null
+      },
+      predeterminado: false,
+      paraTacon: false
     },
     avillos: [],
-    unidades: ["pares",
-      "pares en pliego",
-      "galones"
+    unidades: [
+      {
+        nombre: "pares",
+        conversiones: [
+          {
+            nombre: "pares",
+            constante: Number(1)
+          }
+        ]
+      },
+      {
+        nombre: "pliegos",
+        conversiones: [
+          {
+            nombre: "pliegos",
+            constante: Number(1)
+          },
+          {
+            nombre: "pares en pliego",
+            constante: null
+          }
+        ]
+      },
+      {
+        nombre: "yardas",
+        conversiones: [
+          {
+            nombre: "yardas",
+            constante: Number(1)
+          },
+          {
+            nombre: "metros",
+            constante: Number(1.094)
+          },
+          {
+            nombre: "centimetros",
+            constante: Number(1 / 91.44)
+          },
+          {
+            nombre: "pulgadas",
+            constante: Number(1 / 36)
+          },
+        ]
+      },
+      {
+        nombre: "centimetros",
+        conversiones: [
+          {
+            nombre: "yardas",
+            constante: Number(91.44)
+          },
+          {
+            nombre: "metros",
+            constante: Number(100)
+          },
+          {
+            nombre: "centimetros",
+            constante: Number(1 / 91.44)
+          },
+          {
+            nombre: "pulgadas",
+            constante: Number(2.54)
+          },
+        ]
+      },
+      {
+        nombre: "pulgadas",
+        conversiones: [
+          {
+            nombre: "yardas",
+            constante: Number(36)
+          },
+          {
+            nombre: "metros",
+            constante: Number(39.37)
+          },
+          {
+            nombre: "centimetros",
+            constante: Number(1 / 2.54)
+          },
+          {
+            nombre: "pulgadas",
+            constante: Number(1)
+          },
+        ]
+      },
+      {
+        nombre: "metros",
+        conversiones: [
+          {
+            nombre: "yardas",
+            constante: Number(1 / 1.094)
+          },
+          {
+            nombre: "metros",
+            constante: Number(1)
+          },
+          {
+            nombre: "centimetros",
+            constante: Number(1 / 100)
+          },
+          {
+            nombre: "pulgadas",
+            constante: Number(1 / 39.37)
+          },
+        ]
+      },
     ]
   },
   mutations: {
@@ -45,9 +161,21 @@ export default {
         _rev: undefined,
         nombre: null,
         cantidad: 0,
-        unidad: "pares",
-        predeterminado:false,
-        paraTacon:false
+        unidad: {
+          nombre: "pares",
+          conversiones: [
+            {
+              nombre: "pares",
+              constante: Number(1)
+            }
+          ]
+        },
+        unidadConversion: {
+          nombre: "pares en pliego",
+          constante: null
+        },
+        predeterminado: false,
+        paraTacon: false
       };
     }
 
@@ -66,9 +194,11 @@ export default {
       commit,
       state
     }) {
-      await axios.put(`${url}${state.nuevoAvillo._id}/`, state.nuevoAvillo, {
+      let update = state.nuevoAvillo;
+      update.unidadConversion = update.unidad.conversiones[0];
+      await axios.put(`${url}${update._id}/`, update, {
         params: {
-          "rev": state.nuevoAvillo._rev
+          "rev": update._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
@@ -81,7 +211,9 @@ export default {
       commit,
       state
     }) {
-      let res = await axios.post(`${url}`, state.nuevoAvillo, {
+      let nuevo = state.nuevoAvillo;
+      nuevo.unidadConversion = nuevo.unidad.conversiones[0];
+      let res = await axios.post(`${url}`, nuevo, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
