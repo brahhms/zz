@@ -35,10 +35,14 @@
                   </v-row>
                   <v-row>
                     <v-col>
-                      <v-checkbox
-                        label="Tacon"
-                        v-model="nueva.tacon"
-                      ></v-checkbox>
+                      <v-autocomplete
+                        v-model="nueva.plantilla"
+                        label="Plantilla"
+                        return-object
+                        item-text="nombre"
+                        :items="plantillas"
+                      >
+                      </v-autocomplete>
                     </v-col>
                   </v-row>
                   <v-row>
@@ -59,7 +63,7 @@
                             <v-divider class="mx-4" inset vertical></v-divider>
                             <v-spacer></v-spacer>
                           </v-toolbar>
-                        </template>   
+                        </template>
 
                         <template v-slot:no-data>
                           <v-btn color="primary" @click="iniciarLinea">
@@ -112,6 +116,9 @@
       <template v-slot:item.tacon="{ item }">
         <v-simple-checkbox v-model="item.tacon" disabled></v-simple-checkbox>
       </template>
+      <template v-slot:item.plantilla="{ item }">
+        <div v-if="item.plantilla != null && item.plantilla != undefined">{{ item.plantilla.nombre }}</div>
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -137,6 +144,12 @@ export default {
         value: "nombre",
       },
       {
+        text: "Plantilla",
+        align: "start",
+        sortable: false,
+        value: "plantilla",
+      },
+      {
         text: "Tacon",
         align: "start",
         sortable: false,
@@ -145,14 +158,14 @@ export default {
 
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    avillosHeaders:[
-        {
-          text: "Nombre",
-          align: "start",
-          sortable: false,
-          value: "nombre",
-        }
-      ],
+    avillosHeaders: [
+      {
+        text: "Nombre",
+        align: "start",
+        sortable: false,
+        value: "nombre",
+      },
+    ],
     editedIndex: -1,
   }),
 
@@ -160,7 +173,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Nueva" : "Editar";
     },
-    ...mapGetters(["lineas", "nuevaLinea","avillos"]),
+    ...mapGetters(["lineas", "nuevaLinea", "avillos", "plantillas"]),
     allLineas: {
       set(lineas) {
         return lineas;
@@ -191,12 +204,17 @@ export default {
 
   created() {
     this.initialize();
-
   },
 
   methods: {
-    ...mapActions(["getLineas", "updateLinea", "saveLinea", "deleteLinea","iniciarLinea"]),
-    ...mapMutationsLinea([ "setNuevaLinea"]),
+    ...mapActions([
+      "getLineas",
+      "updateLinea",
+      "saveLinea",
+      "deleteLinea",
+      "iniciarLinea",
+    ]),
+    ...mapMutationsLinea(["setNuevaLinea"]),
     ...mapMutations(["mostrarMsj"]),
     async initialize() {
       await this.getLineas();

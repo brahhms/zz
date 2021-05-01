@@ -21,10 +21,11 @@ export default {
       nombre: null,
       avillos: []
     },
-    plantillas: [],
-    avillos:[]
+    plantillas: []
   },
   mutations: {
+
+
     setPlantillas(state, data) {
       state.plantillas = data;
     },
@@ -43,7 +44,20 @@ export default {
     }
     ,
     setAvillos(state, avillos) {
-      state.avillos = avillos;
+
+      if (state.nuevaPlantilla.avillos.length==0) {
+        state.nuevaPlantilla.avillos=avillos;
+      }else{
+        avillos.forEach(avillo => {
+          console.log(state.nuevaPlantilla.avillos.filter(a => a.nombre != avillo.nombre));
+        });
+      }
+
+     // avillos.filter(avillo=> avillo.nombre!= );
+
+     
+
+
     }
 
 
@@ -53,12 +67,15 @@ export default {
     async iniciarPlantilla({
       commit
     }) {
-      commit('initialize');
+
       const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
         "selector": {}
       }, credentials.authentication);
 
-      if (res.statusText=='OK') {
+
+
+      if (res.statusText == 'OK') {
+        commit('initialize');
         commit('setAvillos', res.data.docs);
         return true
       } else {
@@ -143,7 +160,7 @@ export default {
   },
   getters: {
     plantillas: state => state.plantillas,
-    avillos:state=> state.avillos,
+
 
     nuevaPlantilla: state => state.nuevaPlantilla
   }

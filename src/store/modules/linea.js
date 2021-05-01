@@ -20,10 +20,12 @@ export default {
       _rev: undefined,
       nombre: null,
       tacon: false,
+      plantilla: null,
       avillos: []
     },
     lineas: [],
-    avillos:[]
+    avillos: [],
+    plantillas: []
   },
   mutations: {
     setLineas(state, data) {
@@ -40,13 +42,16 @@ export default {
         _rev: undefined,
         nombre: null,
         tacon: false,
+        plantilla: null,
         avillos: []
       };
-    }
-    ,
-    setAvillos(state, avillos) {
-      state.avillos = avillos;
-    }
+    },
+
+    setData(state, data) {
+      state.avillos = data[0].data.docs;
+      state.plantillas = data[1].data.docs;
+      state.nuevaLinea.plantilla = state.plantillas[0];
+    },
 
 
   },
@@ -56,16 +61,30 @@ export default {
       commit
     }) {
       commit('initialize');
-      const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
-        "selector": {}
-      }, credentials.authentication);
 
-      if (res.statusText=='OK') {
-        commit('setAvillos', res.data.docs);
-        return true
-      } else {
-        return false
+      const data = await axios.all([
+        axios.post(`http://localhost:5984/zapp-avillos/_find`, {
+          "selector": {}
+        }, credentials.authentication),
+        axios.post('http://localhost:5984/zapp-plantillas/_find', {
+          "selector": {}
+        }, credentials.authentication),
+      ]);
+
+      let isOK = true;
+      data.forEach(res => {
+        if (res.statusText != "OK") {
+          isOK = false;
+        }
+      });
+
+      if (isOK) {
+        commit('setData', data);
       }
+
+      return isOK
+
+
 
     },
 
@@ -88,9 +107,11 @@ export default {
       commit,
       state
     }) {
-      let res = await axios.put(`${url}${state.nuevaLinea._id}/`, state.nuevaLinea, {
+      let nueva = state.nuevaLinea;
+      nueva.nombre = nueva.nombre.toUpperCase();
+      let res = await axios.put(`${url}${nueva._id}/`, nueva, {
         params: {
-          "rev": state.nuevaLinea._rev
+          "rev": nueva._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
@@ -108,7 +129,9 @@ export default {
       commit,
       state
     }) {
-      let res = await axios.post(`${url}`, state.nuevaLinea, {
+      let nueva = state.nuevaLinea;
+      nueva.nombre = nueva.nombre.toUpperCase();
+      let res = await axios.post(`${url}`, nueva, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
@@ -145,7 +168,8 @@ export default {
   },
   getters: {
     lineas: state => state.lineas,
-    avillos:state=> state.avillos,
+    avillos: state => state.avillos,
+    plantillas: state => state.plantillas,
 
     nuevaLinea: state => state.nuevaLinea
   }

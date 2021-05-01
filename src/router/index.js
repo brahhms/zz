@@ -13,6 +13,7 @@ import Adorno from "../views/mantenimiento/Adorno.vue";
 import Avillo from "../views/mantenimiento/Avillo.vue";
 import Talla from "../views/mantenimiento/Talla.vue";
 import Linea from "../views/mantenimiento/Linea.vue";
+import Plantilla from "../views/mantenimiento/Plantilla.vue";
 
 import VistaPrevia from '../components/VistaPrevia.vue'
 
@@ -23,6 +24,11 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/plantilla',
+    name: 'Plantilla',
+    component: Plantilla
   },
   {
     path: '/pedidos',

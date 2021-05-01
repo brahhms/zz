@@ -97,6 +97,7 @@ export default {
       { name: "Avillo", title:"Avillos", icon: "mdi-scatter-plot-outline" },
       { name: "Talla", title:"Tallas", icon: "mdi-format-list-numbered" },
        { name: "Linea", title:"Lineas", icon: "mdi-equal" },
+       { name: "Plantilla", title:"Plantillas", icon: "mdi-shore" }
 
     ],
   }),

@@ -11,6 +11,7 @@ import hormaStore from './modules/horma'
 import adornoStore from './modules/adorno'
 import avilloStore from './modules/avillo'
 import lineaStore from "./modules/linea";
+import plantillaStore from "./modules/plantilla";
 
 
 
@@ -58,6 +59,7 @@ export default new Vuex.Store({
     horma: hormaStore,
     adorno: adornoStore,
     avillo: avilloStore,
-    linea: lineaStore
+    linea: lineaStore,
+    plantilla:plantillaStore
   }
 })

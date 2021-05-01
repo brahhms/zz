@@ -12,7 +12,7 @@
           <v-toolbar-title>PLANTILLAS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog persistent v-model="dialog" max-width="500px">
+          <v-dialog persistent v-model="dialog" max-width="800px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                 Nueva Plantilla
@@ -33,25 +33,15 @@
                       ></v-text-field>
                     </v-col>
                   </v-row>
-                  <v-row>
-                    <v-col>
-                      <v-checkbox
-                        label="Tacon"
-                        v-model="nueva.tacon"
-                      ></v-checkbox>
-                    </v-col>
-                  </v-row>
+
                   <v-row>
                     <v-col>
                       <v-data-table
                         :headers="avillosHeaders"
-                        :items="avillos"
+                        :items="nueva.avillos"
                         class="elevation-1"
                         disable-pagination
                         hide-default-footer
-                        show-select
-                        item-key="nombre"
-                        v-model="nueva.avillos"
                       >
                         <template v-slot:top>
                           <v-toolbar flat>
@@ -59,10 +49,41 @@
                             <v-divider class="mx-4" inset vertical></v-divider>
                             <v-spacer></v-spacer>
                           </v-toolbar>
-                        </template>   
+                        </template>
+
+                        <template v-slot:item.cantidad="{ item }">
+                          <v-row>
+                            <v-col cols="3">
+                              <v-text-field
+                                type="number"
+                                v-model="item.cantidadInicial"
+                                value="0"
+                              ></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                              <v-autocomplete
+                                item-text="nombre"
+                                :items="item.unidad.conversiones"
+                                return-object
+                                label="unidad de entrada"
+                                v-model="item.unidadConversion"
+                              ></v-autocomplete>
+                            </v-col>
+                            <v-col cols="3">
+                              <v-text-field
+                                disabled
+                                v-model="item.cantidad"
+                              ></v-text-field>
+                            </v-col>
+                          </v-row>
+                        </template>
+
+                        <template v-slot:item.unidad="{ item }">
+                          {{ item.unidad.nombre }}
+                        </template>
 
                         <template v-slot:no-data>
-                          <v-btn color="primary" @click="iniciarPlantilla">
+                          <v-btn color="primary" @click="iniciarPlantilla()">
                             Reset
                           </v-btn>
                         </template>
@@ -109,9 +130,6 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
-      <template v-slot:item.tacon="{ item }">
-        <v-simple-checkbox v-model="item.tacon" disabled></v-simple-checkbox>
-      </template>
     </v-data-table>
   </div>
 </template>
@@ -136,22 +154,29 @@ export default {
         sortable: false,
         value: "nombre",
       },
-      {
-        text: "Tacon",
-        align: "start",
-        sortable: false,
-        value: "tacon",
-      },
 
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    avillosHeaders:[
+    avillosHeaders: [
         {
           text: "Nombre",
           align: "start",
           sortable: false,
           value: "nombre",
-        }
+        },
+        {
+          text: "Cantidad",
+          align: "start",
+          sortable: false,
+          value: "cantidad",
+          width: "50%",
+        },
+        {
+          text: "Unidad de Compra",
+          align: "start",
+          sortable: false,
+          value: "unidad",
+        },
       ],
     editedIndex: -1,
   }),
@@ -160,7 +185,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Nueva" : "Editar";
     },
-    ...mapGetters(["plantillas", "nuevaPlantilla","avillos"]),
+    ...mapGetters(["plantillas", "nuevaPlantilla", "avillos"]),
     allPlantillas: {
       set(plantillas) {
         return plantillas;
@@ -187,16 +212,43 @@ export default {
     dialogDelete(val) {
       val || this.closeDelete();
     },
+
+   "nueva.avillos": {
+      handler(newVal) {
+        newVal.forEach((e) => {
+          
+          if (e.cantidadInicial != null) {
+            let numero = 0;
+            if (e.unidadConversion.constante == null) {
+              numero = Number(1 / e.cantidadInicial);
+            } else {
+              numero =
+                Number(e.cantidadInicial) *
+                Number(e.unidadConversion.constante);
+            }
+
+            e.cantidad = numero.toFixed(4);
+          }
+        });
+      },
+      deep: true,
+    },
+
   },
 
   created() {
     this.initialize();
-
   },
 
   methods: {
-    ...mapActions(["getPlantillas", "updatePlantilla", "savePlantilla", "deletePlantilla","iniciarPlantilla"]),
-    ...mapMutationsPlantilla([ "setNuevaPlantilla"]),
+    ...mapActions([
+      "getPlantillas",
+      "updatePlantilla",
+      "savePlantilla",
+      "deletePlantilla",
+      "iniciarPlantilla",
+    ]),
+    ...mapMutationsPlantilla(["setNuevaPlantilla"]),
     ...mapMutations(["mostrarMsj"]),
     async initialize() {
       await this.getPlantillas();

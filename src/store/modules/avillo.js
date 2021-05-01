@@ -19,6 +19,7 @@ export default {
       _rev: undefined,
       nombre: null,
       cantidad: 0,
+      cantidadInicial:0,
       unidad: {
         nombre: "pares",
         conversiones: [
@@ -38,6 +39,15 @@ export default {
     avillos: [],
     unidades: [
       {
+        nombre: "galones",
+        conversiones: [
+          {
+            nombre: "galones",
+            constante: Number(1)
+          }
+        ]
+      },
+      {
         nombre: "pares",
         conversiones: [
           {
@@ -50,12 +60,12 @@ export default {
         nombre: "pliegos",
         conversiones: [
           {
-            nombre: "pliegos",
-            constante: Number(1)
-          },
-          {
             nombre: "pares en pliego",
             constante: null
+          },
+          {
+            nombre: "pliegos",
+            constante: Number(1)
           }
         ]
       },
@@ -161,6 +171,7 @@ export default {
         _rev: undefined,
         nombre: null,
         cantidad: 0,
+        cantidadInicial:0,
         unidad: {
           nombre: "pares",
           conversiones: [

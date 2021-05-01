@@ -18,7 +18,7 @@ export default {
       _id: undefined,
       _rev: undefined,
       nombre: null,
-      cantidad: 0,
+      cantidad: 0, cantidadInicial: 0,
       unidad: {
         nombre: "pares",
         conversiones: [
@@ -57,11 +57,11 @@ export default {
           },
           {
             nombre: "centimetros",
-            constante: Number(1/91.44)
+            constante: Number(1 / 91.44)
           },
           {
             nombre: "pulgadas",
-            constante: Number(1/36)
+            constante: Number(1 / 36)
           },
         ]
       },
@@ -78,11 +78,11 @@ export default {
           },
           {
             nombre: "centimetros",
-            constante: Number(1/91.44)
+            constante: Number(1 / 91.44)
           },
           {
             nombre: "pulgadas",
-            constante: Number( 2.54)
+            constante: Number(2.54)
           },
         ]
       },
@@ -99,7 +99,7 @@ export default {
           },
           {
             nombre: "centimetros",
-            constante: Number(1/2.54)
+            constante: Number(1 / 2.54)
           },
           {
             nombre: "pulgadas",
@@ -112,7 +112,7 @@ export default {
         conversiones: [
           {
             nombre: "yardas",
-            constante: Number(1/1.094)
+            constante: Number(1 / 1.094)
           },
           {
             nombre: "metros",
@@ -120,11 +120,11 @@ export default {
           },
           {
             nombre: "centimetros",
-            constante: Number(1/100)
+            constante: Number(1 / 100)
           },
           {
             nombre: "pulgadas",
-            constante: Number(1/39.37)
+            constante: Number(1 / 39.37)
           },
         ]
       },
@@ -145,7 +145,7 @@ export default {
         _id: undefined,
         _rev: undefined,
         nombre: null,
-        cantidad: 0,
+        cantidad: 0, cantidadInicial: 0,
         unidad: {
           nombre: "pares",
           conversiones: [
