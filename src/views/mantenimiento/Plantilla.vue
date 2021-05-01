@@ -220,7 +220,12 @@ export default {
           if (e.cantidadInicial != null) {
             let numero = 0;
             if (e.unidadConversion.constante == null) {
-              numero = Number(1 / e.cantidadInicial);
+              if (e.cantidadInicial!=0) {
+                  numero = Number(1 / e.cantidadInicial);
+              }else{
+                numero=0;
+              }
+            
             } else {
               numero =
                 Number(e.cantidadInicial) *

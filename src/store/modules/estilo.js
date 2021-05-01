@@ -114,7 +114,7 @@ export default {
             correlativos = correlativos.concat(element);
           });
         }
-        console.log(correlativos);
+        
 
         let n = 1;
         correlativos.sort();
@@ -243,7 +243,7 @@ export default {
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {
-        console.log(res.data.docs);
+     
         commit('setAvillosDeLinea', res.data.docs);
       }
 

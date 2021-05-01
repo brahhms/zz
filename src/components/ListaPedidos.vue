@@ -159,6 +159,10 @@
                 </v-toolbar>
               </template>
 
+  <template v-slot:item.unidad="{ item }">
+                {{ item.unidad.nombre }}
+              </template>
+
               <template v-slot:no-data>
                 <v-btn color="primary"> Reset </v-btn>
               </template>
@@ -353,7 +357,7 @@ export default {
       });
 
       doc
-        .setFontSize(12)
+        .setFontSize(11)
         .text(
           "Semana " +
             this.semanaSeleccionada.semana +
@@ -365,21 +369,37 @@ export default {
 
       this.semanaSeleccionada.pedidos.forEach((pedido) => {
         let items = pedido.detalle.map((detalle) => {
-          return detalle.resumen;
+          let cadena="";
+          let tallas = detalle.detalleTallas.filter(t=>t.cantidad>0);
+          tallas.forEach(talla => {
+            cadena=cadena+" "+talla.cantidad+"/"+talla.talla.nombre+", ";
+          });
+
+          return [
+            detalle.estilo.codigo,
+            detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color,
+            detalle.detalleTacon.material.nombre+" "+detalle.detalleTacon.color,
+            cadena,
+            detalle.horma.nombre,
+            detalle.detalleForro.forro.nombre+" "+detalle.detalleForro.color,
+            detalle.detalleSuela.suela.nombre+" "+detalle.detalleSuela.color,
+            detalle.subtotal
+          ];
         });
-        items.push(["", "", "", "", "", "Total:", pedido.total]);
+        items.push(["", "", "", "", "","", "Total:", pedido.total]);
 
         let head = [
           [
             {
               content: pedido.cliente.nombre,
-              colSpan: 7,
+              colSpan: 8,
               styles: { halign: "left" },
             },
           ],
           [
             { title: "Codigo", dataKey: "codigo" },
             { title: "Material", dataKey: "material" },
+            { title: "Tacon", dataKey: "tacon" },
             { title: "Tallas", dataKey: "tallas" },
             { title: "Horma", dataKey: "horma" },
             { title: "Forro", dataKey: "forro" },
@@ -408,7 +428,7 @@ export default {
       });
 
       doc
-        .setFontSize(12)
+        .setFontSize(11)
         .text(
           "Semana " +
             this.semanaSeleccionada.semana +
@@ -434,7 +454,7 @@ export default {
         ],
       ];
       let items = this.semanaSeleccionada.listaDeCompras.adornos.map((item) => {
-        return [item.cantidad, item.unidad, item.nombre];
+        return [item.cantidad, item.unidad.nombre, item.nombre];
       });
 
       doc.autoTable({
@@ -459,7 +479,7 @@ export default {
         ],
       ];
       items = this.semanaSeleccionada.listaDeCompras.avillos.map((item) => {
-        return [item.cantidad, item.unidad, item.nombre];
+        return [item.cantidad, item.unidad.nombre, item.nombre];
       });
 
       doc.autoTable({

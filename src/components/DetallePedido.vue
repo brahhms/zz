@@ -417,6 +417,9 @@ export default {
           this.detalle.detalleSuela.color =
             newVal.detalleSuela.suela.defaultColor;
         }
+
+
+        
       },
       deep: true,
     },

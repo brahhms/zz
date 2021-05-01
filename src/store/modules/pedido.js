@@ -34,12 +34,19 @@ export default {
     forros: null,
     suelas: null,
     clientes: null,
-    hormas:[],
+    hormas: [],
 
     //var
     isValid: false
   },
   mutations: {
+    calcularTotal(state) {
+      let total = 0;
+      state.pedido.detalle.forEach(deta => {
+        total += deta.subtotal;
+      });
+      state.pedido.total = total;
+    },
     setPedido(state, pedido) {
       state.pedido = pedido;
     },
@@ -147,7 +154,7 @@ export default {
       detalleDefault.detalleForro.color = state.forros[0].defaultColor;
       detalleDefault.detalleSuela.suela = state.suelas[0];
       detalleDefault.detalleSuela.color = state.suelas[0].defaultColor;
-      detalleDefault.horma = state.hormas.filter(h=>state.estilos[0].linea.tacon == h.paraTacon)[0];
+      detalleDefault.horma = state.hormas.filter(h => state.estilos[0].linea.tacon == h.paraTacon)[0];
 
 
       state.pedido.detalle.push(detalleDefault);
@@ -163,7 +170,7 @@ export default {
       state.forros = data[3].data.docs;
       state.suelas = data[4].data.docs;
       state.clientes = data[5].data.docs;
-      state.hormas=data[6].data.docs;
+      state.hormas = data[6].data.docs;
 
     },
     clearPedido(state) {
@@ -176,7 +183,7 @@ export default {
         detalle: [],
         total: 0
       };
-      state.semanaSeleccionada=null;
+      state.semanaSeleccionada = null;
 
     },
 
@@ -187,7 +194,7 @@ export default {
 
     duplicateDetalle(state, item) {
       let detalle = Object.assign({}, item);
-      
+
       detalle.detalleMaterial = {
         ...item.detalleMaterial
       };
@@ -338,7 +345,7 @@ export default {
     async actualizarSemana({
       state, commit
     }) {
-
+      commit('calcularTotal');
       const res = await axios.put(`http://localhost:5984/zapp-semanas/${state.semanaSeleccionada._id}/`, state.semanaSeleccionada, {
         params: {
           "rev": state.semanaSeleccionada._rev
@@ -383,7 +390,7 @@ export default {
     forros: state => state.forros,
     suelas: state => state.suelas,
     clientes: state => state.clientes,
-    hormas:state => state.hormas,
+    hormas: state => state.hormas,
 
     isPedidoValid: state => state.isValid,
     semana: state => state.pedido.semana,

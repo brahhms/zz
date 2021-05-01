@@ -54,6 +54,11 @@
                     <v-text-field
                       label="correlativo"
                       v-model="nuevo.correlativo"
+                      hide-details
+                      min="1"
+                      step="1"
+                      type="number"
+                      oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -62,6 +67,12 @@
                     <v-text-field
                       label="Pares en yarda de Material"
                       v-model="nuevo.rendimientoMaterial"
+                      hide-details
+                              min="1"
+                              
+                              step="1"
+                              type="number"
+                              oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -70,6 +81,12 @@
                     <v-text-field
                       label="Pares en yarda de Forro"
                       v-model="nuevo.rendimientoForro"
+                      hide-details
+                              min="1"
+                              
+                              step="1"
+                              type="number"
+                              oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -105,9 +122,13 @@
                         <v-row>
                           <v-col cols="3">
                             <v-text-field
-                              type="number"
                               v-model="item.cantidadInicial"
-                              value="0"
+                              hide-details
+                              min="0"
+                              max="99"
+                              step="1"
+                              type="number"
+                              oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                             ></v-text-field>
                           </v-col>
                           <v-col cols="6">
@@ -160,9 +181,13 @@
                         <v-row>
                           <v-col cols="3">
                             <v-text-field
-                              type="number"
                               v-model="item.cantidadInicial"
-                              value="0"
+                              hide-details
+                              min="0"
+                              max="99"
+                              step="1"
+                              type="number"
+                              oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                             ></v-text-field>
                           </v-col>
                           <v-col cols="6">
@@ -456,10 +481,12 @@ export default {
     "nuevo.adornos": {
       handler(newVal) {
         newVal.forEach((e) => {
-          if (e.cantidadInicial != null) {
+          if (e.cantidadInicial != null || e.cantidadInicial != "") {
             let numero =
               Number(e.cantidadInicial) * Number(e.unidadConversion.constante);
             e.cantidad = numero.toFixed(4);
+          } else {
+            e.cantidadInicial = 0;
           }
         });
       },
@@ -471,7 +498,11 @@ export default {
           if (e.cantidadInicial != null) {
             let numero = 0;
             if (e.unidadConversion.constante == null) {
-              numero = Number(1 / e.cantidadInicial);
+              if (e.cantidadInicial != 0) {
+                numero = Number(1 / e.cantidadInicial);
+              } else {
+                numero = 0;
+              }
             } else {
               numero =
                 Number(e.cantidadInicial) *
@@ -479,6 +510,8 @@ export default {
             }
 
             e.cantidad = numero.toFixed(4);
+          } else {
+            e.cantidadInicial = 0;
           }
         });
       },
