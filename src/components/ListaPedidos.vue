@@ -30,7 +30,6 @@
                 <v-data-table
                   disable-pagination
                   hide-default-footer
-                  
                   class="pedido sorteable"
                   v-for="pedido in semanaSeleccionada.pedidos"
                   :key="pedido._id"
@@ -43,10 +42,51 @@
 
                       <v-spacer></v-spacer>
                       <v-toolbar-items>
-                        <v-btn dark text @click="editar(pedido, pedido.index)">
+                        <v-btn dark text @click="editar(pedido)">
                           <v-icon dark> mdi-clipboard-edit-outline </v-icon
                           >Editar
                         </v-btn>
+
+                        <!--MOVER  -->
+                        <v-dialog
+                          v-model="moverDialog"
+                          persistent
+                          max-width="320"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              small
+                              color="primary"
+                              v-bind="attrs"
+                              v-on="on"
+                            >
+                              Mover a siguiente semana
+                            </v-btn>
+                          </template>
+                          <v-card>
+                            <v-card-title class="headline">
+                              Desea mover el pedido?
+                            </v-card-title>
+
+                            <v-card-actions>
+                              <v-spacer></v-spacer>
+                              <v-btn text @click="moverDialog = false">
+                                Cancelar
+                              </v-btn>
+                              <v-btn
+                                color="primary"
+                                text
+                                @click="
+                                  mover(pedido);
+                                  moverDialog = false;
+                                "
+                              >
+                                Aceptar
+                              </v-btn>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                        <!--/MOVER -->
                       </v-toolbar-items>
                     </v-toolbar>
                   </template>
@@ -159,7 +199,7 @@
                 </v-toolbar>
               </template>
 
-  <template v-slot:item.unidad="{ item }">
+              <template v-slot:item.unidad="{ item }">
                 {{ item.unidad.nombre }}
               </template>
 
@@ -272,11 +312,12 @@ import draggable from "vuedraggable";
 import { jsPDF } from "jspdf";
 require("jspdf-autotable");
 
-import { createNamespacedHelpers } from "vuex";
+import { createNamespacedHelpers, mapMutations } from "vuex";
 
 const {
   mapActions: mapActionsPedido,
   mapGetters: mapGettersPedido,
+  mapMutations: mapMutationsPedido,
 } = createNamespacedHelpers("pedido");
 
 export default {
@@ -284,6 +325,7 @@ export default {
     draggable,
   },
   data: () => ({
+    moverDialog: false,
     oldIndex: "",
     newIndex: "",
     headers: [
@@ -331,12 +373,27 @@ export default {
       },
     ],
   }),
-  mounted() {},
+
   methods: {
-    ...mapActionsPedido(["actualizarSemana", "edit"]),
+    ...mapActionsPedido(["actualizarSemana", "moverPedido"]),
+    ...mapMutationsPedido(["setPedido"]),
+    ...mapMutations(["mostrarMsj"]),
     editar(pedido) {
-      this.edit(pedido);
+      pedido.isEditing = true;
+      pedido.isMoving = false;
+      this.setPedido(pedido);
       this.$router.push({ name: "NuevoPedido" });
+    },
+    async mover(pedido) {
+      pedido.isEditing = false;
+      pedido.isMoving = true;
+      pedido.semana = Number(pedido.semana) + 1;
+      this.setPedido(pedido);
+
+      let res = await this.moverPedido();
+      if (res.status == 201 || res.status == 200) {
+        this.mostrarMsj("Se ha movido el pedido a la semana " + pedido.semana);
+      }
     },
     onEnd() {
       this.actualizarSemana();
@@ -369,24 +426,33 @@ export default {
 
       this.semanaSeleccionada.pedidos.forEach((pedido) => {
         let items = pedido.detalle.map((detalle) => {
-          let cadena="";
-          let tallas = detalle.detalleTallas.filter(t=>t.cantidad>0);
-          tallas.forEach(talla => {
-            cadena=cadena+" "+talla.cantidad+"/"+talla.talla.nombre+", ";
+          let cadena = "";
+          let tallas = detalle.detalleTallas.filter((t) => t.cantidad > 0);
+          tallas.forEach((talla) => {
+            cadena =
+              cadena + " " + talla.cantidad + "/" + talla.talla.nombre + ", ";
           });
 
           return [
             detalle.estilo.codigo,
-            detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color,
-            detalle.detalleTacon.material.nombre+" "+detalle.detalleTacon.color,
+            detalle.detalleMaterial.material.nombre +
+              " " +
+              detalle.detalleMaterial.color,
+            detalle.detalleTacon.material.nombre +
+              " " +
+              detalle.detalleTacon.color,
             cadena,
             detalle.horma.nombre,
-            detalle.detalleForro.forro.nombre+" "+detalle.detalleForro.color,
-            detalle.detalleSuela.suela.nombre+" "+detalle.detalleSuela.color,
-            detalle.subtotal
+            detalle.detalleForro.forro.nombre +
+              " " +
+              detalle.detalleForro.color,
+            detalle.detalleSuela.suela.nombre +
+              " " +
+              detalle.detalleSuela.color,
+            detalle.subtotal,
           ];
         });
-        items.push(["", "", "", "", "","", "Total:", pedido.total]);
+        items.push(["", "", "", "", "", "", "Total:", pedido.total]);
 
         let head = [
           [

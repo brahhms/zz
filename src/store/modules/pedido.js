@@ -11,7 +11,31 @@ Date.prototype.getWeekNumber = function () {
 
 const urlSemana = "http://localhost:5984/zapp-semanas/";
 
+async function findSemanaByWeek(item) {
+  return await axios.post(`http://localhost:5984/zapp-semanas/_find`, {
+    "selector": {
+      "semana": item.semana,
+      "ano": item.ano
+    }
+  }, credentials.authentication);
+}
 
+async function createPedido(data) {
+  return await axios.post(`http://localhost:5984/zapp-semanas/_design/manejadorSemanas/_update/agregarPedido/`, data, {
+    "auth": credentials.authentication.auth,
+    "headers": credentials.authentication.headers,
+  }, credentials.authentication);
+}
+
+async function updateSemana(oldVal, newVal) {
+  return await axios.put(`http://localhost:5984/zapp-semanas/${oldVal._id}/`, newVal, {
+    params: {
+      "rev": oldVal._rev
+    },
+    "auth": credentials.authentication.auth,
+    "headers": credentials.authentication.headers,
+  }, credentials.authentication);
+}
 
 export default {
   namespaced: true,
@@ -22,6 +46,8 @@ export default {
       ano: new Date().getFullYear(),
       semana: new Date().getWeekNumber(),
       detalle: [],
+      isEditing: false,
+      isMoving: false,
       total: 0
     },
 
@@ -40,6 +66,12 @@ export default {
     isValid: false
   },
   mutations: {
+
+    clearStates(state){
+      state.isEditing=false;
+      state.isMoving=false;
+    },
+
     calcularTotal(state) {
       let total = 0;
       state.pedido.detalle.forEach(deta => {
@@ -54,6 +86,7 @@ export default {
       state.semanaSeleccionada._rev = rev;
     },
     actualizarPedidos(state, pedidos) {
+      //borrame?
       state.semanaSeleccionada.pedidos = pedidos;
       console.log("actualizando");
     },
@@ -160,7 +193,7 @@ export default {
       state.pedido.detalle.push(detalleDefault);
 
     },
-    setSemana(state, semana) {
+    setSemanaSeleccionada(state, semana) {
       state.semanaSeleccionada = semana;
     },
     setData(state, data) {
@@ -181,9 +214,10 @@ export default {
         ano: state.pedido.ano,
         semana: state.pedido.semana,
         detalle: [],
+        isEditing: false,
+        isMoving: false,
         total: 0
       };
-      state.semanaSeleccionada = null;
 
     },
 
@@ -226,10 +260,6 @@ export default {
   },
   actions: {
 
-    edit({ commit }, pedido) {
-      commit("setPedido", pedido);
-    },
-
     async getSemana({
       commit,
       state
@@ -242,9 +272,9 @@ export default {
       }, credentials.authentication);
       if (res.statusText == "OK") {
         if (res.data.docs.length > 0) {
-          commit('setSemana', res.data.docs[0]);
+          commit('setSemanaSeleccionada', res.data.docs[0]);
         } else {
-          commit('setSemana', {
+          commit('setSemanaSeleccionada', {
             semana: state.pedido.semana,
             ano: state.pedido.ano
           });
@@ -261,40 +291,30 @@ export default {
       state
     }) {
 
-      const resSFind = await axios.post(`http://localhost:5984/zapp-semanas/_find`, {
-        "selector": {
-          "semana": state.pedido.semana,
-          "ano": state.pedido.ano
-        }
-      }, credentials.authentication);
-
-      let semana = resSFind.data.docs[0];
-
+      const resSemana = await findSemanaByWeek(state.pedido);
+      let semana = resSemana.data.docs[0];
 
       let data = {
         nuevoPedido: state.pedido,
         semana: semana || undefined
       };
+      const resAgregarPedido = await createPedido(data);
 
-      const resSemana = await axios.post(`http://localhost:5984/zapp-semanas/_design/manejadorSemanas/_update/agregarPedido/`, data, {
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
+      console.log(resAgregarPedido);
+      if (resSemana.data.docs.length > 0) {
+        const res = await updateSemana(semana, resAgregarPedido.data);
 
-
-      if (resSFind.data.docs.length > 0) {
-
-        await axios.put(`http://localhost:5984/zapp-semanas/${semana._id}/`, resSemana.data, {
-          params: {
-            "rev": semana._rev
-          },
-          "auth": credentials.authentication.auth,
-          "headers": credentials.authentication.headers,
-        }, credentials.authentication);
+        if (res.statusText == "OK") {
+          commit('clearPedido');
+          commit('addDetalle');
+          commit('clearStates');
+        }
+        return res
 
       }
-      commit('clearPedido');
-      commit('addDetalle');
+
+
+
       return resSemana;
 
     },
@@ -345,18 +365,52 @@ export default {
     async actualizarSemana({
       state, commit
     }) {
+      let semana = state.semanaSeleccionada;
       commit('calcularTotal');
-      const res = await axios.put(`http://localhost:5984/zapp-semanas/${state.semanaSeleccionada._id}/`, state.semanaSeleccionada, {
-        params: {
-          "rev": state.semanaSeleccionada._rev
-        },
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
+
+
+      //aqui deberia recalcular la lista de comprars
+      const res = await updateSemana(semana, semana);
 
       if (res.data.ok) {
         console.log("actualizada");
+        commit('clearPedido');
+        commit('addDetalle');
         commit('setRevSemana', res.data.rev);
+      }
+      return res
+
+    },
+
+    async moverPedido({
+      state, commit
+    }) {
+      commit('calcularTotal');
+      let semana = state.semanaSeleccionada;
+
+      const res = await updateSemana(semana, semana);
+
+
+      if (res.statusText == "OK") {
+        commit('setRevSemana', res.data.rev);
+        let index = semana.pedidos.findIndex(x => x.id == state.pedido.id);
+        let pedido = semana.pedidos.splice(index, 1);
+        let nuevaSemana = state.semanaSeleccionada;
+        nuevaSemana.ano = pedido.ano;
+        nuevaSemana.semana = pedido.semana;
+
+        let data = {
+          nuevoPedido: pedido,
+          semana: nuevaSemana || undefined
+        };
+        const resAgregarPedido = await createPedido(data);
+        const res2 = await updateSemana(semana, resAgregarPedido.data);
+        if (res2.statusText == 'OK') {
+          commit('clearPedido');
+          commit('addDetalle');
+          commit('setRevSemana', res.data.rev);
+          return res2
+        }
       }
       return res
 
@@ -381,7 +435,9 @@ export default {
   getters: {
     detalles: state => state.pedido.detalle,
     cliente: state => state.pedido.cliente,
-    isEditing: state => { return (state.pedido.detalle.length > 0 && state.pedido.cliente != null) },
+    isEditing: state => state.pedido.isEditing,
+    isMoving: state => state.pedido.isMoving,
+    isEmpty:state=> state.pedido.cliente == null && state.semanaSeleccionada!=null,
 
 
     estilos: state => state.estilos,

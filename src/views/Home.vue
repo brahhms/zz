@@ -59,7 +59,7 @@
             >
             <v-spacer></v-spacer>
             <v-toolbar-items>
-              <v-btn dark text @click="crearPedido">
+              <v-btn dark text @click="crearPedido()">
                 Nuevo Pedido
               </v-btn>
             </v-toolbar-items>

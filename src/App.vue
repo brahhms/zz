@@ -40,7 +40,7 @@
           <v-divider></v-divider>
 
           <v-list dense>
-            <v-list-item v-if="isEditing" link :to="{ name: 'NuevoPedido'}">
+            <v-list-item v-if="!isEmpty" link :to="{ name: 'NuevoPedido'}">
               <v-list-item-icon>
                 <v-icon></v-icon>
               </v-list-item-icon>
@@ -103,7 +103,7 @@ export default {
   }),
   computed: {
     ...mapState(["showBar","snackbar"]),
-    ...mapGetters(["isEditing"])
+    ...mapGetters(["isEmpty"])
   },
   methods: {
     ...mapActions(["auth"]),

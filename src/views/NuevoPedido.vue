@@ -78,9 +78,7 @@
                   hide-default-footer
                 >
                   <template v-slot:item="{ item }">
-                    <detalle-pedido
-                      :detalle="item"
-                    ></detalle-pedido>
+                    <detalle-pedido :detalle="item"></detalle-pedido>
                   </template>
                 </v-data-table>
               </v-form>
@@ -185,7 +183,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["savePedido", "iniciarDetalle","actualizarSemana"]),
+    ...mapActions(["savePedido", "iniciarDetalle", "actualizarSemana"]),
     ...mapMutationsPedido(["addDetalle", "validarPedido", "setCliente"]),
     ...mapMutations(["mostrarMsj"]),
     async loadData() {
@@ -197,7 +195,7 @@ export default {
         this.loading1 = true;
       }
 
-      if (this.isEditing) {
+      if (!this.isEmpty) {
         this.e1 = 2;
       } else {
         this.addDetalle();
@@ -209,10 +207,10 @@ export default {
 
       if (!this.isPedidoValid) return;
 
-      let res={status:0};
-      let msj="";
+      let res = { status: 0 };
+      let msj = "";
 
-      if (this.semanaSeleccionada._id != undefined) {
+      if (this.semanaSeleccionada._id != undefined && this.isEditing) {
         res = await this.actualizarSemana();
         msj = "actualizado";
       } else {
@@ -221,7 +219,7 @@ export default {
       }
 
       if (res.status == 201 || res.status == 200) {
-        this.mostrarMsj("Pedido "+msj);
+        this.mostrarMsj("Se ha " + msj + " el pedido exitosamente!");
         this.e1 = 1;
       }
     },
@@ -235,7 +233,9 @@ export default {
       "isPedidoValid",
       "semana",
       "isEditing",
+      "isMoving",
       "semanaSeleccionada",
+      "isEmpty"
     ]),
 
     clienteSeleccionado: {
@@ -252,7 +252,6 @@ export default {
   mounted() {
     this.loadData();
   },
-
 };
 </script>
 
