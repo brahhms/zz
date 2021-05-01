@@ -305,9 +305,7 @@ export default {
   },
   data: () => ({
     notNull: [(v) => !!v || "" || "Este campo es requerido"],
-    selected: {
-      estilo: null,
-    },
+
     hormasSegunTacon: [],
   }),
   methods: {

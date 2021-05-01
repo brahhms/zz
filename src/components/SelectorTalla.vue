@@ -5,6 +5,7 @@
         <tr>
           <td v-for="t in detalleTallas" :key="t.index">
             <v-text-field
+              :id="t.talla.nombre"
               v-model.lazy.number="t.cantidad"
               flat
               hide-details
@@ -15,6 +16,9 @@
               type="number"
               oninput="this.value=this.value.replace(/[^0-9]/g,'');"
               :rules="rules"
+              v-on:keyup.left="prevEl($event)"
+              v-on:keyup.right="nextEl($event)"
+              v-on:keyup.enter="nextEl($event)"
             ></v-text-field>
           </td>
         </tr>
@@ -41,7 +45,22 @@ export default {
       ],
     };
   },
-  methods: {},
+  methods: {
+    nextEl(evt) {
+      let index = Number(evt.target.id) + 1;
+      try {
+        document.getElementById(index).focus();
+      } catch (error) {
+      
+      }
+    },
+    prevEl(evt) {
+      let index = Number(evt.target.id) - 1;
+      try {
+        document.getElementById(index).focus();
+      } catch (error) {}
+    },
+  },
 
   watch: {
     detalleTallas: {
@@ -69,11 +88,11 @@ export default {
           value: element.nombre,
           divider: true,
         });
-       
-       let agregar = true;
+
+        let agregar = true;
         this.detalleTallas.forEach((detalle) => {
           if (element.nombre == detalle.talla.nombre) {
-            agregar=false;
+            agregar = false;
           }
         });
 
