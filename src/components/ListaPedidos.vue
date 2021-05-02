@@ -376,7 +376,7 @@ export default {
   }),
 
   methods: {
-    ...mapActionsPedido(["actualizarSemana", "moverPedido"]),
+    ...mapActionsPedido([ "actualizarOrden","moverPedido"]),
     ...mapMutationsPedido(["setPedido"]),
     ...mapMutations(["mostrarMsj"]),
     editar(pedido) {
@@ -400,7 +400,7 @@ export default {
       }
     },
     onEnd() {
-      this.actualizarSemana();
+      this.actualizarOrden();
     },
     total(detalle) {
       let sum = 0;

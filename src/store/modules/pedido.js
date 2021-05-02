@@ -389,6 +389,17 @@ export default {
 
     },
 
+    async actualizarOrden({
+      state, commit
+    }) {
+      let semana = state.semanaSeleccionada;
+      const res = await updateSemana(semana, semana);
+      if (res.data.ok) {
+        commit('setRevSemana', res.data.rev);
+      }
+      return res
+    },
+
     async moverPedido({
       state, commit
     }) {

@@ -9,6 +9,7 @@
           fullscreen
           hide-overlay
           transition="dialog-bottom-transition"
+          scrollable
           v-model="dialog"
         >
           <template v-slot:activator="{ on, attrs }">
@@ -68,11 +69,10 @@
                       label="Pares en yarda de Material"
                       v-model="nuevo.rendimientoMaterial"
                       hide-details
-                              min="1"
-                              
-                              step="1"
-                              type="number"
-                              oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+                      min="1"
+                      step="1"
+                      type="number"
+                      oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -82,11 +82,10 @@
                       label="Pares en yarda de Forro"
                       v-model="nuevo.rendimientoForro"
                       hide-details
-                              min="1"
-                              
-                              step="1"
-                              type="number"
-                              oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+                      min="1"
+                      step="1"
+                      type="number"
+                      oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -101,8 +100,8 @@
                     ></v-file-input>
                   </v-col>
                 </v-row>
-                <v-row>
-                  <v-col cols="12">
+                <v-row v-if="nuevo.avillos.length > 0">
+                  <v-col>
                     <v-data-table
                       :headers="adornoHeaders"
                       :items="nuevo.avillos"
@@ -160,8 +159,10 @@
                       </template>
                     </v-data-table>
                   </v-col>
-
-                  <v-col cols="12">
+                </v-row>
+                <v-row
+                >
+                  <v-col>
                     <v-data-table
                       :headers="adornoHeaders"
                       :items="nuevo.adornos"

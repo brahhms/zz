@@ -12,7 +12,7 @@
           <v-toolbar-title>TALLAS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog persistent v-model="dialog" max-width="500px">
+          <v-dialog persistent v-model="dialog" max-width="300px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                 Nueva Talla
@@ -105,7 +105,7 @@ export default {
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Nueva" : "Editar";
+      return this.editedIndex === -1 ? "Nueva Talla" : "Editar Talla";
     },
     ...mapGetters(["tallas", "nuevaTalla"]),
     allTallas: {

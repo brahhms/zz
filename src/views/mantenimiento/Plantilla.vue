@@ -12,7 +12,7 @@
           <v-toolbar-title>PLANTILLAS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog persistent v-model="dialog" max-width="800px">
+          <v-dialog scrollable persistent v-model="dialog" max-width="800px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                 Nueva Plantilla
@@ -183,7 +183,7 @@ export default {
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Nueva" : "Editar";
+      return this.editedIndex === -1 ? "Nueva Plantilla" : "Editar Plantilla";
     },
     ...mapGetters(["plantillas", "nuevaPlantilla", "avillos"]),
     allPlantillas: {
