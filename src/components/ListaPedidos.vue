@@ -138,6 +138,9 @@
                           {{ detalle.detalleSuela.suela.nombre }}
                           {{ detalle.detalleSuela.color }}
                         </td>
+                        <td>
+                          {{detalle.subtotal}}
+                        </td>
                       </tr>
                       <tr>
                         <td colspan="6"></td>
@@ -292,6 +295,8 @@
                         >
                       </span>
                     </td>
+                    <td>Total: {{suela.total}}</td>
+                    
                   </tr>
                 </tbody>
               </template>
@@ -583,6 +588,31 @@ export default {
         margin: { top: 1 },
       });
       //materiales
+     //FORROS
+      head = [
+        [
+          {
+            content: "Forros",
+            colSpan: 3,
+            styles: { halign: "left" },
+          },
+        ],
+        [
+          { title: "Cantidad", dataKey: "cantidad" },
+          { title: "Nombre", dataKey: "nombre" },
+          { title: "Color", dataKey: "color" },
+        ],
+      ];
+      items = this.semanaSeleccionada.listaDeCompras.forros.map((item) => {
+        return [item.cantidad, item.nombre, item.color];
+      });
+
+      doc.autoTable({
+        head,
+        body: items,
+        margin: { top: 1 },
+      });
+      //forros
 
       //saving file
       doc.save(

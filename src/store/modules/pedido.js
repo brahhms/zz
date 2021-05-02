@@ -21,7 +21,7 @@ async function findSemanaByWeek(item) {
   }, credentials.authentication);
 }
 
-async function createPedido(data) {
+async function generatePedido(data) {
   return await axios.post(`http://localhost:5984/zapp-semanas/_design/manejadorSemanas/_update/agregarPedido/`, data, {
     "auth": credentials.authentication.auth,
     "headers": credentials.authentication.headers,
@@ -29,6 +29,7 @@ async function createPedido(data) {
 }
 
 async function updateSemana(oldVal, newVal) {
+
   return await axios.put(`http://localhost:5984/zapp-semanas/${oldVal._id}/`, newVal, {
     params: {
       "rev": oldVal._rev
@@ -37,6 +38,186 @@ async function updateSemana(oldVal, newVal) {
     "headers": credentials.authentication.headers,
   }, credentials.authentication);
 }
+
+//recalcula lista de compras y devuelve la misma semana
+function generateSemana(semana) {
+
+  let lista = {
+    adornos: [],
+    avillos: [],
+    suelas: [],
+    tacones: [],
+    estilos: [],
+    materiales: [],
+    forros: []
+  };
+
+
+  semana.pedidos.forEach(pedido => {
+    pedido.total=0;
+    pedido.detalle.forEach((detalle) => {
+      detalle.estilo.adornos.forEach((adorno) => {
+        if (adorno.cantidad > 0) {
+
+          let existe = false;
+          lista.adornos.forEach((adornoEnLista) => {
+            if (adornoEnLista._id == adorno._id) {
+              adornoEnLista.cantidad = Number(adornoEnLista.cantidad) + Number(adorno.cantidad) * detalle.subtotal;
+              existe = true
+            }
+          });
+          if (!existe) {
+            let nuevoAdorno = Object.assign({}, adorno);
+            nuevoAdorno.cantidad = nuevoAdorno.cantidad * detalle.subtotal;
+            lista.adornos.push(nuevoAdorno);
+          }
+        }
+      });
+
+      detalle.estilo.avillos.forEach((avillo) => {
+        if (avillo.cantidad > 0) {
+
+          let existe = false;
+          lista.avillos.forEach((avilloEnLista) => {
+            if (avilloEnLista._id == avillo._id) {
+              avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
+              existe = true;
+            }
+          });
+          if (!existe) {
+            let nuevoAvillo = Object.assign({}, avillo);
+            nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
+            lista.avillos.push(nuevoAvillo);
+          }
+
+        }
+      });
+
+      let existeMaterial = false;
+      lista.materiales.forEach((materialEnLista) => {
+
+        if (detalle.detalleMaterial.material.nombre == materialEnLista.nombre &&
+          detalle.detalleMaterial.color == materialEnLista.color) {
+          materialEnLista.cantidad = Number(materialEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial);
+          existeMaterial = true;
+        }
+      });
+
+      if (!existeMaterial) {
+        let nuevoMaterial = {
+          _id: detalle.detalleMaterial.material._id + detalle.detalleMaterial.color,
+          nombre: detalle.detalleMaterial.material.nombre,
+          color: detalle.detalleMaterial.color,
+          cantidad: (detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial)
+        };
+
+        lista.materiales.push(nuevoMaterial);
+      }
+
+      let existeForro = false;
+      lista.forros.forEach((forroEnLista) => {
+
+        if (detalle.detalleForro.forro.nombre == forroEnLista.nombre &&
+          detalle.detalleForro.color == forroEnLista.color) {
+          forroEnLista.cantidad = Number(forroEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
+          existeForro = true;
+        }
+      });
+
+      if (!existeForro) {
+        let nuevoForro = {
+          _id: detalle.detalleForro.forro._id + detalle.detalleForro.color,
+          nombre: detalle.detalleForro.forro.nombre,
+          color: detalle.detalleForro.color,
+          cantidad: (detalle.subtotal) * Number(detalle.estilo.rendimientoForro)
+        };
+
+        lista.forros.push(nuevoForro);
+      }
+
+      let existeSuela = false;
+      lista.suelas.forEach((suelaEnLista) => {
+
+        if (detalle.detalleSuela.suela.nombre == suelaEnLista.nombre &&
+          detalle.detalleSuela.color == suelaEnLista.color) {
+            suelaEnLista.total=0;
+          detalle.detalleTallas.forEach(t => {
+            let e = false;
+            suelaEnLista.detalle.forEach(l => {
+              if (t.talla.nombre == l.nombre) {
+                l.cantidad += t.cantidad;
+                suelaEnLista.total+=l.cantidad;
+                e = true
+              }
+            });
+            if (!e) {
+              suelaEnLista.detalle.push({
+                nombre: t.talla.nombre,
+                cantidad: t.cantidad
+              });
+              suelaEnLista.total+=t.cantidad;
+            }
+          });
+          existeSuela = true;
+        }
+      });
+
+      if (!existeSuela) {
+        let nuevaSuela = {
+          _id: detalle.detalleSuela.suela._id + detalle.detalleSuela.color,
+          nombre: detalle.detalleSuela.suela.nombre,
+          color: detalle.detalleSuela.color,
+          detalle: detalle.detalleTallas.filter(s => s.cantidad > 0),
+          total: 0
+        };
+
+        nuevaSuela.detalle = nuevaSuela.detalle.map(s => {
+          nuevaSuela.total += s.cantidad;
+          return {
+            nombre: s.talla.nombre,
+            cantidad: s.cantidad
+          }
+        });
+        
+        lista.suelas.push(nuevaSuela);
+      }
+
+      lista.estilos.push({
+        codigo: detalle.estilo.linea.nombre + detalle.estilo.correlativo,
+        rendimientoPorYarda: detalle.estilo.rendimientoPorYarda,
+        capeyada: detalle.estilo.capeyada,
+      });
+
+      lista.tacones.push(detalle.detalleTacon);
+
+      pedido.total += detalle.subtotal;
+
+    });
+    
+  });
+
+semana.listaDeCompras = lista;
+
+return semana
+}
+
+
+async function createSemana(pedido) {
+  let nuevaSemana ={
+    "semana": pedido.semana,
+    "siguienteSemana": pedido.siguienteSemana,
+    "ano": pedido.ano,
+    "fecha": pedido.fecha,
+    "pedidos": [pedido],
+    "listaDeCompras": null
+  };
+  nuevaSemana=generateSemana(nuevaSemana);
+  return await axios.post(`${urlSemana}`, nuevaSemana, {
+    "auth": credentials.authentication.auth,
+    "headers": credentials.authentication.headers,
+  }, credentials.authentication);
+}
+
 
 export default {
   namespaced: true,
@@ -83,13 +264,6 @@ export default {
       state.isMoving = false;
     },
 
-    calcularTotal(state) {
-      let total = 0;
-      state.pedido.detalle.forEach(deta => {
-        total += deta.subtotal;
-      });
-      state.pedido.total = total;
-    },
     setPedido(state, pedido) {
       state.pedido = pedido;
     },
@@ -307,22 +481,21 @@ export default {
 
       const resSemana = await findSemanaByWeek(state.pedido);
       let semana = resSemana.data.docs[0];
-
-      let data = {
-        nuevoPedido: state.pedido,
-        semana: semana || undefined
-      };
-      const resAgregarPedido = await createPedido(data);
-
-
-      if (resSemana.data.docs.length > 0) {
-        await updateSemana(semana, resAgregarPedido.data);
+      let res;
+ 
+      if (semana == undefined || semana==null) {
+        res = await createSemana(state.pedido);
+      } else {
+        semana.pedidos.push(state.pedido);
+        semana =  generateSemana(semana);
+        res = await updateSemana(semana, semana);
       }
-      commit('clearPedido');
-      commit('addDetalle');
-      commit('clearStates');
-
-      return resSemana;
+      if (res.status == 200 || res.status ==201) {
+        commit('clearPedido');
+        commit('addDetalle');
+        commit('clearStates');
+      }
+      return res;
 
     },
 
@@ -373,11 +546,11 @@ export default {
       state, commit
     }) {
       let semana = state.semanaSeleccionada;
-      commit('calcularTotal');
 
 
-      //aqui deberia recalcular la lista de comprars
-      const res = await updateSemana(semana, semana);
+      const semanaGenerada = generateSemana(semana);
+  
+      const res = await updateSemana(semana, semanaGenerada);
 
       if (res.data.ok) {
         console.log("actualizada");
@@ -403,7 +576,6 @@ export default {
     async moverPedido({
       state, commit
     }) {
-      //commit('calcularTotal');
       let semana = state.semanaSeleccionada;
       let pedido = Object.assign({}, semana.pedidos.find(x => x._id == state.pedido._id));
       pedido.semana = state.pedido.semana;
@@ -411,10 +583,10 @@ export default {
       //pedido.siguienteSemana = 
       let fecha = new Date(state.pedido.fecha);
       fecha.setDate(fecha.getDate() + 7);
-      pedido.fecha = fecha+"";
+      pedido.fecha = fecha + "";
       fecha.setDate(fecha.getDate() + 7);
       pedido.siguienteSemana = fecha.getWeekNumber();
-      
+
 
       const resSemana = await findSemanaByWeek(state.pedido);
 
@@ -424,7 +596,7 @@ export default {
         nuevoPedido: pedido,
         semana: nuevaSemana || undefined
       };
-      let resAgregarPedido = await createPedido(data);
+      let resAgregarPedido = await generatePedido(data);
 
       if (resSemana.data.docs.length > 0) {
         resAgregarPedido = await updateSemana(nuevaSemana, resAgregarPedido.data);
