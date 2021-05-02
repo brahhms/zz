@@ -25,13 +25,12 @@
           ref="calendar"
           v-model="focus"
           type="month"
-          @change="updateRange"
           :weekdays="weekdays"
           locale="es"
         >
           <template v-slot:day="{ weekday, day, month, year }">
             <v-btn
-              @click="openDialog(semanaDelAno(year, month, day), year)"
+              @click="openDialog(year, month, day)"
               v-if="weekday == 1"
               block
               color="primary"
@@ -59,9 +58,7 @@
             >
             <v-spacer></v-spacer>
             <v-toolbar-items>
-              <v-btn dark text @click="crearPedido()">
-                Nuevo Pedido
-              </v-btn>
+              <v-btn dark text @click="crearPedido()"> Nuevo Pedido </v-btn>
             </v-toolbar-items>
           </v-toolbar>
 
@@ -88,6 +85,7 @@ const {
   mapGetters: mapGettersPedido,
   mapActions: mapActionsPedido,
 } = createNamespacedHelpers("pedido");
+
 Date.prototype.getWeekNumber = function () {
   var d = new Date(+this); //Creamos un nuevo Date con la fecha de "this".
   d.setHours(0, 0, 0, 0); //Nos aseguramos de limpiar la hora.
@@ -114,13 +112,13 @@ export default {
     ...mapMutationsPedido([
       "setSemanaPedido",
       "setAnoPedido",
+      "setFechaPedido",
       "actualizarPedidos",
-      "clearPedido"
+      "clearPedido",
+      "setSiguienteSemana",
     ]),
     ...mapActionsPedido(["getSemana"]),
-    updateRange({ start, end }) {
-      console.log("//" + start.date + "--" + end.date);
-    },
+
     setToday() {
       this.focus = "";
     },
@@ -130,12 +128,19 @@ export default {
     next() {
       this.$refs.calendar.next();
     },
-    async openDialog(semana, ano) {
+    async openDialog(ano, mes, dia) {
+      let semana = this.semanaDelAno(ano, mes, dia);
+      let siguiente = this.siguienteSemana(ano, mes, dia);
       this.dialog = true;
       this.setSemanaPedido(semana);
+      this.setSiguienteSemana(siguiente);
       this.setAnoPedido(ano);
+      let mm = mes-1;
+      this.setFechaPedido(new Date(ano, mm, dia));
       const existeSemana = await this.getSemana();
       if (existeSemana) {
+        this.clearPedido();
+
         this.loading1 = false;
       } else {
         this.loading1 = true;
@@ -144,13 +149,17 @@ export default {
 
     semanaDelAno(year, mes, dia) {
       mes--;
-      //console.log("DelAno: " + year + "-" + mes + "-" + dia);
       let fech = new Date(year, mes, dia);
-      //console.log(fech);
       return fech.getWeekNumber();
     },
+    siguienteSemana(year, mes, dia) {
+      mes--;
+      let fecha = new Date(year, mes, dia);
+      fecha.setDate(fecha.getDate() + 7);
+      return fecha.getWeekNumber();
+    },
+
     crearPedido() {
-      this.clearPedido();
       this.$router.push({ name: "NuevoPedido" });
     },
   },

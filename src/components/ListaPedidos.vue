@@ -59,6 +59,7 @@
                               color="primary"
                               v-bind="attrs"
                               v-on="on"
+                              @click="setPedidoAMover(pedido)"
                             >
                               Mover a siguiente semana
                             </v-btn>
@@ -384,15 +385,18 @@ export default {
       this.setPedido(pedido);
       this.$router.push({ name: "NuevoPedido" });
     },
-    async mover(pedido) {
-      pedido.isEditing = false;
-      pedido.isMoving = true;
-      pedido.semana = Number(pedido.semana) + 1;
-      this.setPedido(pedido);
-
+    setPedidoAMover(pedido) {
+      let p = Object.assign({}, pedido);
+      console.log("diste click a :" + p.cliente.nombre);
+      p.isEditing = false;
+      p.isMoving = true;
+      p.semana = this.semanaSeleccionada.siguienteSemana;
+      this.setPedido(p);
+    },
+    async mover() {
       let res = await this.moverPedido();
       if (res.status == 201 || res.status == 200) {
-        this.mostrarMsj("Se ha movido el pedido a la semana " + pedido.semana);
+        this.mostrarMsj("Se ha movido el pedido a la siguiente semana ");
       }
     },
     onEnd() {

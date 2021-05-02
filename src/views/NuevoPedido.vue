@@ -184,11 +184,17 @@ export default {
   },
   methods: {
     ...mapActions(["savePedido", "iniciarDetalle", "actualizarSemana"]),
-    ...mapMutationsPedido(["addDetalle", "validarPedido", "setCliente"]),
+    ...mapMutationsPedido([
+      "addDetalle",
+      "clearPedido",
+      "validarPedido",
+      "setCliente",
+    ]),
     ...mapMutations(["mostrarMsj"]),
     async loadData() {
-      const valido = await this.iniciarDetalle();
+      let valido = false;
 
+      valido = await this.iniciarDetalle();
       if (valido) {
         this.loading1 = false;
       } else {
@@ -197,7 +203,9 @@ export default {
 
       if (!this.isEmpty) {
         this.e1 = 2;
+        console.log(this.cliente);
       } else {
+        this.clearPedido();
         this.addDetalle();
       }
     },
@@ -235,7 +243,7 @@ export default {
       "isEditing",
       "isMoving",
       "semanaSeleccionada",
-      "isEmpty"
+      "isEmpty",
     ]),
 
     clienteSeleccionado: {

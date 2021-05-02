@@ -11,6 +11,7 @@ Date.prototype.getWeekNumber = function () {
 
 const urlSemana = "http://localhost:5984/zapp-semanas/";
 
+
 async function findSemanaByWeek(item) {
   return await axios.post(`http://localhost:5984/zapp-semanas/_find`, {
     "selector": {
@@ -43,8 +44,10 @@ export default {
     pedido: {
       _id: "pedido-" + Math.floor(Math.random() * 999999),
       cliente: null,
-      ano: new Date().getFullYear(),
-      semana: new Date().getWeekNumber(),
+      ano: null,
+      fecha: null,
+      semana: null,
+      siguienteSemana: null,
       detalle: [],
       isEditing: false,
       isMoving: false,
@@ -54,12 +57,12 @@ export default {
     semanaSeleccionada: null,
 
     //database
-    estilos: null,
-    materiales: null,
-    tallas: null,
-    forros: null,
-    suelas: null,
-    clientes: null,
+    estilos: [],
+    materiales: [],
+    tallas: [],
+    forros: [],
+    suelas: [],
+    clientes: [],
     hormas: [],
 
     //var
@@ -67,9 +70,17 @@ export default {
   },
   mutations: {
 
-    clearStates(state){
-      state.isEditing=false;
-      state.isMoving=false;
+    setFechaPedido(state, fecha) {
+      state.pedido.fecha = fecha;
+    },
+
+    setSiguienteSemana(state, semana) {
+      state.pedido.siguienteSemana = semana;
+    },
+
+    clearStates(state) {
+      state.isEditing = false;
+      state.isMoving = false;
     },
 
     calcularTotal(state) {
@@ -96,6 +107,7 @@ export default {
     setSemanaPedido(state, semana) {
       state.pedido.semana = semana;
     },
+
 
     setCliente(state, cliente) {
       state.pedido.cliente = cliente;
@@ -207,12 +219,14 @@ export default {
 
     },
     clearPedido(state) {
-
+      console.log("CLEANING");
       state.pedido = {
         _id: "pedido-" + Math.floor(Math.random() * 999999),
         cliente: null,
         ano: state.pedido.ano,
+        fecha: state.pedido.fecha,
         semana: state.pedido.semana,
+        siguienteSemana: state.pedido.siguienteSemana,
         detalle: [],
         isEditing: false,
         isMoving: false,
@@ -300,20 +314,13 @@ export default {
       };
       const resAgregarPedido = await createPedido(data);
 
-      console.log(resAgregarPedido);
+
       if (resSemana.data.docs.length > 0) {
-        const res = await updateSemana(semana, resAgregarPedido.data);
-
-        if (res.statusText == "OK") {
-          commit('clearPedido');
-          commit('addDetalle');
-          commit('clearStates');
-        }
-        return res
-
+        await updateSemana(semana, resAgregarPedido.data);
       }
-
-
+      commit('clearPedido');
+      commit('addDetalle');
+      commit('clearStates');
 
       return resSemana;
 
@@ -385,34 +392,45 @@ export default {
     async moverPedido({
       state, commit
     }) {
-      commit('calcularTotal');
+      //commit('calcularTotal');
       let semana = state.semanaSeleccionada;
+      let pedido = Object.assign({}, semana.pedidos.find(x => x._id == state.pedido._id));
+      pedido.semana = state.pedido.semana;
+      pedido.ano = state.pedido.ano;
+      //pedido.siguienteSemana = 
+      let fecha = new Date(state.pedido.fecha);
+      fecha.setDate(fecha.getDate() + 7);
+      pedido.fecha = fecha+"";
+      fecha.setDate(fecha.getDate() + 7);
+      pedido.siguienteSemana = fecha.getWeekNumber();
+      
 
-      const res = await updateSemana(semana, semana);
+      const resSemana = await findSemanaByWeek(state.pedido);
 
+      let nuevaSemana = resSemana.data.docs[0];
 
-      if (res.statusText == "OK") {
-        commit('setRevSemana', res.data.rev);
-        let index = semana.pedidos.findIndex(x => x.id == state.pedido.id);
-        let pedido = semana.pedidos.splice(index, 1);
-        let nuevaSemana = state.semanaSeleccionada;
-        nuevaSemana.ano = pedido.ano;
-        nuevaSemana.semana = pedido.semana;
+      let data = {
+        nuevoPedido: pedido,
+        semana: nuevaSemana || undefined
+      };
+      let resAgregarPedido = await createPedido(data);
 
-        let data = {
-          nuevoPedido: pedido,
-          semana: nuevaSemana || undefined
-        };
-        const resAgregarPedido = await createPedido(data);
-        const res2 = await updateSemana(semana, resAgregarPedido.data);
-        if (res2.statusText == 'OK') {
-          commit('clearPedido');
-          commit('addDetalle');
-          commit('setRevSemana', res.data.rev);
-          return res2
-        }
+      if (resSemana.data.docs.length > 0) {
+        resAgregarPedido = await updateSemana(nuevaSemana, resAgregarPedido.data);
       }
-      return res
+
+      if (resAgregarPedido.status == 200 || resAgregarPedido.status == 201) {
+        let index = semana.pedidos.findIndex(x => x._id == state.pedido._id);
+        semana.pedidos.splice(index, 1);
+
+        const res = await updateSemana(semana, semana);
+        commit('setRevSemana', res.data.rev);
+        commit('clearPedido');
+        commit('clearStates');
+        commit('addDetalle');
+      }
+
+      return resAgregarPedido
 
     },
 
@@ -437,7 +455,7 @@ export default {
     cliente: state => state.pedido.cliente,
     isEditing: state => state.pedido.isEditing,
     isMoving: state => state.pedido.isMoving,
-    isEmpty:state=> state.pedido.cliente == null && state.semanaSeleccionada!=null,
+    isEmpty: state => state.pedido.cliente == null || state.semanaSeleccionada == null,
 
 
     estilos: state => state.estilos,
@@ -454,6 +472,7 @@ export default {
 
     semanaSeleccionada: state => state.semanaSeleccionada || {
       semana: null,
+      siguienteSemana: null,
       ano: null
     },
 
