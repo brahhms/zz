@@ -23,7 +23,7 @@
             >
               Nuevo Estilo
             </v-btn>
-            <v-btn color="primary" depressed dark class="mb-2"> Imgs </v-btn>
+            <v-btn color="primary" :to="{ name: 'Imagenes'}"  depressed dark class="mb-2"> Imgs </v-btn>
           </template>
           <v-card>
             <v-toolbar dark color="primary">
@@ -96,7 +96,7 @@
                       show-size
                       small-chips
                       truncate-length="9"
-                      v-model="nuevo._attachments"
+                      v-model="nuevo.img"
                     ></v-file-input>
                   </v-col>
                 </v-row>
@@ -285,23 +285,7 @@
               <span v-else>sin imagen</span>
             </template>
           </v-data-table>
-          <v-container v-else fluid>
-            <v-row dense>
-              <v-col v-for="card in cards" :key="card.title" :cols="card.flex">
-                <v-card>
-                  <v-img
-                    :key="card.rev"
-                    :src="card.src"
-                    class="white--text align-end"
-                    gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-                    height="200px"
-                  >
-                    <v-card-title v-text="card.title"></v-card-title>
-                  </v-img>
-                </v-card>
-              </v-col>
-            </v-row>
-          </v-container>
+
         </v-tab-item>
       </v-tabs-items>
     </v-card>

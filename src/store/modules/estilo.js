@@ -19,6 +19,8 @@ async function createAttachment(att, id, rev) {
   }, credentials.authentication);
 }
 
+
+
 async function iniciarEstilo() {
   const data = await axios.all([
     axios.post(`http://localhost:5984/zapp-lineas/_find`, {
@@ -45,6 +47,7 @@ export default {
       rendimientoForro: null,
       avillos: [],
       adornos: [],
+      img:null,
       _attachments: undefined
     },
 
@@ -64,6 +67,7 @@ export default {
         rendimientoForro: null,
         avillos: [],
         adornos: [],
+        img:null,
         _attachments: undefined
       };
     },
@@ -95,7 +99,7 @@ export default {
       state.nuevoEstilo.adornos = data[1].data.docs;
     },
 
-    setNuevoEstilo(state, estilo) {
+    async setNuevoEstilo(state, estilo) {
       state.nuevoEstilo = estilo;
     }
 
@@ -156,12 +160,12 @@ export default {
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
-      let att = state.nuevoEstilo._attachments;
-      if (res.data.ok && att != null && att != undefined) {
+      let att = state.nuevoEstilo.img;
+
+      if (res.data.ok && att.name != undefined) {
+        console.log("createAtt");
         await createAttachment(att, res.data.id, res.data.rev);
       }
-
-
 
       const response = await getAll();
       commit('setEstilos', response.data.docs);
