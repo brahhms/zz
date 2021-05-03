@@ -385,9 +385,10 @@ export default {
     ...mapMutationsPedido(["setPedido"]),
     ...mapMutations(["mostrarMsj"]),
     editar(pedido) {
-      pedido.isEditing = true;
-      pedido.isMoving = false;
-      this.setPedido(pedido);
+      let p = Object.assign({}, pedido);
+      p.isEditing = true;
+      p.isMoving = false;
+      this.setPedido(p);
       this.$router.push({ name: "NuevoPedido" });
     },
     setPedidoAMover(pedido) {
@@ -402,6 +403,7 @@ export default {
       let res = await this.moverPedido();
       if (res.status == 201 || res.status == 200) {
         this.mostrarMsj("Se ha movido el pedido a la siguiente semana ");
+        
       }
     },
     onEnd() {

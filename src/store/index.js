@@ -39,14 +39,6 @@ export default new Vuex.Store({
     },
   },
   actions: {
-
-    async auth() {
-     
-
-
-    }
-
-
   },
   modules: {
     cliente: clienteStore,

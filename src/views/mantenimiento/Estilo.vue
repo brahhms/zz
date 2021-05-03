@@ -423,8 +423,8 @@ export default {
     },
     editItem(item) {
       this.editedIndex = this.estilos.indexOf(item);
-      item.rendimientoForro = Number(1 / item.rendimientoForro);
-      item.rendimientoMaterial = Number(1 / item.rendimientoMaterial);
+      item.rendimientoForro = Math.round(Number(1 / item.rendimientoForro));
+      item.rendimientoMaterial = Math.round(Number(1 / item.rendimientoMaterial));
       this.nuevo = item;
       this.dialog = true;
     },
@@ -447,7 +447,7 @@ export default {
     ...mapGetters(["nuevoEstilo", "lineas", "estilos"]),
     nuevo: {
       set(estilo) {
-        estilo.linea = this.lineas.filter((l) => l._id == estilo.linea._id)[0];
+        estilo.linea = this.lineas.find((l) => l._id == estilo.linea._id);
         this.setNuevoEstilo(estilo);
         this.actualizarAdornos();
         this.actualizarAvillos();
@@ -517,7 +517,7 @@ export default {
         });
       },
       deep: true,
-    },
+    }
   },
   created() {
     this.initialize();

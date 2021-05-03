@@ -106,10 +106,9 @@ export default {
     ...mapGetters(["isEmpty"])
   },
   methods: {
-    ...mapActions(["auth"]),
   },
   created() {
-    this.auth();
+
     
   },
 };

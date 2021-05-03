@@ -15,7 +15,7 @@ import Talla from "../views/mantenimiento/Talla.vue";
 import Linea from "../views/mantenimiento/Linea.vue";
 import Plantilla from "../views/mantenimiento/Plantilla.vue";
 
-import VistaPrevia from '../components/VistaPrevia.vue'
+import Imagenes from '../components/Imagenes.vue'
 
 Vue.use(VueRouter)
 
@@ -91,9 +91,9 @@ const routes = [
     component: Linea
   },
   {
-    path: '/vistaPrevia',
-    name: 'VistaPrevia',
-    component: VistaPrevia
+    path: '/imagenes',
+    name: 'Imagenes',
+    component: Imagenes
   }
 
 ]

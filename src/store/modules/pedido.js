@@ -21,13 +21,6 @@ async function findSemanaByWeek(item) {
   }, credentials.authentication);
 }
 
-async function generatePedido(data) {
-  return await axios.post(`http://localhost:5984/zapp-semanas/_design/manejadorSemanas/_update/agregarPedido/`, data, {
-    "auth": credentials.authentication.auth,
-    "headers": credentials.authentication.headers,
-  }, credentials.authentication);
-}
-
 async function updateSemana(oldVal, newVal) {
 
   return await axios.put(`http://localhost:5984/zapp-semanas/${oldVal._id}/`, newVal, {
@@ -52,9 +45,8 @@ function generateSemana(semana) {
     forros: []
   };
 
-
   semana.pedidos.forEach(pedido => {
-    pedido.total=0;
+    pedido.total = 0;
     pedido.detalle.forEach((detalle) => {
       detalle.estilo.adornos.forEach((adorno) => {
         if (adorno.cantidad > 0) {
@@ -63,12 +55,14 @@ function generateSemana(semana) {
           lista.adornos.forEach((adornoEnLista) => {
             if (adornoEnLista._id == adorno._id) {
               adornoEnLista.cantidad = Number(adornoEnLista.cantidad) + Number(adorno.cantidad) * detalle.subtotal;
+              adornoEnLista.cantidad = Number(adornoEnLista.cantidad.toFixed(3));
               existe = true
             }
           });
           if (!existe) {
             let nuevoAdorno = Object.assign({}, adorno);
             nuevoAdorno.cantidad = nuevoAdorno.cantidad * detalle.subtotal;
+            nuevoAdorno.cantidad = Number(nuevoAdorno.cantidad.toFixed(3));
             lista.adornos.push(nuevoAdorno);
           }
         }
@@ -81,14 +75,19 @@ function generateSemana(semana) {
           lista.avillos.forEach((avilloEnLista) => {
             if (avilloEnLista._id == avillo._id) {
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
+              avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
               existe = true;
             }
           });
+
           if (!existe) {
             let nuevoAvillo = Object.assign({}, avillo);
             nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
+            nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
             lista.avillos.push(nuevoAvillo);
           }
+
+
 
         }
       });
@@ -99,16 +98,19 @@ function generateSemana(semana) {
         if (detalle.detalleMaterial.material.nombre == materialEnLista.nombre &&
           detalle.detalleMaterial.color == materialEnLista.color) {
           materialEnLista.cantidad = Number(materialEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial);
+          materialEnLista.cantidad = Number(materialEnLista.cantidad.toFixed(3));
           existeMaterial = true;
         }
+
       });
 
       if (!existeMaterial) {
+        let rendimientoMaterial = Number((detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial));
         let nuevoMaterial = {
           _id: detalle.detalleMaterial.material._id + detalle.detalleMaterial.color,
           nombre: detalle.detalleMaterial.material.nombre,
           color: detalle.detalleMaterial.color,
-          cantidad: (detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial)
+          cantidad: Number(rendimientoMaterial.toFixed(3))
         };
 
         lista.materiales.push(nuevoMaterial);
@@ -120,16 +122,18 @@ function generateSemana(semana) {
         if (detalle.detalleForro.forro.nombre == forroEnLista.nombre &&
           detalle.detalleForro.color == forroEnLista.color) {
           forroEnLista.cantidad = Number(forroEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
+          forroEnLista.cantidad = Number(forroEnLista.cantidad.toFixed(3));
           existeForro = true;
         }
       });
 
       if (!existeForro) {
+        let rendimientoForro = (detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
         let nuevoForro = {
           _id: detalle.detalleForro.forro._id + detalle.detalleForro.color,
           nombre: detalle.detalleForro.forro.nombre,
           color: detalle.detalleForro.color,
-          cantidad: (detalle.subtotal) * Number(detalle.estilo.rendimientoForro)
+          cantidad: Number(rendimientoForro.toFixed(3))
         };
 
         lista.forros.push(nuevoForro);
@@ -140,13 +144,13 @@ function generateSemana(semana) {
 
         if (detalle.detalleSuela.suela.nombre == suelaEnLista.nombre &&
           detalle.detalleSuela.color == suelaEnLista.color) {
-            suelaEnLista.total=0;
+          suelaEnLista.total = 0;
           detalle.detalleTallas.forEach(t => {
             let e = false;
             suelaEnLista.detalle.forEach(l => {
               if (t.talla.nombre == l.nombre) {
                 l.cantidad += t.cantidad;
-                suelaEnLista.total+=l.cantidad;
+                suelaEnLista.total += l.cantidad;
                 e = true
               }
             });
@@ -155,7 +159,7 @@ function generateSemana(semana) {
                 nombre: t.talla.nombre,
                 cantidad: t.cantidad
               });
-              suelaEnLista.total+=t.cantidad;
+              suelaEnLista.total += t.cantidad;
             }
           });
           existeSuela = true;
@@ -178,9 +182,35 @@ function generateSemana(semana) {
             cantidad: s.cantidad
           }
         });
-        
+
         lista.suelas.push(nuevaSuela);
       }
+
+
+      let existePlantilla = false;
+
+      detalle.estilo.linea.plantilla.avillos.forEach(avillo => {
+        let avilloEnLista = lista.avillos.find(x => x._id == avillo._id);
+        if (avillo.cantidad > 0) {
+          if (avilloEnLista != undefined) {
+            avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
+            avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
+            existePlantilla = true;
+          }
+
+          if (!existePlantilla) {
+            let nuevoAvillo = Object.assign({}, avillo);
+            nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
+            nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
+            lista.avillos.push(nuevoAvillo);
+          }
+        }
+        existePlantilla = false;
+      });
+
+
+
+
 
       lista.estilos.push({
         codigo: detalle.estilo.linea.nombre + detalle.estilo.correlativo,
@@ -193,17 +223,17 @@ function generateSemana(semana) {
       pedido.total += detalle.subtotal;
 
     });
-    
+
   });
 
-semana.listaDeCompras = lista;
+  semana.listaDeCompras = lista;
 
-return semana
+  return semana
 }
 
 
 async function createSemana(pedido) {
-  let nuevaSemana ={
+  let nuevaSemana = {
     "semana": pedido.semana,
     "siguienteSemana": pedido.siguienteSemana,
     "ano": pedido.ano,
@@ -211,7 +241,7 @@ async function createSemana(pedido) {
     "pedidos": [pedido],
     "listaDeCompras": null
   };
-  nuevaSemana=generateSemana(nuevaSemana);
+  nuevaSemana = generateSemana(nuevaSemana);
   return await axios.post(`${urlSemana}`, nuevaSemana, {
     "auth": credentials.authentication.auth,
     "headers": credentials.authentication.headers,
@@ -262,6 +292,10 @@ export default {
     clearStates(state) {
       state.isEditing = false;
       state.isMoving = false;
+      state.pedido.ano = state.semanaSeleccionada.ano;
+      state.pedido.fecha = state.semanaSeleccionada.fecha;
+      state.pedido.semana = state.semanaSeleccionada.semana;
+      state.pedido.siguienteSemana = state.semanaSeleccionada.siguienteSemana;
     },
 
     setPedido(state, pedido) {
@@ -482,15 +516,15 @@ export default {
       const resSemana = await findSemanaByWeek(state.pedido);
       let semana = resSemana.data.docs[0];
       let res;
- 
-      if (semana == undefined || semana==null) {
+
+      if (semana == undefined || semana == null) {
         res = await createSemana(state.pedido);
       } else {
         semana.pedidos.push(state.pedido);
-        semana =  generateSemana(semana);
+        semana = generateSemana(semana);
         res = await updateSemana(semana, semana);
       }
-      if (res.status == 200 || res.status ==201) {
+      if (res.status == 200 || res.status == 201) {
         commit('clearPedido');
         commit('addDetalle');
         commit('clearStates');
@@ -545,11 +579,9 @@ export default {
     async actualizarSemana({
       state, commit
     }) {
-      let semana = state.semanaSeleccionada;
-
-
+      let semana = Object.assign({}, state.semanaSeleccionada);
       const semanaGenerada = generateSemana(semana);
-  
+
       const res = await updateSemana(semana, semanaGenerada);
 
       if (res.data.ok) {
@@ -580,7 +612,7 @@ export default {
       let pedido = Object.assign({}, semana.pedidos.find(x => x._id == state.pedido._id));
       pedido.semana = state.pedido.semana;
       pedido.ano = state.pedido.ano;
-      //pedido.siguienteSemana = 
+
       let fecha = new Date(state.pedido.fecha);
       fecha.setDate(fecha.getDate() + 7);
       pedido.fecha = fecha + "";
@@ -589,31 +621,29 @@ export default {
 
 
       const resSemana = await findSemanaByWeek(state.pedido);
-
       let nuevaSemana = resSemana.data.docs[0];
+      let res;
 
-      let data = {
-        nuevoPedido: pedido,
-        semana: nuevaSemana || undefined
-      };
-      let resAgregarPedido = await generatePedido(data);
-
-      if (resSemana.data.docs.length > 0) {
-        resAgregarPedido = await updateSemana(nuevaSemana, resAgregarPedido.data);
+      if (nuevaSemana == undefined || nuevaSemana == null) {
+        res = await createSemana(pedido);
+      } else {
+        nuevaSemana.pedidos.push(pedido);
+        nuevaSemana = generateSemana(nuevaSemana);
+        res = await updateSemana(nuevaSemana, nuevaSemana);
       }
 
-      if (resAgregarPedido.status == 200 || resAgregarPedido.status == 201) {
+      if (res.status == 200 || res.status == 201) {
         let index = semana.pedidos.findIndex(x => x._id == state.pedido._id);
         semana.pedidos.splice(index, 1);
-
-        const res = await updateSemana(semana, semana);
-        commit('setRevSemana', res.data.rev);
+        semana = generateSemana(semana);
+        const response = await updateSemana(semana, semana);
+        commit('setRevSemana', response.data.rev);
         commit('clearPedido');
         commit('clearStates');
         commit('addDetalle');
+        return response
       }
-
-      return resAgregarPedido
+      return res;
 
     },
 
