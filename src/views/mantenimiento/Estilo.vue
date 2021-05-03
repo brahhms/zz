@@ -365,7 +365,7 @@ export default {
         { text: "Acciones", value: "actions", sortable: false },
       ],
       editedIndex: -1,
-      cards: [],
+
     };
   },
 
@@ -433,14 +433,7 @@ export default {
 
       this.iniciarEstilo();
 
-      this.cards = this.estilos.map((item) => {
-        return {
-          title: item.codigo,
-          src: `http://localhost:5984/zapp-estilos/${item._id}/img`,
-          flex: 3,
-          rev: item._rev,
-        };
-      });
+
     },
   },
   computed: {

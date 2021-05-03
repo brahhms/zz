@@ -465,8 +465,6 @@ export default {
         ...item.detalleSuela
       };
 
-      //detalle.horma=state.hormas.filter(h=>detalle.estilo.linea.tacon == h.paraTacon)[0];
-
 
       detalle.detalleTallas = item.detalleTallas.map(item => {
         return {
