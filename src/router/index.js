@@ -15,7 +15,8 @@ import Talla from "../views/mantenimiento/Talla.vue";
 import Linea from "../views/mantenimiento/Linea.vue";
 import Plantilla from "../views/mantenimiento/Plantilla.vue";
 
-import Imagenes from '../components/Imagenes.vue'
+import Imagenes from '../components/Imagenes.vue';
+import Imprimir from "../components/Imprimir.vue";
 
 Vue.use(VueRouter)
 
@@ -94,6 +95,11 @@ const routes = [
     path: '/imagenes',
     name: 'Imagenes',
     component: Imagenes
+  },
+  {
+    path: '/imprimir',
+    name: 'Imprimir',
+    component: Imprimir
   }
 
 ]

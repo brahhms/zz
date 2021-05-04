@@ -18,6 +18,16 @@
               <v-btn @click="generarPedidosPDF" color="primary">
                 Descargar pdf
               </v-btn>
+              <v-btn @click="imprimirPedidos()" color="primary">
+                Imprimir
+              </v-btn>
+
+              <iframe
+                id="pedidosIframe"
+                width="0"
+                height="0"
+                :src="srcPedidos"
+              ></iframe>
             </v-row>
           </v-container>
           <v-card-text>
@@ -139,7 +149,7 @@
                           {{ detalle.detalleSuela.color }}
                         </td>
                         <td>
-                          {{detalle.subtotal}}
+                          {{ detalle.subtotal }}
                         </td>
                       </tr>
                       <tr>
@@ -295,8 +305,7 @@
                         >
                       </span>
                     </td>
-                    <td>Total: {{suela.total}}</td>
-                    
+                    <td>Total: {{ suela.total }}</td>
                   </tr>
                 </tbody>
               </template>
@@ -331,6 +340,7 @@ export default {
     draggable,
   },
   data: () => ({
+    srcPedidos:`http://localhost:8080/#/Imprimir`,
     moverDialog: false,
     oldIndex: "",
     newIndex: "",
@@ -381,9 +391,10 @@ export default {
   }),
 
   methods: {
-    ...mapActionsPedido([ "actualizarOrden","moverPedido"]),
+    ...mapActionsPedido(["actualizarOrden", "moverPedido"]),
     ...mapMutationsPedido(["setPedido"]),
     ...mapMutations(["mostrarMsj"]),
+
     editar(pedido) {
       let p = Object.assign({}, pedido);
       p.isEditing = true;
@@ -403,7 +414,6 @@ export default {
       let res = await this.moverPedido();
       if (res.status == 201 || res.status == 200) {
         this.mostrarMsj("Se ha movido el pedido a la siguiente semana ");
-        
       }
     },
     onEnd() {
@@ -590,7 +600,7 @@ export default {
         margin: { top: 1 },
       });
       //materiales
-     //FORROS
+      //FORROS
       head = [
         [
           {
@@ -663,9 +673,16 @@ export default {
     positivos(lista) {
       return lista.filter((item) => item.cantidad > 0);
     },
+    imprimirPedidos() {
+      //window.frames['pedidosIframe'].imprimir();
+      document.getElementById("pedidosIframe").contentWindow.print();
+    },
   },
   computed: {
     ...mapGettersPedido(["semanaSeleccionada"]),
+  },
+  created() {
+    this.srcPedidos=`http://localhost:8080/#/Imprimir?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`
   },
 };
 </script>

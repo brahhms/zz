@@ -131,12 +131,14 @@ export default {
     async openDialog(ano, mes, dia) {
       let semana = this.semanaDelAno(ano, mes, dia);
       let siguiente = this.siguienteSemana(ano, mes, dia);
-      this.dialog = true;
+
       this.setSemanaPedido(semana);
       this.setSiguienteSemana(siguiente);
       this.setAnoPedido(ano);
-      let mm = mes-1;
+
+      let mm = mes - 1;
       this.setFechaPedido(new Date(ano, mm, dia));
+      this.dialog = true;
       const existeSemana = await this.getSemana();
       if (existeSemana) {
         this.clearPedido();

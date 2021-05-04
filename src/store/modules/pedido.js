@@ -276,6 +276,9 @@ export default {
     clientes: [],
     hormas: [],
 
+    //docs
+    docCompras: null,
+
     //var
     isValid: false
   },
@@ -492,12 +495,17 @@ export default {
       }, credentials.authentication);
       if (res.statusText == "OK") {
         if (res.data.docs.length > 0) {
+          console.log("hay");
+          console.log(res.data.docs[0]);
           commit('setSemanaSeleccionada', res.data.docs[0]);
         } else {
+          console.log("no hay");
+          
           commit('setSemanaSeleccionada', {
             semana: state.pedido.semana,
             ano: state.pedido.ano
           });
+       
         }
         return true
       } else {
@@ -680,6 +688,8 @@ export default {
     isPedidoValid: state => state.isValid,
     semana: state => state.pedido.semana,
     ano: state => state.pedido.ano,
+
+    docCompras: state => state.docCompras,
 
     semanaSeleccionada: state => state.semanaSeleccionada || {
       semana: null,
