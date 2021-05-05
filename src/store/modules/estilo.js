@@ -152,6 +152,9 @@ export default {
       state.nuevoEstilo.rendimientoMaterial = rendimientoMaterial.toFixed(4);
       state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => a.cantidad > 0);
       state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => a.cantidad > 0);
+
+      let att = state.nuevoEstilo.img;
+      state.nuevoEstilo.img=undefined;
       const res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
         params: {
           "rev": state.nuevoEstilo._rev
@@ -160,9 +163,9 @@ export default {
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
-      let att = state.nuevoEstilo.img;
+      
 
-      if (res.data.ok && att.name != undefined) {
+      if (res.data.ok && att != null && att!=undefined ) {
         console.log("createAtt");
         await createAttachment(att, res.data.id, res.data.rev);
       }
