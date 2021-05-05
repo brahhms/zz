@@ -76,6 +76,7 @@
                   :headers="headers"
                   :items="detalles"
                   hide-default-footer
+                  disable-pagination
                 >
                   <template v-slot:item="{ item }">
                     <detalle-pedido :detalle="item"></detalle-pedido>

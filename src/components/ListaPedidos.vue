@@ -340,10 +340,8 @@ export default {
     draggable,
   },
   data: () => ({
-    srcPedidos:`http://localhost:8080/#/Imprimir`,
+    srcPedidos: `http://localhost:8080/#/Imprimir`,
     moverDialog: false,
-    oldIndex: "",
-    newIndex: "",
     headers: [
       {
         text: "Cantidad",
@@ -447,12 +445,17 @@ export default {
 
       this.semanaSeleccionada.pedidos.forEach((pedido) => {
         let items = pedido.detalle.map((detalle) => {
-          let cadena = "";
-          let tallas = detalle.detalleTallas.filter((t) => t.cantidad > 0);
-          tallas.forEach((talla) => {
-            cadena =
-              cadena + " " + talla.cantidad + "/" + talla.talla.nombre + ", ";
-          });
+          let cadena = detalle.detalleTallas
+            .filter((t) => t.cantidad > 0)
+            .map((talla) => {
+              return " " + talla.cantidad + "/" + talla.talla.nombre;
+            })
+            .join();
+
+          if (detalle.detalleTacon.material == null) {
+            detalle.detalleTacon.material = { nombre: "" };
+            detalle.detalleTacon.color = "";
+          }
 
           return [
             detalle.estilo.codigo,
@@ -650,11 +653,13 @@ export default {
         );
 
       this.semanaSeleccionada.listaDeCompras.suelas.forEach((suela) => {
-        let talls = "";
-        suela.detalle.forEach((detalle) => {
-          talls = talls + detalle.cantidad + "/" + detalle.nombre + ", ";
-        });
-        talls = talls.substring(0, talls.length - 2);
+        let talls = suela.detalle
+          .filter((s) => s.cantidad > 0)
+          .map((suela) => {
+            return " " + suela.cantidad + "/" + suela.nombre;
+          })
+          .join();
+
         let items = [[talls, suela.total]];
 
         let head = [[suela.nombre + " " + suela.color, "Total"]];
@@ -682,7 +687,7 @@ export default {
     ...mapGettersPedido(["semanaSeleccionada"]),
   },
   created() {
-    this.srcPedidos=`http://localhost:8080/#/Imprimir?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`
+    this.srcPedidos = `http://localhost:8080/#/Imprimir?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`;
   },
 };
 </script>

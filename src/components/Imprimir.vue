@@ -2,9 +2,10 @@
   <v-container>
     <div class="contenedor">
       <div class="columna">
+        Semana {{semana}}, {{ano}}
         <div class="pedido" v-for="pedido in resumenPedidos" :key="pedido._id">
           <v-row>
-            <v-col cols="12" style="font-size: 16px; font-weight: bold">
+            <v-col cols="12" style="font-size: 10px; font-weight: bold">
               {{ pedido.cliente }}
             </v-col>
             <v-col>
@@ -13,7 +14,7 @@
                   <thead>
                     <td style="font-weight: bold">Codigo</td>
                     <td style="font-weight: bold">Material</td>
-                    <td style="font-weight: bold">Material-tacon</td>
+                    <td style="font-weight: bold">Tacon</td>
                     <td style="font-weight: bold">Tallas</td>
                     <td style="font-weight: bold">Horma</td>
                     <td style="font-weight: bold">Forro</td>
@@ -37,11 +38,11 @@
 
                       <td>{{ detalle.detalleSuela }}</td>
 
-                      <td style="font-size: 16px; font-weight: bold">
+                      <td style="font-size: 14px; font-weight: bold">
                         {{ detalle.subtotal }}
                       </td>
                     </tr>
-                    <tr class="fila" style="font-size: 16px; font-weight: bold">
+                    <tr class="fila" style="font-size: 14px; font-weight: bold">
                       <td colspan="6"></td>
                       <td style="font-weight: bold">Total:</td>
                       <td>{{ pedido.total }}</td>
@@ -72,6 +73,8 @@ export default {
   data() {
     return {
       resumenPedidos: [],
+      ano: 0,
+      semana: 0,
     };
   },
   methods: {
@@ -119,9 +122,10 @@ export default {
       });
     },
     async loadData() {
-
-      this.setAnoPedido(Number(this.$route.query.ano));
-      this.setSemanaPedido(Number(this.$route.query.semana));
+      this.ano = Number(this.$route.query.ano);
+      this.semana = Number(this.$route.query.semana);
+      this.setAnoPedido(this.ano);
+      this.setSemanaPedido(this.semana);
 
       await this.getSemana();
       this.resumirPedidos();
@@ -142,22 +146,22 @@ export default {
 <style scoped>
 @media print {
   @page {
-    margin: 0;
-    size: 8.46in 12.49in landscape;
+    margin: 0 !important;
+    size: 8.46in 12.49in landscape !important;
   }
   button {
     display: none;
   }
 }
 td {
-  font-size: 11px !important;
-  padding: 2px !important;
+  font-size: 9px !important;
+  padding: 1px !important;
 }
 .contenedor {
   -webkit-column-count: 2; /* Chrome, Safari, Opera */
   -moz-column-count: 2; /* Firefox */
   column-count: 2;
-  column-gap: 4rem;
+  column-gap: 3rem;
   margin: 0 auto;
   width: 100%;
 }

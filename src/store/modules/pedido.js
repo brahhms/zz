@@ -359,6 +359,9 @@ export default {
                 errores++;
                 console.log("material tacon vacio");
               }
+            }else{
+              deta.detalleTacon.material=null;
+              deta.detalleTacon.color=null;
             }
           }
 
