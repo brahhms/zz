@@ -42,8 +42,8 @@ export default {
         nombre: "galones",
         conversiones: [
           {
-            nombre: "galones",
-            constante: Number(1)
+            nombre: "pares en galon",
+            constante: null
           }
         ]
       },
@@ -62,10 +62,6 @@ export default {
           {
             nombre: "pares en pliego",
             constante: null
-          },
-          {
-            nombre: "pliegos",
-            constante: Number(1)
           }
         ]
       },
@@ -73,8 +69,8 @@ export default {
         nombre: "yardas",
         conversiones: [
           {
-            nombre: "yardas",
-            constante: Number(1)
+            nombre: "pares en yardas",
+            constante: null
           },
           {
             nombre: "metros",
@@ -93,6 +89,10 @@ export default {
       {
         nombre: "centimetros",
         conversiones: [
+          {
+            nombre: "pares en centimetros",
+            constante: null
+          },
           {
             nombre: "yardas",
             constante: Number(91.44)
@@ -135,6 +135,10 @@ export default {
       {
         nombre: "metros",
         conversiones: [
+          {
+            nombre: "pares en metros",
+            constante: null
+          },
           {
             nombre: "yardas",
             constante: Number(1 / 1.094)
