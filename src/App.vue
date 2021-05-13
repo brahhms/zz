@@ -1,17 +1,18 @@
 <template>
   <v-app>
-    <v-app-bar v-if="showBar"  app color="primary" dark>
+    <v-app-bar v-if="showBar" app color="primary" dark>
       <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
+        <v-btn
+          style="text-transform: none !important;font-size:32px; font-weight: bold;"
+          plain
+          text
+          dark
+          link
+          x-large
 
-        <h1>Fuentes</h1>
+          :to="{ name: 'Home' }"
+          >Fuentes</v-btn
+        >
       </div>
 
       <v-spacer></v-spacer>
@@ -25,7 +26,7 @@
         <!--dddddddddd-->
 
         <v-navigation-drawer v-model="drawer" absolute temporary>
-          <v-list-item>
+          <v-list-item link :to="{ name: 'Home' }">
             <v-list-item-avatar>
               <v-img
                 src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
@@ -33,14 +34,14 @@
             </v-list-item-avatar>
 
             <v-list-item-content>
-              <v-list-item-title>Fuentes</v-list-item-title>
+              <v-list-item-title><b> Home</b></v-list-item-title>
             </v-list-item-content>
           </v-list-item>
 
           <v-divider></v-divider>
 
           <v-list dense>
-            <v-list-item v-if="!isEmpty" link :to="{ name: 'NuevoPedido'}">
+            <v-list-item v-if="!isEmpty" link :to="{ name: 'NuevoPedido' }">
               <v-list-item-icon>
                 <v-icon></v-icon>
               </v-list-item-icon>
@@ -49,7 +50,12 @@
                 <v-list-item-title>Ultimo pedido en borrador</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item v-for="item in items" :key="item.title" link :to="{ name: item.name }">
+            <v-list-item
+              v-for="item in items"
+              :key="item.title"
+              link
+              :to="{ name: item.name }"
+            >
               <v-list-item-icon>
                 <v-icon>{{ item.icon }}</v-icon>
               </v-list-item-icon>
@@ -62,21 +68,26 @@
         </v-navigation-drawer>
         <!--fffffff-->
         <v-snackbar v-model="snackbar.show" :timeout="snackbar.timeout">
-      {{ snackbar.msj }}
+          {{ snackbar.msj }}
 
-      <template v-slot:action="{ attrs }">
-        <v-btn color="blue" text v-bind="attrs" @click="snackbar.show = false">
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
+          <template v-slot:action="{ attrs }">
+            <v-btn
+              color="blue"
+              text
+              v-bind="attrs"
+              @click="snackbar.show = false"
+            >
+              Close
+            </v-btn>
+          </template>
+        </v-snackbar>
       </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import { createNamespacedHelpers, mapActions, mapState  } from "vuex";
+import { createNamespacedHelpers, mapActions, mapState } from "vuex";
 const { mapGetters } = createNamespacedHelpers("pedido");
 export default {
   name: "App",
@@ -86,31 +97,25 @@ export default {
   data: () => ({
     drawer: null,
     items: [
-      { name: "Home", title:"Home",icon: "mdi-view-dashboard" },
-      { name: "Estilo", title:"Estilos", icon: "mdi-shoe-heel" },
-      { name: "Forro", title:"Forros", icon: "mdi-layers-triple" },
-      { name: "Material", title:"Materiales", icon: "mdi-layers-outline" },
-      { name: "Suela", title:"Suelas", icon: "mdi-shoe-print" },
-      { name: "Cliente", title:"Clientes", icon: "mdi-account-box-multiple" },
-      { name: "Horma", title:"Hormas", icon: "mdi-shoe-formal" },
-      { name: "Adorno", title:"Adornos", icon: "mdi-scatter-plot" },
-      { name: "Avillo", title:"Avillos", icon: "mdi-scatter-plot-outline" },
-      { name: "Talla", title:"Tallas", icon: "mdi-format-list-numbered" },
-       { name: "Linea", title:"Lineas", icon: "mdi-equal" },
-       { name: "Plantilla", title:"Plantillas", icon: "mdi-shore" }
-
+      { name: "Estilo", title: "Estilos", icon: "mdi-shoe-heel" },
+      { name: "Forro", title: "Forros", icon: "mdi-layers-triple" },
+      { name: "Material", title: "Materiales", icon: "mdi-layers-outline" },
+      { name: "Suela", title: "Suelas", icon: "mdi-shoe-print" },
+      { name: "Cliente", title: "Clientes", icon: "mdi-account-box-multiple" },
+      { name: "Horma", title: "Hormas", icon: "mdi-shoe-formal" },
+      { name: "Adorno", title: "Adornos", icon: "mdi-scatter-plot" },
+      { name: "Avillo", title: "Avillos", icon: "mdi-scatter-plot-outline" },
+      { name: "Talla", title: "Tallas", icon: "mdi-format-list-numbered" },
+      { name: "Linea", title: "Lineas", icon: "mdi-equal" },
+      { name: "Plantilla", title: "Plantillas", icon: "mdi-shore" },
     ],
   }),
   computed: {
-    ...mapState(["showBar","snackbar"]),
-    ...mapGetters(["isEmpty"])
+    ...mapState(["showBar", "snackbar"]),
+    ...mapGetters(["isEmpty"]),
   },
-  methods: {
-  },
-  created() {
-
-    
-  },
+  methods: {},
+  created() {},
 };
 </script>
 
@@ -123,7 +128,7 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
 }
 </style>

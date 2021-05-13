@@ -113,7 +113,16 @@ export default {
         return tallas;
       },
       get() {
-        return this.tallas;
+        return this.tallas.sort(function (a, b) {
+        if (Number(a.nombre) > Number(b.nombre)) {
+          return 1;
+        }
+        if (Number(a.nombre) < Number(b.nombre)) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      });
       },
     },
     nueva: {
@@ -163,8 +172,8 @@ export default {
     async deleteItemConfirm() {
       let res = await this.deleteTalla();
       if (res) {
-          this.mostrarMsj("Talla eliminada!");
-        }
+        this.mostrarMsj("Talla eliminada!");
+      }
       this.closeDelete();
     },
 
@@ -193,10 +202,8 @@ export default {
         }
       } else {
         //guardar
-        let res = await this.saveTalla();
-        if (res) {
-          this.mostrarMsj("Talla guardada!");
-        }
+        let msj = await this.saveTalla();
+        this.mostrarMsj("" + msj);
       }
       this.close();
     },

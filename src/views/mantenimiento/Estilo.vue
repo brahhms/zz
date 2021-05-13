@@ -5,13 +5,7 @@
         <v-toolbar-title>Estilos</v-toolbar-title>
 
         <v-spacer></v-spacer>
-        <v-dialog
-          fullscreen
-          hide-overlay
-          transition="dialog-bottom-transition"
-          scrollable
-          v-model="dialog"
-        >
+        <v-dialog fullscreen hide-overlay scrollable v-model="dialog">
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               color="primary"
@@ -23,7 +17,15 @@
             >
               Nuevo Estilo
             </v-btn>
-            <v-btn color="primary" :to="{ name: 'Imagenes'}"  depressed dark class="mb-2"> Imgs </v-btn>
+            <v-btn
+              color="primary"
+              :to="{ name: 'Imagenes' }"
+              depressed
+              dark
+              class="mb-2"
+            >
+              Imgs
+            </v-btn>
           </template>
           <v-card>
             <v-toolbar dark color="primary">
@@ -64,7 +66,7 @@
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="12">
+                  <v-col cols="4">
                     <v-text-field
                       label="Pares en yarda de Material"
                       v-model="nuevo.rendimientoMaterial"
@@ -75,9 +77,7 @@
                       oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
-                </v-row>
-                <v-row>
-                  <v-col cols="12">
+                  <v-col cols="4">
                     <v-text-field
                       label="Pares en yarda de Forro"
                       v-model="nuevo.rendimientoForro"
@@ -88,9 +88,7 @@
                       oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
-                </v-row>
-                <v-row>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="4">
                     <v-file-input
                       label="Imagen"
                       show-size
@@ -100,6 +98,7 @@
                     ></v-file-input>
                   </v-col>
                 </v-row>
+
                 <v-row v-if="nuevo.avillos.length > 0">
                   <v-col>
                     <v-data-table
@@ -110,7 +109,7 @@
                       hide-default-footer
                     >
                       <template v-slot:top>
-                        <v-toolbar flat>
+                        <v-toolbar dense color="primary" dark flat>
                           <v-toolbar-title>Avillos</v-toolbar-title>
                           <v-divider class="mx-4" inset vertical></v-divider>
                           <v-spacer></v-spacer>
@@ -160,8 +159,7 @@
                     </v-data-table>
                   </v-col>
                 </v-row>
-                <v-row
-                >
+                <v-row>
                   <v-col>
                     <v-data-table
                       :headers="adornoHeaders"
@@ -171,7 +169,7 @@
                       hide-default-footer
                     >
                       <template v-slot:top>
-                        <v-toolbar flat>
+                        <v-toolbar dense color="primary" dark flat>
                           <v-toolbar-title>Adornos</v-toolbar-title>
                           <v-divider class="mx-4" inset vertical></v-divider>
                           <v-spacer></v-spacer>
@@ -285,7 +283,6 @@
               <span v-else>sin imagen</span>
             </template>
           </v-data-table>
-
         </v-tab-item>
       </v-tabs-items>
     </v-card>
@@ -349,7 +346,6 @@ export default {
         { text: "Acciones", value: "actions", sortable: false },
       ],
       editedIndex: -1,
-
     };
   },
 
@@ -408,7 +404,9 @@ export default {
     editItem(item) {
       this.editedIndex = this.estilos.indexOf(item);
       item.rendimientoForro = Math.round(Number(1 / item.rendimientoForro));
-      item.rendimientoMaterial = Math.round(Number(1 / item.rendimientoMaterial));
+      item.rendimientoMaterial = Math.round(
+        Number(1 / item.rendimientoMaterial)
+      );
       this.nuevo = item;
       this.dialog = true;
     },
@@ -416,8 +414,6 @@ export default {
       await this.getEstilos();
 
       this.iniciarEstilo();
-
-
     },
   },
   computed: {
@@ -459,7 +455,7 @@ export default {
     "nuevo.adornos": {
       handler(newVal) {
         newVal.forEach((e) => {
-          if (e.cantidadInicial != null || e.cantidadInicial != "") {
+          if (e.cantidadInicial != null && e.cantidadInicial != "") {
             let numero =
               Number(e.cantidadInicial) * Number(e.unidadConversion.constante);
             e.cantidad = numero.toFixed(4);
@@ -473,10 +469,10 @@ export default {
     "nuevo.avillos": {
       handler(newVal) {
         newVal.forEach((e) => {
-          if (e.cantidadInicial != null) {
+          if (e.cantidadInicial != null && e.cantidadInicial != "") {
             let numero = 0;
             if (e.unidadConversion.constante == null) {
-              if (e.cantidadInicial != 0) {
+              if (Number(e.cantidadInicial) > 0) {
                 numero = Number(1 / e.cantidadInicial);
               } else {
                 numero = 0;
@@ -494,7 +490,7 @@ export default {
         });
       },
       deep: true,
-    }
+    },
   },
   created() {
     this.initialize();

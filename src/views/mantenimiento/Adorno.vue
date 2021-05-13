@@ -41,6 +41,12 @@
                         return-object
                       ></v-autocomplete>
                     </v-col>
+                    <v-col>
+                       <v-checkbox
+                        label="Color segun Material?"
+                        v-model="nuevo.colorSegunMaterial"
+                      ></v-checkbox>
+                    </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>

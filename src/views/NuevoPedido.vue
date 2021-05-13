@@ -204,7 +204,7 @@ export default {
 
       if (!this.isEmpty) {
         this.e1 = 2;
-        console.log(this.cliente);
+       
       } else {
         this.clearPedido();
         this.addDetalle();

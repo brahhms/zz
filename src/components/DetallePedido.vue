@@ -1,7 +1,7 @@
 <template>
   <tr>
     <td>
-      <v-edit-dialog>
+      <v-edit-dialog :key="detalle.estilo">
         <span v-if="detalle.estilo != null"
           >{{ detalle.estilo.linea.nombre
           }}{{ detalle.estilo.correlativo }}</span
@@ -155,7 +155,7 @@
 
     <!--horma-->
     <td>
-      <v-edit-dialog>
+      <v-edit-dialog :key="detalle.horma">
         <span v-if="detalle.horma != null">{{ detalle.horma.nombre }}</span>
         <span v-else>[horma]</span>
         <template v-slot:input>
@@ -312,6 +312,7 @@ export default {
     ...mapMutations(["validarPedido", "removeDetalle", "duplicateDetalle"]),
     ...mapActions(["actualizarHormas"]),
     async changeEstilo() {
+
       await this.validarPedido();
       if (this.detalle.estilo != null) {
         this.hormasSegunTacon = await this.actualizarHormas(

@@ -18,7 +18,9 @@ export default {
       _id: undefined,
       _rev: undefined,
       nombre: null,
-      cantidad: 0, cantidadInicial: 0,
+      colorSegunMaterial:false,
+      cantidad: 0, 
+      cantidadInicial: 0,
       unidad: {
         nombre: "pares",
         conversiones: [
@@ -52,10 +54,6 @@ export default {
             constante: Number(1)
           },
           {
-            nombre: "metros",
-            constante: Number(1.094)
-          },
-          {
             nombre: "centimetros",
             constante: Number(1 / 91.44)
           },
@@ -65,58 +63,13 @@ export default {
           },
         ]
       },
-      {
-        nombre: "centimetros",
-        conversiones: [
-          {
-            nombre: "yardas",
-            constante: Number(91.44)
-          },
-          {
-            nombre: "metros",
-            constante: Number(100)
-          },
-          {
-            nombre: "centimetros",
-            constante: Number(1 / 91.44)
-          },
-          {
-            nombre: "pulgadas",
-            constante: Number(2.54)
-          },
-        ]
-      },
-      {
-        nombre: "pulgadas",
-        conversiones: [
-          {
-            nombre: "yardas",
-            constante: Number(36)
-          },
-          {
-            nombre: "metros",
-            constante: Number(39.37)
-          },
-          {
-            nombre: "centimetros",
-            constante: Number(1 / 2.54)
-          },
-          {
-            nombre: "pulgadas",
-            constante: Number(1)
-          },
-        ]
-      },
+
       {
         nombre: "metros",
         conversiones: [
           {
             nombre: "yardas",
             constante: Number(1 / 1.094)
-          },
-          {
-            nombre: "metros",
-            constante: Number(1)
           },
           {
             nombre: "centimetros",
@@ -145,7 +98,9 @@ export default {
         _id: undefined,
         _rev: undefined,
         nombre: null,
-        cantidad: 0, cantidadInicial: 0,
+        cantidad: 0, 
+        cantidadInicial: 0,
+        colorSegunMaterial:false,
         unidad: {
           nombre: "pares",
           conversiones: [

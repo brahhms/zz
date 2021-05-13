@@ -15,12 +15,16 @@
         <v-card flat>
           <v-container>
             <v-row>
-              <v-btn @click="generarPedidosPDF" color="primary">
-                Descargar pdf
-              </v-btn>
-              <v-btn @click="imprimirPedidos()" color="primary">
-                Imprimir
-              </v-btn>
+              <v-col cols="2"
+                ><v-btn @click="generarPedidosPDF" color="primary">
+                  Descargar pdf
+                </v-btn>
+              </v-col>
+              <v-col cols="2">
+                <v-btn @click="imprimirPedidos()" color="primary">
+                  Imprimir
+                </v-btn>
+              </v-col>
 
               <iframe
                 id="pedidosIframe"
@@ -53,9 +57,51 @@
                       <v-spacer></v-spacer>
                       <v-toolbar-items>
                         <v-btn dark text @click="editar(pedido)">
-                          <v-icon dark> mdi-clipboard-edit-outline </v-icon
-                          >Editar
+                          <v-icon dark> mdi-file-edit </v-icon>Editar
                         </v-btn>
+                       
+
+                         <!--ELIMINAR  -->
+                        <v-dialog
+                          v-model="eliminarDialog"
+                          persistent
+                          max-width="370"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              dark
+                              text
+                              @click="setEliminar(pedido)"
+                              v-bind="attrs"
+                              v-on="on"
+                            >
+                               <v-icon dark> mdi-delete </v-icon>Eliminar
+                            </v-btn>
+                          </template>
+                          <v-card>
+                            <v-card-title class="headline">
+                              Desea Eliminar el pedido?
+                            </v-card-title>
+
+                            <v-card-actions>
+                              <v-spacer></v-spacer>
+                              <v-btn text @click="eliminarDialog = false">
+                                Cancelar
+                              </v-btn>
+                              <v-btn
+                                color="red"
+                                outlined
+                                @click="
+                                  eliminar(pedido);
+                                  eliminarDialog = false;
+                                "
+                              >
+                                Aceptar
+                              </v-btn>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                        <!--/ELIMINAR -->
 
                         <!--MOVER  -->
                         <v-dialog
@@ -65,13 +111,14 @@
                         >
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn
-                              small
-                              color="primary"
+                              dark
+                              text
+                              @click="setPedidoAMover(pedido)"
                               v-bind="attrs"
                               v-on="on"
-                              @click="setPedidoAMover(pedido)"
                             >
-                              Mover a siguiente semana
+                              <v-icon dark>mdi-file-move </v-icon>Mover a
+                              siguiente semana
                             </v-btn>
                           </template>
                           <v-card>
@@ -131,7 +178,7 @@
                               )"
                               :key="t.index"
                             >
-                              <v-chip
+                              <v-chip dense
                                 >{{ t.cantidad }}/{{ t.talla.nombre }}</v-chip
                               >
                             </div>
@@ -342,6 +389,7 @@ export default {
   data: () => ({
     srcPedidos: `http://localhost:8080/#/Imprimir`,
     moverDialog: false,
+    eliminarDialog: false,
     headers: [
       {
         text: "Cantidad",
@@ -389,7 +437,7 @@ export default {
   }),
 
   methods: {
-    ...mapActionsPedido(["actualizarOrden", "moverPedido"]),
+    ...mapActionsPedido(["actualizarOrden", "moverPedido","deletePedido"]),
     ...mapMutationsPedido(["setPedido"]),
     ...mapMutations(["mostrarMsj"]),
 
@@ -400,9 +448,16 @@ export default {
       this.setPedido(p);
       this.$router.push({ name: "NuevoPedido" });
     },
+
+    setEliminar(pedido) {
+      let p = Object.assign({}, pedido);
+      p.isEditing = false;
+      p.isMoving = false;
+      this.setPedido(p);
+    },
+
     setPedidoAMover(pedido) {
       let p = Object.assign({}, pedido);
-      console.log("diste click a :" + p.cliente.nombre);
       p.isEditing = false;
       p.isMoving = true;
       p.semana = this.semanaSeleccionada.siguienteSemana;
@@ -412,6 +467,12 @@ export default {
       let res = await this.moverPedido();
       if (res.status == 201 || res.status == 200) {
         this.mostrarMsj("Se ha movido el pedido a la siguiente semana ");
+      }
+    },
+    async eliminar() {
+      let res = await this.deletePedido();
+      if (res.status == 201 || res.status == 200) {
+        this.mostrarMsj("Pedido eliminado");
       }
     },
     onEnd() {
@@ -594,7 +655,7 @@ export default {
         ],
       ];
       items = this.semanaSeleccionada.listaDeCompras.materiales.map((item) => {
-        return [item.cantidad, item.nombre, item.color];
+        return [item.cantidad + " yardas", item.nombre, item.color];
       });
 
       doc.autoTable({
@@ -619,7 +680,7 @@ export default {
         ],
       ];
       items = this.semanaSeleccionada.listaDeCompras.forros.map((item) => {
-        return [item.cantidad, item.nombre, item.color];
+        return [item.cantidad + " yardas", item.nombre, item.color];
       });
 
       doc.autoTable({

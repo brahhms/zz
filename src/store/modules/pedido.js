@@ -53,27 +53,80 @@ function generateSemana(semana) {
 
           let existe = false;
           lista.adornos.forEach((adornoEnLista) => {
-            if (adornoEnLista._id == adorno._id) {
-              adornoEnLista.cantidad = Number(adornoEnLista.cantidad) + Number(adorno.cantidad) * detalle.subtotal;
+            if (adornoEnLista.nombre == adorno.nombre || (adornoEnLista._id == adorno._id && adornoEnLista.nombre.includes(detalle.detalleMaterial.color) && adornoEnLista.nombre.includes(detalle.detalleMaterial.material.nombre))) {
+              adornoEnLista.cantidad = Number(adornoEnLista.cantidad) + (Number(adorno.cantidad) * Number(detalle.subtotal));
               adornoEnLista.cantidad = Number(adornoEnLista.cantidad.toFixed(3));
-              existe = true
+              existe = true;
+              //xcepcion2
+              if (adornoEnLista.nombre.includes("punteras")) {
+                detalle.detalleTallas.filter(x => x.cantidad > 0).forEach(t => {
+                  let h = t.talla.nombre;
+                  if (h == '3') {
+                    adornoEnLista.punteras[0].cantidad += t.cantidad;
+                  } else if (h == '4' || h == '5') {
+                    adornoEnLista.punteras[1].cantidad += t.cantidad;
+                  } else if (h == '6' || h == '7') {
+                    adornoEnLista.punteras[2].cantidad += t.cantidad;
+                  } else {
+                    adornoEnLista.punteras[3].cantidad += t.cantidad;
+                  }
+                });
+                let total = 0;
+                let resumen = adornoEnLista.punteras.map(m => {
+                  total += m.cantidad;
+                  return " " + " " + m.cantidad + "/" + m.categoria;
+                }).join();
+
+                adornoEnLista.nombre = adorno.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color + " " + resumen;
+              }
             }
           });
           if (!existe) {
-            let nuevoAdorno = Object.assign({}, adorno);
-            nuevoAdorno.cantidad = nuevoAdorno.cantidad * detalle.subtotal;
+            let nuevoAdorno = { ...adorno };
+
+            nuevoAdorno.cantidad = Number(nuevoAdorno.cantidad) * Number(detalle.subtotal);
             nuevoAdorno.cantidad = Number(nuevoAdorno.cantidad.toFixed(3));
+
+            if (adorno.colorSegunMaterial) {
+              nuevoAdorno.nombre = adorno.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
+              //excepcion1
+              if (nuevoAdorno.nombre.includes("punteras")) {
+                nuevoAdorno.punteras = [{ cantidad: 0, categoria: "[3]" }, { cantidad: 0, categoria: "[4-5]" }, { cantidad: 0, categoria: "[6-7]" }, { cantidad: 0, categoria: "[8-9]" }];
+
+                detalle.detalleTallas.filter(x => x.cantidad > 0).forEach(t => {
+                  let h = t.talla.nombre;
+                  if (h == '3') {
+                    nuevoAdorno.punteras[0].cantidad += t.cantidad;
+                  } else if (h == '4' || h == '5') {
+                    nuevoAdorno.punteras[1].cantidad += t.cantidad;
+                  } else if (h == '6' || h == '7') {
+                    nuevoAdorno.punteras[2].cantidad += t.cantidad;
+                  } else {
+                    nuevoAdorno.punteras[3].cantidad += t.cantidad;
+                  }
+                });
+                let total = 0;
+                let resumen = nuevoAdorno.punteras.map(m => {
+                  total += m.cantidad;
+                  return " " + " " + m.cantidad + "/" + m.categoria;
+                }).join();
+
+                nuevoAdorno.nombre = nuevoAdorno.nombre + "  " + resumen;
+
+              }
+            }
+
             lista.adornos.push(nuevoAdorno);
           }
         }
       });
 
       detalle.estilo.avillos.forEach((avillo) => {
-        if (avillo.cantidad > 0) {
+        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity") {
 
           let existe = false;
           lista.avillos.forEach((avilloEnLista) => {
-            if (avilloEnLista._id == avillo._id) {
+            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre.includes(detalle.detalleMaterial.color) && avilloEnLista.nombre.includes(detalle.detalleMaterial.material.nombre))) {
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
               existe = true;
@@ -84,6 +137,9 @@ function generateSemana(semana) {
             let nuevoAvillo = Object.assign({}, avillo);
             nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
             nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
+            if (avillo.colorSegunMaterial) {
+              nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
+            }
             lista.avillos.push(nuevoAvillo);
           }
 
@@ -191,7 +247,7 @@ function generateSemana(semana) {
 
       detalle.estilo.linea.plantilla.avillos.forEach(avillo => {
         let avilloEnLista = lista.avillos.find(x => x._id == avillo._id);
-        if (avillo.cantidad > 0) {
+        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity") {
           if (avilloEnLista != undefined) {
             avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
             avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
@@ -359,9 +415,9 @@ export default {
                 errores++;
                 console.log("material tacon vacio");
               }
-            }else{
-              deta.detalleTacon.material=null;
-              deta.detalleTacon.color=null;
+            } else {
+              deta.detalleTacon.material = null;
+              deta.detalleTacon.color = null;
             }
           }
 
@@ -425,7 +481,16 @@ export default {
     setData(state, data) {
       state.estilos = data[0].data.docs;
       state.materiales = data[1].data.docs;
-      state.tallas = data[2].data.docs;
+      state.tallas = data[2].data.docs.sort(function (a, b) {
+        if (Number(a.nombre) > Number(b.nombre)) {
+          return 1;
+        }
+        if (Number(a.nombre) < Number(b.nombre)) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      });
       state.forros = data[3].data.docs;
       state.suelas = data[4].data.docs;
       state.clientes = data[5].data.docs;
@@ -499,16 +564,16 @@ export default {
       if (res.statusText == "OK") {
         if (res.data.docs.length > 0) {
           console.log("hay");
-          console.log(res.data.docs[0]);
+
           commit('setSemanaSeleccionada', res.data.docs[0]);
         } else {
           console.log("no hay");
-          
+
           commit('setSemanaSeleccionada', {
             semana: state.pedido.semana,
             ano: state.pedido.ano
           });
-       
+
         }
         return true
       } else {
@@ -670,7 +735,26 @@ export default {
         return []
       }
 
-    }
+    },
+
+    async deletePedido({
+      state, commit
+    }) {
+      let semana = state.semanaSeleccionada;
+
+
+      let index = semana.pedidos.findIndex(x => x._id == state.pedido._id);
+      semana.pedidos.splice(index, 1);
+      semana = generateSemana(semana);
+      const response = await updateSemana(semana, semana);
+      commit('setRevSemana', response.data.rev);
+      commit('clearPedido');
+      commit('clearStates');
+      commit('addDetalle');
+      return response
+
+
+    },
   },
   getters: {
     detalles: state => state.pedido.detalle,

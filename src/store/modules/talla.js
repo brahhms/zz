@@ -10,6 +10,28 @@ async function getAll() {
   return response;
 }
 
+async function existeNombre(nombre) {
+  const response = await axios.post(`${url}_find`, {
+    "selector": {
+      "nombre": nombre
+    }
+  }, credentials.authentication);
+
+  if (response.data.docs.length > 1) {
+    await axios.delete(`${url}${response.data.docs[1]._id}`, {
+      params: {
+        "rev": response.data.docs[1]._rev
+      },
+      "auth": credentials.authentication.auth,
+      "headers": credentials.authentication.headers,
+    }, credentials.authentication);
+    response.data.docs.pop();
+  }
+
+
+  return response.data.docs.length > 0;
+}
+
 
 export default {
   namespaced: true,
@@ -46,10 +68,10 @@ export default {
       const res = await axios.post(`${url}_find`, {
         "selector": {}
       }, credentials.authentication);
-      
-      if(res.statusText=='OK'){
+
+      if (res.statusText == 'OK') {
         commit('setTallas', res.data.docs);
-      }else{
+      } else {
         console.log('ErrorGET');
       }
     },
@@ -68,7 +90,7 @@ export default {
       if (res.data.ok) {
         const response = await getAll();
         commit('setTallas', response.data.docs);
-      }else{
+      } else {
         console.log('errorUPDATE');
       }
       return res.data.ok
@@ -78,17 +100,26 @@ export default {
       commit,
       state
     }) {
-      let res = await axios.post(`${url}`, state.nuevaTalla, {
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-      if (res.data.ok) {
-        const response = await getAll();
-        commit('setTallas', response.data.docs);
-      }else{
-        console.log('errorSAVE');
+
+
+      if (await existeNombre(state.nuevaTalla.nombre)) {
+        return "Ya existe una talla con ese nombre"
+      } else {
+        let res = await axios.post(`${url}`, state.nuevaTalla, {
+          "auth": credentials.authentication.auth,
+          "headers": credentials.authentication.headers,
+        }, credentials.authentication);
+        if (res.data.ok) {
+          const response = await getAll();
+          commit('setTallas', response.data.docs);
+          return "Talla guardada exitosamente!"
+        } else {
+          "Error al guardar talla"
+        }
+
       }
-      return res.data.ok
+
+
 
     },
 
@@ -107,7 +138,7 @@ export default {
       if (res.data.ok) {
         const response = await getAll();
         commit('setTallas', response.data.docs);
-      }else{
+      } else {
         console.log('errorDelete');
       }
       return res.data.ok

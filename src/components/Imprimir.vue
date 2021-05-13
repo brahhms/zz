@@ -90,6 +90,7 @@ export default {
           total: pedido.total,
           cliente: pedido.cliente.nombre,
           detalle: pedido.detalle.map((lineaDeta) => {
+            lineaDeta.detalleTacon.material=lineaDeta.detalleTacon.material || {nombre:""};
             return {
               estilo: lineaDeta.estilo.codigo,
               detalleMaterial:

@@ -18,7 +18,7 @@
           <v-toolbar-title>AVILLOS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog persistent v-model="dialog" max-width="400px">
+          <v-dialog persistent v-model="dialog" max-width="550px" scrollable>
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                 Nuevo Avillo
@@ -57,6 +57,12 @@
                       <v-checkbox
                         label="Para Tacon?"
                         v-model="nuevo.paraTacon"
+                      ></v-checkbox>
+                    </v-col>
+                         <v-col>
+                       <v-checkbox
+                        label="Color segun Material?"
+                        v-model="nuevo.colorSegunMaterial"
                       ></v-checkbox>
                     </v-col>
                   </v-row>

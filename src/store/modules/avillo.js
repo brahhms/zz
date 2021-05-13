@@ -29,6 +29,7 @@ export default {
           }
         ]
       },
+      colorSegunMaterial:false,
       unidadConversion: {
         nombre: "pares en pliego",
         constante: null
@@ -73,10 +74,6 @@ export default {
             constante: null
           },
           {
-            nombre: "metros",
-            constante: Number(1.094)
-          },
-          {
             nombre: "centimetros",
             constante: Number(1 / 91.44)
           },
@@ -86,52 +83,7 @@ export default {
           },
         ]
       },
-      {
-        nombre: "centimetros",
-        conversiones: [
-          {
-            nombre: "pares en centimetros",
-            constante: null
-          },
-          {
-            nombre: "yardas",
-            constante: Number(91.44)
-          },
-          {
-            nombre: "metros",
-            constante: Number(100)
-          },
-          {
-            nombre: "centimetros",
-            constante: Number(1 / 91.44)
-          },
-          {
-            nombre: "pulgadas",
-            constante: Number(2.54)
-          },
-        ]
-      },
-      {
-        nombre: "pulgadas",
-        conversiones: [
-          {
-            nombre: "yardas",
-            constante: Number(36)
-          },
-          {
-            nombre: "metros",
-            constante: Number(39.37)
-          },
-          {
-            nombre: "centimetros",
-            constante: Number(1 / 2.54)
-          },
-          {
-            nombre: "pulgadas",
-            constante: Number(1)
-          },
-        ]
-      },
+
       {
         nombre: "metros",
         conversiones: [
@@ -185,6 +137,7 @@ export default {
             }
           ]
         },
+        colorSegunMaterial:false,
         unidadConversion: {
           nombre: "pares en pliego",
           constante: null

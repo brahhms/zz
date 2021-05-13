@@ -47,7 +47,7 @@ export default {
       rendimientoForro: null,
       avillos: [],
       adornos: [],
-      img:null,
+      img: null,
       _attachments: undefined
     },
 
@@ -67,13 +67,13 @@ export default {
         rendimientoForro: null,
         avillos: [],
         adornos: [],
-        img:null,
+        img: null,
         _attachments: undefined
       };
     },
 
-    resetAvillos(state){
-      state.nuevoEstilo.avillos=[];
+    resetAvillos(state) {
+      state.nuevoEstilo.avillos = [];
     },
 
     addAdornos(state, adornos) {
@@ -118,7 +118,7 @@ export default {
             correlativos = correlativos.concat(element);
           });
         }
-        
+
 
         let n = 1;
         correlativos.sort();
@@ -146,15 +146,15 @@ export default {
       commit,
       state
     }) {
-      let rendimientoForro = 1/Number(state.nuevoEstilo.rendimientoForro );
-      let rendimientoMaterial = 1/Number(state.nuevoEstilo.rendimientoMaterial );
+      let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
+      let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
       state.nuevoEstilo.rendimientoMaterial = rendimientoMaterial.toFixed(4);
       state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => a.cantidad > 0);
       state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => a.cantidad > 0);
 
       let att = state.nuevoEstilo.img;
-      state.nuevoEstilo.img=undefined;
+      state.nuevoEstilo.img = undefined;
       const res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
         params: {
           "rev": state.nuevoEstilo._rev
@@ -163,9 +163,9 @@ export default {
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
-      
 
-      if (res.data.ok && att != null && att!=undefined ) {
+
+      if (res.data.ok && att != null && att != undefined) {
         console.log("createAtt");
         await createAttachment(att, res.data.id, res.data.rev);
       }
@@ -178,8 +178,8 @@ export default {
       commit,
       state
     }) {
-      let rendimientoForro = 1/Number(state.nuevoEstilo.rendimientoForro );
-      let rendimientoMaterial = 1/Number(state.nuevoEstilo.rendimientoMaterial );
+      let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
+      let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
       state.nuevoEstilo.rendimientoMaterial = rendimientoMaterial.toFixed(4);
       const res = await axios.post(`${url}`, state.nuevoEstilo, {
@@ -240,6 +240,8 @@ export default {
       if (state.nuevoEstilo.linea.tacon) {
         condiciones.push({ "paraTacon": true });
       }
+
+
       const res = await axios.post('http://localhost:5984/zapp-avillos/_find', {
         "selector": {
           "$or": condiciones,
@@ -249,8 +251,40 @@ export default {
         }
       }, credentials.authentication);
 
-      if (res.statusText == 'OK') {
-     
+      const res2 = await axios.post('http://localhost:5984/zapp-avillos/_find', {
+        "selector": {
+          "nombre": {
+            "$in": state.nuevoEstilo.avillos.map(x => { return x.nombre })
+          }
+        }
+      }, credentials.authentication);
+
+
+
+      if (res2.statusText == 'OK') {
+
+        res2.data.docs.forEach(item => {
+
+          state.nuevoEstilo.avillos.forEach(a => {
+
+          if (a.nombre == item.nombre) {
+            a.predeterminado = item.predeterminado;
+            a.paraTacon = item.paraTacon;
+            a.colorSegunMaterial = item.colorSegunMaterial;
+            if (item.unidad.nombre != a.unidad.nombre || item.unidadConversion.nombre != a.unidadConversion.nombre) {
+              console.log(a.unidad.nombre);
+              console.log(a.unidadConversion);
+              a.cantidad = 0;
+              a.cantidadInicial = 0;
+              a.unidad = item.unidad;
+              a.unidadConversion = item.unidadConversion;
+            }
+          }
+  
+          });
+
+        });
+
         commit('setAvillosDeLinea', res.data.docs);
       }
 
