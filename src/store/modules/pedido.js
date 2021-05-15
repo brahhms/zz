@@ -175,7 +175,7 @@ function generateSemana(semana) {
       let existeForro = false;
       lista.forros.forEach((forroEnLista) => {
 
-        if (detalle.detalleForro.forro.nombre == forroEnLista.nombre &&
+        if (detalle.detalleForro.forro._id == forroEnLista._id &&
           detalle.detalleForro.color == forroEnLista.color) {
           forroEnLista.cantidad = Number(forroEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
           forroEnLista.cantidad = Number(forroEnLista.cantidad.toFixed(3));
@@ -187,7 +187,7 @@ function generateSemana(semana) {
         let rendimientoForro = (detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
         let nuevoForro = {
           _id: detalle.detalleForro.forro._id + detalle.detalleForro.color,
-          nombre: detalle.detalleForro.forro.nombre,
+          nombre: "forro "+detalle.detalleForro.forro.nombre,
           color: detalle.detalleForro.color,
           cantidad: Number(rendimientoForro.toFixed(3))
         };

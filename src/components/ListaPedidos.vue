@@ -9,7 +9,6 @@
         <v-icon left>mdi-clipboard-check </v-icon>
         Lista de Compras
       </v-tab>
-      <v-tab> Suelas </v-tab>
 
       <v-tab-item>
         <v-card flat>
@@ -59,9 +58,8 @@
                         <v-btn dark text @click="editar(pedido)">
                           <v-icon dark> mdi-file-edit </v-icon>Editar
                         </v-btn>
-                       
 
-                         <!--ELIMINAR  -->
+                        <!--ELIMINAR  -->
                         <v-dialog
                           v-model="eliminarDialog"
                           persistent
@@ -75,7 +73,7 @@
                               v-bind="attrs"
                               v-on="on"
                             >
-                               <v-icon dark> mdi-delete </v-icon>Eliminar
+                              <v-icon dark> mdi-delete </v-icon>Eliminar
                             </v-btn>
                           </template>
                           <v-card>
@@ -271,7 +269,11 @@
             <br />
             <v-data-table
               :headers="materialesHeaders"
-              :items="semanaSeleccionada.listaDeCompras.materiales"
+              :items="
+                semanaSeleccionada.listaDeCompras.materiales.concat(
+                  semanaSeleccionada.listaDeCompras.forros
+                )
+              "
               class="elevation-1"
               disable-pagination
               hide-default-footer
@@ -291,70 +293,32 @@
               </template>
             </v-data-table>
             <br />
-            <v-data-table
-              :headers="materialesHeaders"
-              :items="semanaSeleccionada.listaDeCompras.forros"
-              class="elevation-1"
-              disable-pagination
-              hide-default-footer
-            >
-              <template v-slot:top>
-                <v-toolbar dense color="primary" dark flat>
-                  <v-toolbar-title>Forros</v-toolbar-title>
-                </v-toolbar>
-              </template>
 
-              <template v-slot:item.cantidad="{ item }">
-                {{ item.cantidad }} yardas
-              </template>
-
-              <template v-slot:no-data>
-                <v-btn color="primary"> Reset </v-btn>
-              </template>
-            </v-data-table>
-          </v-card-text>
-        </v-card>
-      </v-tab-item>
-      <v-tab-item>
-        <v-card flat>
-          <v-container>
-            <v-row>
-              <v-btn @click="generarSuelasPDF" color="primary">
-                Descargar
-              </v-btn>
-            </v-row>
-          </v-container>
-          <v-card-text v-if="semanaSeleccionada.listaDeCompras != null">
             <v-data-table
-              v-for="suela in semanaSeleccionada.listaDeCompras.suelas"
-              :key="suela.index"
+              :items="semanaSeleccionada.listaDeCompras.suelas"
+              :headers="suelasHeaders"
               class="elevation-1 mb-4"
               disable-pagination
               hide-default-footer
             >
               <template v-slot:top>
                 <v-toolbar dense color="primary" dark flat>
-                  <v-toolbar-title
-                    >{{ suela.nombre }} {{ suela.color }}</v-toolbar-title
-                  >
+                  <v-toolbar-title>Suelas</v-toolbar-title>
                 </v-toolbar>
               </template>
 
-              <template v-slot:body>
-                <tbody>
-                  <tr>
-                    <td>
-                      <span
-                        v-for="detalle in positivos(suela.detalle)"
-                        :key="detalle.nombre"
-                        ><v-chip
-                          >{{ detalle.cantidad }}/{{ detalle.nombre }}</v-chip
-                        >
-                      </span>
-                    </td>
-                    <td>Total: {{ suela.total }}</td>
-                  </tr>
-                </tbody>
+              <template v-slot:item.suela="{ item }">
+                {{ item.nombre }} {{ item.color }}
+              </template>
+              <template v-slot:item.cantidades="{ item }">
+                <span
+                  v-for="detalle in positivos(item.detalle)"
+                  :key="detalle.nombre"
+                  ><v-chip>{{ detalle.cantidad }}/{{ detalle.nombre }}</v-chip>
+                </span>
+              </template>
+              <template v-slot:item.total="{ item }">
+                <b> {{ item.total }}</b>
               </template>
 
               <template v-slot:no-data>
@@ -434,10 +398,32 @@ export default {
         value: "color",
       },
     ],
+    suelasHeaders: [
+      {
+        text: "Suela",
+        align: "start",
+        sortable: false,
+        value: "suela",
+        width: "15%",
+      },
+      {
+        text: "Cantidades",
+        align: "start",
+        sortable: false,
+        value: "cantidades",
+      },
+      {
+        text: "Total",
+        align: "start",
+        sortable: false,
+        value: "total",
+        width: "15%",
+      },
+    ],
   }),
 
   methods: {
-    ...mapActionsPedido(["actualizarOrden", "moverPedido","deletePedido"]),
+    ...mapActionsPedido(["actualizarOrden", "moverPedido", "deletePedido"]),
     ...mapMutationsPedido(["setPedido"]),
     ...mapMutations(["mostrarMsj"]),
 

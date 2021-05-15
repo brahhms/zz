@@ -21,7 +21,6 @@ async function actualizarEnEstilo(adorno) {
     }
   }, credentials.authentication);
 
-
   let estilos = response.data.docs;
 
   estilos.forEach(estilo => {
@@ -34,9 +33,7 @@ async function actualizarEnEstilo(adorno) {
       estilo.adornos[index].cantidadInicial = 0;
       estilo.adornos[index].cantidad = 0;
     }
-
   });
-
 
   const res = await axios.post(`http://localhost:5984/zapp-estilos/_bulk_docs`, {
     "docs": estilos
