@@ -32,8 +32,8 @@
 
               <iframe
                 id="pedidosIframe"
-                width="800"
-                height="500"
+                width="0"
+                height="0"
                 :src="srcPedidos"
                 v-on:load="onLoadPedidosIframe"
               ></iframe>
@@ -224,8 +224,8 @@
             <v-row>
               <iframe
                 id="listaIframe"
-                width="800"
-                height="500"
+                width="0"
+                height="0"
                 :src="srcLista"
                 v-on:load="onLoadListaIframe"
               ></iframe>
