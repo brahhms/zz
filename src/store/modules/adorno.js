@@ -10,6 +10,42 @@ async function getAll() {
   return response;
 }
 
+async function actualizarEnEstilo(adorno) {
+  const response = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
+    "selector": {
+      "adornos": {
+        "$elemMatch": {
+          "_id": adorno._id
+        }
+      }
+    }
+  }, credentials.authentication);
+
+
+  let estilos = response.data.docs;
+
+  estilos.forEach(estilo => {
+    let index = estilo.adornos.findIndex(x => x._id == adorno._id);
+    estilo.adornos[index].nombre = adorno.nombre;
+    estilo.adornos[index].colorSegunMaterial = adorno.colorSegunMaterial;
+    if (estilo.adornos[index].unidad.nombre != adorno.unidad.nombre) {
+      estilo.adornos[index].unidad = adorno.unidad;
+      estilo.adornos[index].unidadConversion = adorno.unidadConversion;
+      estilo.adornos[index].cantidadInicial = 0;
+      estilo.adornos[index].cantidad = 0;
+    }
+
+  });
+
+
+  const res = await axios.post(`http://localhost:5984/zapp-estilos/_bulk_docs`, {
+    "docs": estilos
+  }, credentials.authentication);
+
+
+  return res;
+}
+
 
 export default {
   namespaced: true,
@@ -18,8 +54,8 @@ export default {
       _id: undefined,
       _rev: undefined,
       nombre: null,
-      colorSegunMaterial:false,
-      cantidad: 0, 
+      colorSegunMaterial: false,
+      cantidad: 0,
       cantidadInicial: 0,
       unidad: {
         nombre: "pares",
@@ -98,9 +134,9 @@ export default {
         _id: undefined,
         _rev: undefined,
         nombre: null,
-        cantidad: 0, 
+        cantidad: 0,
         cantidadInicial: 0,
-        colorSegunMaterial:false,
+        colorSegunMaterial: false,
         unidad: {
           nombre: "pares",
           conversiones: [
@@ -143,6 +179,7 @@ export default {
       }, credentials.authentication);
       const response = await getAll();
       commit('setAdornos', response.data.docs);
+      await actualizarEnEstilo(update);
     },
 
     async saveAdorno({

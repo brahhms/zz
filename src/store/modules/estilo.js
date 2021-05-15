@@ -146,6 +146,7 @@ export default {
       commit,
       state
     }) {
+      commit('setCorrelativo', state.nuevoEstilo.correlativo);
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
@@ -178,6 +179,7 @@ export default {
       commit,
       state
     }) {
+      commit('setCorrelativo', state.nuevoEstilo.correlativo);
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);

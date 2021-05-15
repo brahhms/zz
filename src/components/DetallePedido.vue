@@ -1,7 +1,7 @@
 <template>
   <tr>
     <td>
-      <v-edit-dialog :key="detalle.estilo">
+      <v-edit-dialog :key="detalle.estilo.codigo">
         <span v-if="detalle.estilo != null"
           >{{ detalle.estilo.linea.nombre
           }}{{ detalle.estilo.correlativo }}</span
@@ -155,7 +155,7 @@
 
     <!--horma-->
     <td>
-      <v-edit-dialog :key="detalle.horma">
+      <v-edit-dialog :key="detalle.horma.nombre">
         <span v-if="detalle.horma != null">{{ detalle.horma.nombre }}</span>
         <span v-else>[horma]</span>
         <template v-slot:input>
