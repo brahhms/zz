@@ -31,6 +31,12 @@
                 height="0"
                 :src="srcPedidos"
               ></iframe>
+               <iframe
+                id="listaIframe"
+                width="600"
+                height="600"
+                :src="srcLista"
+              ></iframe>
             </v-row>
           </v-container>
           <v-card-text>
@@ -352,6 +358,7 @@ export default {
   },
   data: () => ({
     srcPedidos: `http://localhost:8080/#/Imprimir`,
+    srcLista: `http://localhost:8080/#/ImprimirLista`,
     moverDialog: false,
     eliminarDialog: false,
     headers: [
@@ -382,7 +389,7 @@ export default {
         align: "start",
         sortable: false,
         value: "cantidad",
-        width: "10%",
+        width: "20%",
       },
       {
         text: "Nombre",
@@ -726,7 +733,7 @@ export default {
       return lista.filter((item) => item.cantidad > 0);
     },
     imprimirPedidos() {
-      //window.frames['pedidosIframe'].imprimir();
+      
       document.getElementById("pedidosIframe").contentWindow.print();
     },
   },
@@ -735,6 +742,7 @@ export default {
   },
   created() {
     this.srcPedidos = `http://localhost:8080/#/Imprimir?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`;
+      this.srcLista = `http://localhost:8080/#/ImprimirLista?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`;
   },
 };
 </script>

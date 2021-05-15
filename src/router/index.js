@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
-import Pedidos from '../views/Pedidos.vue'
+
 import NuevoPedido from '../views/NuevoPedido.vue'
 import Forro from '../views/mantenimiento/Forro.vue'
 import Material from '../views/mantenimiento/Material.vue'
@@ -17,6 +17,7 @@ import Plantilla from "../views/mantenimiento/Plantilla.vue";
 
 import Imagenes from '../components/Imagenes.vue';
 import Imprimir from "../components/Imprimir.vue";
+import ImprimirLista from "../components/ImprimirLista.vue";
 
 Vue.use(VueRouter)
 
@@ -31,11 +32,7 @@ const routes = [
     name: 'Plantilla',
     component: Plantilla
   },
-  {
-    path: '/pedidos',
-    name: 'Pedidos',
-    component: Pedidos
-  },
+
   {
     path: '/nuevoPedido',
     name: 'NuevoPedido',
@@ -100,6 +97,11 @@ const routes = [
     path: '/imprimir',
     name: 'Imprimir',
     component: Imprimir
+  },
+  {
+    path: '/imprimirLista',
+    name: 'ImprimirLista',
+    component: ImprimirLista
   }
 
 ]

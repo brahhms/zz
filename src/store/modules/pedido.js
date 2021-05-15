@@ -186,8 +186,8 @@ function generateSemana(semana) {
       if (!existeForro) {
         let rendimientoForro = (detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
         let nuevoForro = {
-          _id: detalle.detalleForro.forro._id + detalle.detalleForro.color,
-          nombre: "forro "+detalle.detalleForro.forro.nombre,
+          _id: detalle.detalleForro.forro._id,
+          nombre: "forro " + detalle.detalleForro.forro.nombre,
           color: detalle.detalleForro.color,
           cantidad: Number(rendimientoForro.toFixed(3))
         };
@@ -274,12 +274,34 @@ function generateSemana(semana) {
         capeyada: detalle.estilo.capeyada,
       });
 
-      lista.tacones.push(detalle.detalleTacon);
+      if (detalle.detalleTacon.material != null) {
+        lista.tacones.push(detalle.detalleTacon);
+      }
+
 
       pedido.total += detalle.subtotal;
 
     });
 
+  });
+
+  lista.adornos = lista.adornos.sort((a, b) => {
+    if (a.nombre > b.nombre)
+      return 1;
+
+    if (a.nombre < b.nombre)
+      return -1;
+
+    return 0;
+  });
+  lista.avillos = lista.avillos.sort((a, b) => {
+    if (a.nombre > b.nombre)
+      return 1;
+
+    if (a.nombre < b.nombre)
+      return -1;
+
+    return 0;
   });
 
   semana.listaDeCompras = lista;

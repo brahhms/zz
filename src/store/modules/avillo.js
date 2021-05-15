@@ -43,6 +43,39 @@ async function actualizarEnEstilo(avillo) {
   return res;
 }
 
+async function actualizarEnPlantilla(avillo) {
+  const response = await axios.post(`http://localhost:5984/zapp-plantillas/_find`, {
+    "selector": {
+      "avillos": {
+        "$elemMatch": {
+          "_id": avillo._id
+        }
+      }
+    }
+  }, credentials.authentication);
+
+  let plantillas = response.data.docs;
+
+  plantillas.forEach(plantilla => {
+    let index = plantilla.avillos.findIndex(x => x._id == avillo._id);
+    plantilla.avillos[index].nombre = avillo.nombre;
+    plantilla.avillos[index].colorSegunMaterial = avillo.colorSegunMaterial;
+    if (plantilla.avillos[index].unidad.nombre != avillo.unidad.nombre) {
+      plantilla.avillos[index].unidad = avillo.unidad;
+      plantilla.avillos[index].unidadConversion = avillo.unidadConversion;
+      plantilla.avillos[index].cantidadInicial = 0;
+      plantilla.avillos[index].cantidad = 0;
+    }
+  });
+
+  const res = await axios.post(`http://localhost:5984/zapp-plantillas/_bulk_docs`, {
+    "docs": plantillas
+  }, credentials.authentication);
+
+
+  return res;
+}
+
 
 export default {
   namespaced: true,
@@ -207,6 +240,7 @@ export default {
       const response = await getAll();
       commit('setAvillos', response.data.docs);
       await actualizarEnEstilo(update);
+      await actualizarEnPlantilla(update);
     },
 
     async saveAvillo({
