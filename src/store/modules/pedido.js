@@ -303,6 +303,15 @@ function generateSemana(semana) {
 
     return 0;
   });
+  lista.materiales = lista.materiales.sort((a, b) => {
+    if (a.nombre > b.nombre)
+      return 1;
+
+    if (a.nombre < b.nombre)
+      return -1;
+
+    return 0;
+  });
 
   semana.listaDeCompras = lista;
 

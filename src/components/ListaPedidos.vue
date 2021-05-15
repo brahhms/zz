@@ -31,12 +31,6 @@
                 height="0"
                 :src="srcPedidos"
               ></iframe>
-               <iframe
-                id="listaIframe"
-                width="600"
-                height="600"
-                :src="srcLista"
-              ></iframe>
             </v-row>
           </v-container>
           <v-card-text>
@@ -222,9 +216,22 @@
         <v-card flat>
           <v-container>
             <v-row>
-              <v-btn @click="generarListaPDF" color="primary">
-                Descargar
-              </v-btn>
+              <v-col cols="2"
+                ><v-btn @click="generarListaPDF" color="primary">
+                  Descargar pdf
+                </v-btn>
+              </v-col>
+              <v-col cols="2">
+                <v-btn @click="imprimirLista()" color="primary">
+                  Imprimir
+                </v-btn>
+              </v-col>
+              <iframe
+                id="listaIframe"
+                width="0"
+                height="0"
+                :src="srcLista"
+              ></iframe>
             </v-row>
           </v-container>
           <v-card-text v-if="semanaSeleccionada.listaDeCompras != null">
@@ -688,53 +695,15 @@ export default {
         `lista S${this.semanaSeleccionada.semana}A${this.semanaSeleccionada.ano}.pdf`
       );
     },
-    generarSuelasPDF() {
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "in",
-        format: "legal",
-      });
 
-      doc
-        .setFontSize(12)
-        .text(
-          "Semana " +
-            this.semanaSeleccionada.semana +
-            " " +
-            this.semanaSeleccionada.ano,
-          0.5,
-          0.8
-        );
-
-      this.semanaSeleccionada.listaDeCompras.suelas.forEach((suela) => {
-        let talls = suela.detalle
-          .filter((s) => s.cantidad > 0)
-          .map((suela) => {
-            return " " + suela.cantidad + "/" + suela.nombre;
-          })
-          .join();
-
-        let items = [[talls, suela.total]];
-
-        let head = [[suela.nombre + " " + suela.color, "Total"]];
-        doc.autoTable({
-          head,
-          body: items,
-          margin: { top: 1 },
-        });
-      });
-
-      // Creating footer and saving file
-      doc.save(
-        `suelas S${this.semanaSeleccionada.semana}A${this.semanaSeleccionada.ano}.pdf`
-      );
-    },
     positivos(lista) {
       return lista.filter((item) => item.cantidad > 0);
     },
     imprimirPedidos() {
-      
       document.getElementById("pedidosIframe").contentWindow.print();
+    },
+    imprimirLista() {
+      document.getElementById("listaIframe").contentWindow.print();
     },
   },
   computed: {
@@ -742,7 +711,7 @@ export default {
   },
   created() {
     this.srcPedidos = `http://localhost:8080/#/Imprimir?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`;
-      this.srcLista = `http://localhost:8080/#/ImprimirLista?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`;
+    this.srcLista = `http://localhost:8080/#/ImprimirLista?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`;
   },
 };
 </script>

@@ -68,7 +68,7 @@
             indeterminate
             color="cyan"
           ></v-progress-linear>
-          <lista-pedidos v-else></lista-pedidos>
+          <lista-pedidos :key="semanaSeleccionada._id" v-else></lista-pedidos>
         </v-card>
       </v-dialog>
     </v-col>
