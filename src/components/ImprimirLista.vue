@@ -1,7 +1,10 @@
 <template>
   <v-container>
-    <div class="contenedor" >
-      <div class="columna" v-if="semanaSeleccionada.listaDeCompras!=undefined">
+    <div class="contenedor">
+      <div
+        class="columna"
+        v-if="semanaSeleccionada.listaDeCompras != undefined"
+      >
         Semana {{ semana }}, {{ ano }}<br />
 
         <v-simple-table dense>
@@ -101,7 +104,7 @@
                     >{{ detalle.cantidad }}/{{ detalle.nombre }},
                   </span>
                 </td>
-                <td>{{suela.total}}</td>
+                <td>{{ suela.total }}</td>
               </tr>
             </tbody>
           </template>
@@ -115,6 +118,7 @@
 
 
 <script>
+
 import { createNamespacedHelpers, mapMutations } from "vuex";
 const {
   mapGetters: mapGettersPedido,
@@ -140,6 +144,7 @@ export default {
       this.setSemanaPedido(this.semana);
 
       await this.getSemana();
+
     },
   },
   computed: {

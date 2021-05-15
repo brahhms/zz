@@ -15,21 +15,27 @@
           <v-container>
             <v-row>
               <v-col cols="2"
-                ><v-btn @click="generarPedidosPDF" color="primary">
+                ><v-btn small @click="generarPedidosPDF" color="primary">
                   Descargar pdf
                 </v-btn>
               </v-col>
               <v-col cols="2">
-                <v-btn @click="imprimirPedidos()" color="primary">
+                <v-btn
+                  :disabled="!isPedidosReady"
+                  small
+                  @click="imprimirPedidos()"
+                  color="primary"
+                >
                   Imprimir
                 </v-btn>
               </v-col>
 
               <iframe
                 id="pedidosIframe"
-                width="0"
-                height="0"
+                width="800"
+                height="500"
                 :src="srcPedidos"
+                v-on:load="onLoadPedidosIframe"
               ></iframe>
             </v-row>
           </v-container>
@@ -216,22 +222,28 @@
         <v-card flat>
           <v-container>
             <v-row>
+              <iframe
+                id="listaIframe"
+                width="800"
+                height="500"
+                :src="srcLista"
+                v-on:load="onLoadListaIframe"
+              ></iframe>
               <v-col cols="2"
-                ><v-btn @click="generarListaPDF" color="primary">
+                ><v-btn small @click="generarListaPDF" color="primary">
                   Descargar pdf
                 </v-btn>
               </v-col>
               <v-col cols="2">
-                <v-btn @click="imprimirLista()" color="primary">
+                <v-btn
+                  small
+                  :disabled="!isListaReady"
+                  @click="imprimirLista()"
+                  color="primary"
+                >
                   Imprimir
                 </v-btn>
               </v-col>
-              <iframe
-                id="listaIframe"
-                width="0"
-                height="0"
-                :src="srcLista"
-              ></iframe>
             </v-row>
           </v-container>
           <v-card-text v-if="semanaSeleccionada.listaDeCompras != null">
@@ -364,6 +376,8 @@ export default {
     draggable,
   },
   data: () => ({
+    isListaReady: false,
+    isPedidosReady: false,
     srcPedidos: `http://localhost:8080/#/Imprimir`,
     srcLista: `http://localhost:8080/#/ImprimirLista`,
     moverDialog: false,
@@ -440,6 +454,13 @@ export default {
     ...mapActionsPedido(["actualizarOrden", "moverPedido", "deletePedido"]),
     ...mapMutationsPedido(["setPedido"]),
     ...mapMutations(["mostrarMsj"]),
+
+    onLoadListaIframe() {
+      this.isListaReady = true;
+    },
+    onLoadPedidosIframe() {
+      this.isPedidosReady = true;
+    },
 
     editar(pedido) {
       let p = Object.assign({}, pedido);
@@ -702,6 +723,7 @@ export default {
     imprimirPedidos() {
       document.getElementById("pedidosIframe").contentWindow.print();
     },
+
     imprimirLista() {
       document.getElementById("listaIframe").contentWindow.print();
     },

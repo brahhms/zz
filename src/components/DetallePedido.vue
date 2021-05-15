@@ -16,13 +16,13 @@
               :rules="notNull"
               label="codigo"
               :items="estilos"
-              clearable
               dense
               filled
               rounded
               return-object
               @change="changeEstilo()"
             >
+            
               <template v-slot:selection="data">
                 {{ data.item.linea.nombre }}{{ data.item.correlativo }}
               </template>
@@ -85,7 +85,7 @@
 
     <td>
       <v-edit-dialog v-if="isTacon">
-        <span v-if="detalle.detalleTacon.material != null">{{
+        <span v-if="detalle.detalleTacon.material != null && detalle.detalleTacon.material !=''">{{
           detalle.detalleTacon.material.nombre
         }}</span>
         <span v-else>[material] : </span>

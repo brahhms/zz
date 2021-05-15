@@ -145,7 +145,15 @@ export default {
     }
   },
   getters: {
-    tallas: state => state.tallas,
+    tallas: state => state.tallas.sort((a, b) => {
+      if (Number(a.nombre) > Number(b.nombre))
+        return 1;
+  
+      if (Number(a.nombre) < Number(b.nombre))
+        return -1;
+  
+      return 0;
+    }),
 
     nuevaTalla: state => state.nuevaTalla
   }

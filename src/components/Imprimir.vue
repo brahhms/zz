@@ -2,20 +2,20 @@
   <v-container>
     <div class="contenedor">
       <div class="columna">
-        Semana {{semana}}, {{ano}}
+        Semana {{ semana }}, {{ ano }}
         <div class="pedido" v-for="pedido in resumenPedidos" :key="pedido._id">
           <v-row>
-            <v-col cols="12" style="font-size: 10px; font-weight: bold">
-              {{ pedido.cliente }}
-            </v-col>
+         
             <v-col>
-              <v-simple-table>
+              <v-simple-table dense>
                 <template v-slot:default>
                   <thead>
-                    <td style="font-weight: bold">Codigo</td>
-                    <td style="font-weight: bold">Material</td>
+                    <td style="font-weight: bold">{{ pedido.cliente }}</td>
                     <td style="font-weight: bold">Tacon</td>
-                    <td style="font-weight: bold">Tallas</td>
+                    <td v-for="talla in tallas" style="font-weight: bold">
+                      {{ talla.nombre }}
+                    </td>
+
                     <td style="font-weight: bold">Horma</td>
                     <td style="font-weight: bold">Forro</td>
                     <td style="font-weight: bold">Suela</td>
@@ -27,23 +27,12 @@
                       v-for="detalle in pedido.detalle"
                       :key="detalle.index"
                     >
-                      <td>{{ detalle.estilo }}</td>
-                      <td>{{ detalle.detalleMaterial }}</td>
-
-                      <td>{{ detalle.detalleTacon }}</td>
-
-                      <td>{{ detalle.detalleTallas }}</td>
-                      <td>{{ detalle.horma }}</td>
-                      <td>{{ detalle.detalleForro }}</td>
-
-                      <td>{{ detalle.detalleSuela }}</td>
-
-                      <td style="font-size: 14px; font-weight: bold">
-                        {{ detalle.subtotal }}
+                      <td v-for="item in detalle" :key="item.index">
+                        {{ item }}
                       </td>
                     </tr>
-                    <tr class="fila" style="font-size: 14px; font-weight: bold">
-                      <td colspan="6"></td>
+                    <tr class="fila" style="font-weight: bold">
+                      <td colspan="12"></td>
                       <td style="font-weight: bold">Total:</td>
                       <td>{{ pedido.total }}</td>
                     </tr>
@@ -69,6 +58,10 @@ const {
   mapActions: mapActionsPedido,
   mapMutations: mapMutationsPedido,
 } = createNamespacedHelpers("pedido");
+const {
+  mapActions: mapActionsTalla,
+  mapGetters: mapGettersTalla,
+} = createNamespacedHelpers("talla");
 export default {
   data() {
     return {
@@ -81,46 +74,61 @@ export default {
     ...mapMutations(["ocultarBarra"]),
     ...mapMutationsPedido(["setSemanaPedido", "setAnoPedido"]),
     ...mapActionsPedido(["getSemana"]),
+    ...mapActionsTalla(["getTallas"]),
     resumirPedidos() {
-      this.resumenPedidos = this.semanaSeleccionada.pedidos.map((pedido) => {
-        return {
-          _id: pedido._id,
-          semana: pedido.semana,
-          ano: pedido.ano,
-          total: pedido.total,
-          cliente: pedido.cliente.nombre,
-          detalle: pedido.detalle.map((lineaDeta) => {
-            lineaDeta.detalleTacon.material=lineaDeta.detalleTacon.material || {nombre:""};
-            return {
-              estilo: lineaDeta.estilo.codigo,
-              detalleMaterial:
-                lineaDeta.detalleMaterial.material.nombre +
-                " " +
-                lineaDeta.detalleMaterial.color,
-              detalleTacon:
+      if (this.semanaSeleccionada.pedidos != undefined) {
+        this.resumenPedidos = this.semanaSeleccionada.pedidos.map((pedido) => {
+          return {
+            _id: pedido._id,
+            semana: pedido.semana,
+            ano: pedido.ano,
+            total: pedido.total,
+            cliente: pedido.cliente.nombre,
+            detalle: pedido.detalle.map((lineaDeta) => {
+              lineaDeta.detalleTacon.material = lineaDeta.detalleTacon
+                .material || { nombre: "" };
+              lineaDeta.detalleTacon.color = lineaDeta.detalleTacon.color || "";
+              let d = [];
+              d.push(
+                lineaDeta.estilo.codigo +
+                  " " +
+                  lineaDeta.detalleMaterial.material.nombre +
+                  " " +
+                  lineaDeta.detalleMaterial.color
+              );
+
+              d.push(
                 lineaDeta.detalleTacon.material.nombre +
-                " " +
-                lineaDeta.detalleTacon.color,
-              detalleTallas: lineaDeta.detalleTallas
-                .filter((t) => t.cantidad > 0)
-                .map((talla) => {
-                  return "  " + talla.cantidad + "/" + talla.talla.nombre;
-                })
-                .join(),
-              horma: lineaDeta.horma.nombre,
-              detalleForro:
+                  " " +
+                  lineaDeta.detalleTacon.color
+              );
+
+              d = d.concat(
+                lineaDeta.detalleTallas
+                  
+                  .map((talla) => {
+                    return talla.cantidad;
+                  })
+              );
+              d.push(lineaDeta.horma.nombre);
+              d.push(
                 lineaDeta.detalleForro.forro.nombre +
-                " " +
-                lineaDeta.detalleForro.color,
-              detalleSuela:
+                  " " +
+                  lineaDeta.detalleForro.color
+              );
+
+              d.push(
                 lineaDeta.detalleSuela.suela.nombre +
-                " " +
-                lineaDeta.detalleSuela.color,
-              subtotal: lineaDeta.subtotal,
-            };
-          }),
-        };
-      });
+                  " " +
+                  lineaDeta.detalleSuela.color
+              );
+              d.push(lineaDeta.subtotal);
+
+              return d;
+            }),
+          };
+        });
+      }else return []
     },
     async loadData() {
       this.ano = Number(this.$route.query.ano);
@@ -129,11 +137,13 @@ export default {
       this.setSemanaPedido(this.semana);
 
       await this.getSemana();
+      await this.getTallas();
       this.resumirPedidos();
     },
   },
   computed: {
     ...mapGettersPedido(["semanaSeleccionada"]),
+    ...mapGettersTalla(["tallas"]),
   },
 
   created() {},
@@ -154,6 +164,13 @@ export default {
     display: none;
   }
 }
+
+table,
+th,
+td {
+  border: 1px solid black;
+}
+
 td {
   font-size: 9px !important;
   padding: 1px !important;
