@@ -509,7 +509,7 @@ export default {
     },
     generarPedidosPDF() {
       const doc = new jsPDF({
-        orientation: "portrait",
+        orientation: "landscape",
         unit: "in",
         format: "legal",
       });
@@ -594,7 +594,7 @@ export default {
     },
     generarListaPDF() {
       const doc = new jsPDF({
-        orientation: "portrait",
+        orientation: "landscape",
         unit: "in",
         format: "legal",
       });
@@ -610,86 +610,79 @@ export default {
           0.8
         );
 
-      //ADORNOS
+      //ADORNOS AVILLOS
       let head = [
         [
           {
             content: "Adornos",
-            colSpan: 3,
+            colSpan: 2,
             styles: { halign: "left" },
           },
-        ],
-        [
-          { title: "Cantidad", dataKey: "cantidad" },
-          { title: "Unidad", dataKey: "material" },
-          { title: "Nombre", dataKey: "nombre" },
-        ],
-      ];
-      let items = this.semanaSeleccionada.listaDeCompras.adornos.map((item) => {
-        return [item.cantidad, item.unidad.nombre, item.nombre];
-      });
-
-      doc.autoTable({
-        head,
-        body: items,
-        margin: { top: 1 },
-      });
-      //adornos
-      //AVILLOS
-      head = [
-        [
           {
             content: "Avillos",
-            colSpan: 3,
+            colSpan: 2,
             styles: { halign: "left" },
           },
         ],
         [
           { title: "Cantidad", dataKey: "cantidad" },
-          { title: "Unidad", dataKey: "material" },
+          { title: "Nombre", dataKey: "nombre" },
+          { title: "Cantidad", dataKey: "cantidad" },
           { title: "Nombre", dataKey: "nombre" },
         ],
       ];
-      items = this.semanaSeleccionada.listaDeCompras.avillos.map((item) => {
-        return [item.cantidad, item.unidad.nombre, item.nombre];
-      });
+
+      let size = 0;
+      let items = [];
+      let adornos = [...this.semanaSeleccionada.listaDeCompras.adornos];
+      let avillos = [...this.semanaSeleccionada.listaDeCompras.avillos];
+      if (adornos.length > avillos.length) {
+        size = adornos.length;
+      } else {
+        size = avillos.length;
+      }
+
+      for (let index = 0; index < size; index++) {
+        let adorno = adornos.pop();
+        if (adorno == undefined || adorno == null) {
+          adorno = ["", ""];
+        } else {
+          adorno = [
+            adorno.cantidad + " " + adorno.unidad.nombre,
+            adorno.nombre,
+          ];
+        }
+
+        let avillo = avillos.pop();
+        if (avillo == undefined || avillo == null) {
+          avillos = ["", ""];
+        } else {
+          avillo = [
+            avillo.cantidad + " " + avillo.unidad.nombre,
+            avillo.nombre,
+          ];
+        }
+
+        items.push([adorno[0], adorno[1], avillo[0], avillo[1]]);
+      }
 
       doc.autoTable({
         head,
         body: items,
         margin: { top: 1 },
       });
-      //avillos
-      //MATERIALES
+      //adornos avillos
+
+      //MATERIALES FORROS SUELAS
       head = [
         [
           {
             content: "Materiales",
-            colSpan: 3,
+            colSpan: 2,
             styles: { halign: "left" },
           },
-        ],
-        [
-          { title: "Cantidad", dataKey: "cantidad" },
-          { title: "Nombre", dataKey: "nombre" },
-          { title: "Color", dataKey: "color" },
-        ],
-      ];
-      items = this.semanaSeleccionada.listaDeCompras.materiales.map((item) => {
-        return [item.cantidad + " yardas", item.nombre, item.color];
-      });
-
-      doc.autoTable({
-        head,
-        body: items,
-        margin: { top: 1 },
-      });
-      //materiales
-      //FORROS
-      head = [
-        [
           {
-            content: "Forros",
+            content: "Suelas",
             colSpan: 3,
             styles: { halign: "left" },
           },
@@ -697,19 +690,56 @@ export default {
         [
           { title: "Cantidad", dataKey: "cantidad" },
           { title: "Nombre", dataKey: "nombre" },
-          { title: "Color", dataKey: "color" },
+          { title: "Suela", dataKey: "suela" },
+          { title: "Cantidades", dataKey: "cantidades" },
+           { title: "Total", dataKey: "total" },
         ],
       ];
-      items = this.semanaSeleccionada.listaDeCompras.forros.map((item) => {
-        return [item.cantidad + " yardas", item.nombre, item.color];
-      });
+ 
+         size = 0;
+       items = [];
+      let materiales = [...this.semanaSeleccionada.listaDeCompras.materiales];
+      materiales= materiales.concat(this.semanaSeleccionada.listaDeCompras.forros);
+      let suelas= [...this.semanaSeleccionada.listaDeCompras.suelas];
+      if (materiales.length > suelas.length) {
+        size = materiales.length;
+      } else {
+        size = suelas.length;
+      }
+
+      for (let index = 0; index < size; index++) {
+        let material = materiales.pop();
+        if (material == undefined || material == null) {
+          material = ["", ""];
+        } else {
+          material = [
+            material.cantidad + " yardas",
+            material.nombre+" "+material.color,
+          ];
+        }
+
+        let suela = suelas.pop();
+         if (suela == undefined || suela == null) {
+          suela = ["", "",""];
+        } else {
+          suela = [
+            suela.nombre+" "+suela.color,
+            suela.detalle.filter(s=>s.cantidad>0).map(m=>{return " "+m.cantidad+"/"+m.nombre}).join(),
+            suela.total
+          ];
+        }
+
+        items.push([material[0], material[1], suela[0], suela[1],suela[2]]);
+      }
+
 
       doc.autoTable({
         head,
         body: items,
         margin: { top: 1 },
       });
-      //forros
+      //materiales forros
+  
 
       //saving file
       doc.save(

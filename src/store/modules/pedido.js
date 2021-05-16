@@ -127,21 +127,33 @@ function generateSemana(semana) {
           let existe = false;
           lista.avillos.forEach((avilloEnLista) => {
             if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre.includes(detalle.detalleMaterial.color) && avilloEnLista.nombre.includes(detalle.detalleMaterial.material.nombre))) {
+              avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
+              //excep
+              if (avillo.nombre.includes("durasno") || avillo.nombre.includes("durazno")) {
+                avilloEnLista.colorSegunMaterial = true;
+                avilloEnLista.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
+              }
               existe = true;
             }
+
           });
 
           if (!existe) {
+            if (avillo.nombre.includes("durasno") || avillo.nombre.includes("durazno")) {
+              avillo.colorSegunMaterial = true;
+            }
             let nuevoAvillo = Object.assign({}, avillo);
             nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
             nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
+
             if (avillo.colorSegunMaterial) {
               nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
             }
             lista.avillos.push(nuevoAvillo);
           }
+
 
 
 
@@ -273,7 +285,7 @@ function generateSemana(semana) {
       });
 
       if (detalle.detalleTacon.material != null) {
-        detalle.detalleTacon.cantidad=0.1;
+        detalle.detalleTacon.cantidad = 0.1;
         lista.tacones.push(detalle.detalleTacon);
       }
 
@@ -799,10 +811,10 @@ export default {
     tallas: state => state.tallas.sort((a, b) => {
       if (Number(a.nombre) > Number(b.nombre))
         return 1;
-  
+
       if (Number(a.nombre) < Number(b.nombre))
         return -1;
-  
+
       return 0;
     }),
     forros: state => state.forros,
