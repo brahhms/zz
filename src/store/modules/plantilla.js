@@ -10,7 +10,65 @@ async function getAll() {
   return response;
 }
 
+async function actualizarEnLinea(plantilla, del) {
+  const response = await axios.post(`http://localhost:5984/zapp-lineas/_find`, {
+    "selector": {
+      "$or": [
+        { "plantilla._id": plantilla._id },
+        { "plantilla.nombre": plantilla.nombre }
+      ]
+    }
+  }, credentials.authentication);
 
+  let lineas = response.data.docs;
+
+  lineas.forEach(linea => {
+    linea.plantilla = plantilla;
+
+    if (del) {
+      linea.plantilla = null;
+    }
+
+
+  });
+
+  const res = await axios.post(`http://localhost:5984/zapp-lineas/_bulk_docs`, {
+    "docs": lineas
+  }, credentials.authentication);
+
+
+  return res;
+}
+
+async function actualizarEnEstilo(plantilla, del) {
+  const response = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
+    "selector": {
+      "$or": [
+        { "linea.plantilla._id": plantilla._id },
+        { "linea.plantilla.nombre": plantilla.nombre }
+      ]
+    }
+  }, credentials.authentication);
+
+  let estilos = response.data.docs;
+
+  estilos.forEach(estilo => {
+    estilo.linea.plantilla = plantilla;
+
+    if (del) {
+      estilo.linea.plantilla = null;
+    }
+
+
+  });
+
+  const res = await axios.post(`http://localhost:5984/zapp-estilos/_bulk_docs`, {
+    "docs": estilos
+  }, credentials.authentication);
+
+
+  return res;
+}
 
 export default {
   namespaced: true,
@@ -45,17 +103,17 @@ export default {
     ,
     setAvillos(state, avillos) {
 
-      if (state.nuevaPlantilla.avillos.length==0) {
-        state.nuevaPlantilla.avillos=avillos;
-      }else{
+      if (state.nuevaPlantilla.avillos.length == 0) {
+        state.nuevaPlantilla.avillos = avillos;
+      } else {
         avillos.forEach(avillo => {
           console.log(state.nuevaPlantilla.avillos.filter(a => a.nombre != avillo.nombre));
         });
       }
 
-     // avillos.filter(avillo=> avillo.nombre!= );
+      // avillos.filter(avillo=> avillo.nombre!= );
 
-     
+
 
 
     }
@@ -113,6 +171,8 @@ export default {
       if (res.data.ok) {
         const response = await getAll();
         commit('setPlantillas', response.data.docs);
+        await actualizarEnLinea(state.nuevaPlantilla, false);
+        await actualizarEnEstilo(state.nuevaPlantilla, false);
       } else {
         console.log('errorUPDATE');
       }

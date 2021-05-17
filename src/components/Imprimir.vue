@@ -5,21 +5,22 @@
         Semana {{ semana }}, {{ ano }}
         <div class="pedido" v-for="pedido in resumenPedidos" :key="pedido._id">
           <v-row>
-         
             <v-col>
-              <v-simple-table dense>
-                <template v-slot:default>
+              <table>
+               
                   <thead>
-                    <td style="font-weight: bold">{{ pedido.cliente }}</td>
-                    <td style="font-weight: bold">Tacon</td>
-                    <td v-for="talla in tallas" style="font-weight: bold">
-                      {{ talla.nombre }}
-                    </td>
+                    <tr>
+                      <th>{{ pedido.cliente }}</th>
+                      <th>Tacon</th>
+                      <th v-for="talla in tallas">
+                        {{ talla.nombre }}
+                      </th>
 
-                    <td style="font-weight: bold">Horma</td>
-                    <td style="font-weight: bold">Forro</td>
-                    <td style="font-weight: bold">Suela</td>
-                    <td style="font-weight: bold">Subtotal</td>
+                      <th>Horma</th>
+                      <th>Forro</th>
+                      <th>Suela</th>
+                      <th>Subtotal</th>
+                    </tr>
                   </thead>
                   <tbody>
                     <tr
@@ -33,12 +34,11 @@
                     </tr>
                     <tr class="fila" style="font-weight: bold">
                       <td colspan="12"></td>
-                      <td style="font-weight: bold">Total:</td>
-                      <td>{{ pedido.total }}</td>
+                      <td style="font-weight: bold; color: black">Total:</td>
+                      <td style="color: blue">{{ pedido.total }}</td>
                     </tr>
                   </tbody>
-                </template>
-              </v-simple-table>
+                </table>
             </v-col>
           </v-row>
 
@@ -86,7 +86,7 @@ export default {
             cliente: pedido.cliente.nombre,
             detalle: pedido.detalle.map((lineaDeta) => {
               lineaDeta.detalleTacon.material = lineaDeta.detalleTacon
-                .material || { nombre: "" };
+                .material || { nombre: "-" };
               lineaDeta.detalleTacon.color = lineaDeta.detalleTacon.color || "";
               let d = [];
               d.push(
@@ -104,11 +104,13 @@ export default {
               );
 
               d = d.concat(
-                lineaDeta.detalleTallas
-                  
-                  .map((talla) => {
+                lineaDeta.detalleTallas.map((talla) => {
+                  if (talla.cantidad > 0) {
                     return talla.cantidad;
-                  })
+                  } else {
+                    return "-";
+                  }
+                })
               );
               d.push(lineaDeta.horma.nombre);
               d.push(
@@ -128,7 +130,7 @@ export default {
             }),
           };
         });
-      }else return []
+      } else return [];
     },
     async loadData() {
       this.ano = Number(this.$route.query.ano);
@@ -158,23 +160,48 @@ export default {
 @media print {
   @page {
     margin: 0 !important;
-    size: 8.46in 12.49in landscape !important;
+    size: 8.5in 14in landscape !important;
   }
   button {
     display: none;
   }
 }
 
-table,
-th,
-td {
+
+table, td, th {
   border: 1px solid black;
 }
 
-td {
-  font-size: 9px !important;
-  padding: 1px !important;
+table {
+
+  border-collapse: collapse;
 }
+
+th,
+td {
+  padding: 0 !important;
+  color: blue;
+}
+
+
+
+th {
+  color: black;
+  font-weight: bold;
+}
+
+td,
+th,
+tr {
+  text-align: center !important;
+  font-size:12px !important;
+}
+
+tr {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .contenedor {
   -webkit-column-count: 2; /* Chrome, Safari, Opera */
   -moz-column-count: 2; /* Firefox */

@@ -270,6 +270,11 @@ function generateSemana(semana) {
             let nuevoAvillo = Object.assign({}, avillo);
             nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
             nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
+
+            if (avillo.colorSegunMaterial) {
+              nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
+            }
+
             lista.avillos.push(nuevoAvillo);
           }
         }
