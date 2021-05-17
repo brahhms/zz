@@ -258,13 +258,21 @@ function generateSemana(semana) {
       let existePlantilla = false;
 
       detalle.estilo.linea.plantilla.avillos.forEach(avillo => {
-        let avilloEnLista = lista.avillos.find(x => x._id == avillo._id);
+  
+        
         if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity") {
-          if (avilloEnLista != undefined) {
-            avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
-            avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
-            existePlantilla = true;
-          }
+          let existePlantilla = false;
+          lista.avillos.forEach(avilloEnLista => {
+            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre.includes(detalle.detalleMaterial.color) && avilloEnLista.nombre.includes(detalle.detalleMaterial.material.nombre))) {
+            
+              avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
+              avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
+              avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
+              existePlantilla = true;
+            }
+          });
+          
+
 
           if (!existePlantilla) {
             let nuevoAvillo = Object.assign({}, avillo);
@@ -276,6 +284,7 @@ function generateSemana(semana) {
             }
 
             lista.avillos.push(nuevoAvillo);
+
           }
         }
         existePlantilla = false;
