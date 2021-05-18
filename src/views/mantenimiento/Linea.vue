@@ -46,6 +46,14 @@
                     </v-col>
                   </v-row>
                   <v-row>
+                       <v-col cols="12">
+                      <v-checkbox
+                        label="Tacon?"
+                        v-model="nueva.tacon"
+                      ></v-checkbox>
+                    </v-col>
+                  </v-row>
+                  <v-row>
                     <v-col>
                       <v-data-table
                         :headers="avillosHeaders"

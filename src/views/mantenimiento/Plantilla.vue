@@ -255,6 +255,9 @@ export default {
     ]),
     ...mapMutationsPlantilla(["setNuevaPlantilla"]),
     ...mapMutations(["mostrarMsj"]),
+
+
+
     async initialize() {
       await this.getPlantillas();
       await this.iniciarPlantilla();

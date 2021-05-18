@@ -208,9 +208,10 @@ export default {
       commit,
       state
     }) {
-      await axios.delete(`${url}${state.nuevoAdorno._id}`, {
+      let del =state.nuevoAdorno;
+      await axios.delete(`${url}${del._id}`, {
         params: {
-          "rev": state.nuevoAdorno._rev
+          "rev": del._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
@@ -218,7 +219,7 @@ export default {
 
       const response = await getAll();
       commit('setAdornos', response.data.docs);
-      await actualizarEnEstilo(update,true);
+      await actualizarEnEstilo(del,true);
     }
   },
   getters: {

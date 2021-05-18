@@ -70,6 +70,13 @@ async function actualizarEnEstilo(plantilla, del) {
   return res;
 }
 
+async function getAvillos() {
+  const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
+    "selector": {}
+  }, credentials.authentication);
+  return res.data.docs;
+}
+
 export default {
   namespaced: true,
   state: {
@@ -88,8 +95,27 @@ export default {
       state.plantillas = data;
     },
 
-    setNuevaPlantilla(state, plantilla) {
-      state.nuevaPlantilla = plantilla;
+    async setNuevaPlantilla(state, plantilla) {
+
+      if (plantilla._id == undefined || plantilla._id == null) {
+        state.nuevaPlantilla = plantilla;
+      } else {
+        state.nuevaPlantilla = plantilla;
+        let avillos = await getAvillos();
+        avillos.forEach(avillo => {
+          plantilla.avillos.forEach(a => {
+            if (a.nombre == avillo.nombre || a._id == avillo._id) {
+              avillo.cantidad = a.cantidad;
+              avillo.cantidadInicial = a.cantidadInicial;
+              avillo.unidad = a.unidad;
+              avillo.unidadConversion = a.unidadConversion;
+
+            }
+          });
+        });
+        state.nuevaPlantilla.avillos=avillos;
+      }
+
     },
 
     initialize(state) {
@@ -105,17 +131,7 @@ export default {
 
       if (state.nuevaPlantilla.avillos.length == 0) {
         state.nuevaPlantilla.avillos = avillos;
-      } else {
-        avillos.forEach(avillo => {
-          console.log(state.nuevaPlantilla.avillos.filter(a => a.nombre != avillo.nombre));
-        });
       }
-
-      // avillos.filter(avillo=> avillo.nombre!= );
-
-
-
-
     }
 
 
@@ -161,7 +177,11 @@ export default {
       commit,
       state
     }) {
-      let res = await axios.put(`${url}${state.nuevaPlantilla._id}/`, state.nuevaPlantilla, {
+
+      let nueva = {...state.nuevaPlantilla};
+      nueva.avillos = nueva.avillos.filter(a=>Number(a.cantidad)>0);
+
+      let res = await axios.put(`${url}${nueva._id}/`,nueva, {
         params: {
           "rev": state.nuevaPlantilla._rev
         },
@@ -171,8 +191,8 @@ export default {
       if (res.data.ok) {
         const response = await getAll();
         commit('setPlantillas', response.data.docs);
-        await actualizarEnLinea(state.nuevaPlantilla, false);
-        await actualizarEnEstilo(state.nuevaPlantilla, false);
+        await actualizarEnLinea(nueva, false);
+        await actualizarEnEstilo(nueva, false);
       } else {
         console.log('errorUPDATE');
       }
@@ -183,7 +203,10 @@ export default {
       commit,
       state
     }) {
-      let res = await axios.post(`${url}`, state.nuevaPlantilla, {
+      let nueva = {...state.nuevaPlantilla};
+      nueva.avillos = nueva.avillos.filter(a=>Number(a.cantidad)>0);
+
+      let res = await axios.post(`${url}`, nueva, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
@@ -212,6 +235,8 @@ export default {
       if (res.data.ok) {
         const response = await getAll();
         commit('setPlantillas', response.data.docs);
+        await actualizarEnLinea(nueva, true);
+        await actualizarEnEstilo(nueva, true);
       } else {
         console.log('errorDelete');
       }

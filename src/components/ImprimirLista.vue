@@ -1,16 +1,17 @@
 <template>
   <v-container>
+      Semana {{ semana }}, {{ ano }}
     <div class="contenedor">
       <div
         class="columna"
         v-if="semanaSeleccionada.listaDeCompras != undefined"
       >
-        Semana {{ semana }}, {{ ano }}<br />
+      
 
-        <v-simple-table dense>
+        <v-simple-table dense class="pedido">
           <template v-slot:default>
             <thead>
-              <td style="font-weight: bold">Adornos</td>
+              <tr><th style="font-weight: bold">Adornos</th></tr>
             </thead>
             <tbody>
               <tr>
@@ -30,10 +31,12 @@
         </v-simple-table>
         <br />
 
-        <v-simple-table dense>
+        <v-simple-table dense class="pedido">
           <template v-slot:default>
             <thead>
-              <td style="font-weight: bold">Avillos</td>
+              <tr>
+                <th style="font-weight: bold">Avillos</th>
+              </tr>
             </thead>
             <tbody>
               <tr>
@@ -53,10 +56,12 @@
         </v-simple-table>
         <br />
 
-        <v-simple-table dense>
+        <v-simple-table dense class="pedido">
           <template v-slot:default>
             <thead>
-              <td style="font-weight: bold">Materiales</td>
+              <tr>
+                <th style="font-weight: bold">Materiales</th>
+              </tr>
             </thead>
             <tbody>
               <tr>
@@ -78,10 +83,12 @@
         </v-simple-table>
         <br />
 
-        <v-simple-table dense>
+       <v-simple-table dense class="pedido">>
           <template v-slot:default>
             <thead>
-              <td style="font-weight: bold">Suelas</td>
+             <tr>
+                <th style="font-weight: bold">Suelas</th>
+             </tr>
             </thead>
             <tbody>
               <tr>
@@ -170,16 +177,19 @@ export default {
   }
 }
 td {
-  font-size: 9px !important;
-  padding: 1px !important;
+  font-size: 12px !important;
+  padding: 0px 3px !important;
 }
 .contenedor {
   -webkit-column-count: 2; /* Chrome, Safari, Opera */
   -moz-column-count: 2; /* Firefox */
   column-count: 2;
-  column-gap: 3rem;
+  column-gap: 40px;
   margin: 0 auto;
   width: 100%;
+}
+.container{
+  padding: 3px;
 }
 .columna {
   column-fill: auto;
@@ -189,5 +199,9 @@ td {
   page-break-inside: avoid; /* Firefox */
   break-inside: avoid; /* IE 10+ */
   padding: 0;
+}
+table,
+td{
+  border: 2px solid black;
 }
 </style>

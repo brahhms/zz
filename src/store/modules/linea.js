@@ -11,6 +11,36 @@ async function getAll() {
 }
 
 
+async function actualizarEnEstilo(linea, del) {
+  const response = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
+    "selector": {
+      "$or": [
+        { "linea._id": linea._id },
+        { "linea.nombre": linea.nombre }
+      ]
+    }
+  }, credentials.authentication);
+
+  let estilos = response.data.docs;
+
+  estilos.forEach(estilo => {
+    estilo.linea = linea;
+
+    if (del) {
+      //estilo.linea = null;
+    }
+
+
+  });
+
+  const res = await axios.post(`http://localhost:5984/zapp-estilos/_bulk_docs`, {
+    "docs": estilos
+  }, credentials.authentication);
+
+
+  return res;
+}
+
 
 export default {
   namespaced: true,
@@ -119,6 +149,7 @@ export default {
       if (res.data.ok) {
         const response = await getAll();
         commit('setLineas', response.data.docs);
+        actualizarEnEstilo(nueva,false);
       } else {
         console.log('errorUPDATE');
       }

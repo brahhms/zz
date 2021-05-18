@@ -93,28 +93,22 @@ function generateSemana(semana) {
       });
 
       detalle.estilo.avillos.forEach((avillo) => {
-        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity") {
+        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity" && avillo.cantidad!= undefined) {
 
           let existe = false;
           lista.avillos.forEach((avilloEnLista) => {
-            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre.includes(detalle.detalleMaterial.color) && avilloEnLista.nombre.includes(detalle.detalleMaterial.material.nombre))) {
+            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color) ) {
               avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
-              //excep
-              if (avillo.nombre.includes("durasno") || avillo.nombre.includes("durazno")) {
-                avilloEnLista.colorSegunMaterial = true;
-                avilloEnLista.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
-              }
+             
               existe = true;
             }
 
           });
 
           if (!existe) {
-            if (avillo.nombre.includes("durasno") || avillo.nombre.includes("durazno")) {
-              avillo.colorSegunMaterial = true;
-            }
+           
             let nuevoAvillo = Object.assign({}, avillo);
             nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
             nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
@@ -226,16 +220,24 @@ function generateSemana(semana) {
       }
 
 
-      let existePlantilla = false;
+      
 
       detalle.estilo.linea.plantilla.avillos.forEach(avillo => {
-        let avilloEnLista = lista.avillos.find(x => x._id == avillo._id);
+        let existePlantilla = false;
+        
         if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity") {
-          if (avilloEnLista != undefined) {
-            avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
-            avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
-            existePlantilla = true;
-          }
+         
+          lista.avillos.forEach(avilloEnLista => {
+            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color)) {
+            
+              avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
+              avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
+              avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
+              existePlantilla = true;
+            }
+          });
+          
+
 
           if (!existePlantilla) {
             let nuevoAvillo = Object.assign({}, avillo);
@@ -247,6 +249,7 @@ function generateSemana(semana) {
             }
 
             lista.avillos.push(nuevoAvillo);
+
           }
         }
         existePlantilla = false;
@@ -385,8 +388,47 @@ async function actualizarEnPlantilla(avillo, del) {
     }
   });
 
-  const res = await axios.post(`http://localhost:5984/zapp-plantillas/_bulk_docs`, {
+  await axios.post(`http://localhost:5984/zapp-plantillas/_bulk_docs`, {
     "docs": plantillas
+  }, credentials.authentication);
+
+  const resLineas = await axios.post(`http://localhost:5984/zapp-lineas/_find`, {
+    "selector": {
+      "plantilla._id": { "$in": plantillas.map(m => { return m._id }) }
+    }
+  }, credentials.authentication);
+
+  let lineas = resLineas.data.docs;
+  lineas.forEach(linea => {
+    plantillas.forEach(p => {
+      if (linea.plantilla._id == p._id) {
+        linea.plantilla = p;
+
+      }
+    });
+  });
+
+  await axios.post(`http://localhost:5984/zapp-lineas/_bulk_docs`, {
+    "docs": lineas
+  }, credentials.authentication);
+
+  const resEstilos = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
+    "selector": {
+      "linea._id": { "$in": lineas.map(m => { return m._id }) }
+    }
+  }, credentials.authentication);
+
+  let estilos = resEstilos.data.docs;
+  estilos.forEach(estilo => {
+    lineas.forEach(l => {
+      if (estilo.linea._id == l._id) {
+        estilo.linea = l;
+      }
+    });
+  });
+
+  const res = await axios.post(`http://localhost:5984/zapp-estilos/_bulk_docs`, {
+    "docs": estilos
   }, credentials.authentication);
 
 
@@ -425,9 +467,29 @@ async function actualizarEnLinea(avillo, del) {
 
   });
 
-  const res = await axios.post(`http://localhost:5984/zapp-lineas/_bulk_docs`, {
+  await axios.post(`http://localhost:5984/zapp-lineas/_bulk_docs`, {
     "docs": lineas
   }, credentials.authentication);
+
+  const resEstilos = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
+    "selector": {
+      "linea._id": { "$in": lineas.map(m => { return m._id }) }
+    }
+  }, credentials.authentication);
+
+  let estilos = resEstilos.data.docs;
+  estilos.forEach(estilo => {
+    lineas.forEach(l => {
+      if (estilo.linea._id == l._id) {
+        estilo.linea = l;
+      }
+    });
+  });
+
+  const res = await axios.post(`http://localhost:5984/zapp-estilos/_bulk_docs`, {
+    "docs": estilos
+  }, credentials.authentication);
+
 
 
   return res;
@@ -669,7 +731,7 @@ export default {
       await actualizarEnPlantilla(update, false);
       await actualizarEnLinea(update, false);
       await actualizarEnEstilo(update, false);
-      await actualizarEnPedidos(update);
+      //await actualizarEnPedidos(update);
     },
 
     async saveAvillo({

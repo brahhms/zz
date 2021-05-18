@@ -1,8 +1,9 @@
 <template>
   <v-container>
+      Semana {{ semana }}, {{ ano }}
     <div class="contenedor">
       <div class="columna">
-        Semana {{ semana }}, {{ ano }}
+      
         <div class="pedido" v-for="pedido in resumenPedidos" :key="pedido._id">
           <v-row>
             <v-col>
@@ -12,7 +13,7 @@
                     <tr>
                       <th>{{ pedido.cliente }}</th>
                       <th>Tacon</th>
-                      <th v-for="talla in tallas">
+                      <th style="width:20px" v-for="talla in tallas">
                         {{ talla.nombre }}
                       </th>
 
@@ -86,7 +87,7 @@ export default {
             cliente: pedido.cliente.nombre,
             detalle: pedido.detalle.map((lineaDeta) => {
               lineaDeta.detalleTacon.material = lineaDeta.detalleTacon
-                .material || { nombre: "-" };
+                .material || { nombre: "" };
               lineaDeta.detalleTacon.color = lineaDeta.detalleTacon.color || "";
               let d = [];
               d.push(
@@ -108,7 +109,7 @@ export default {
                   if (talla.cantidad > 0) {
                     return talla.cantidad;
                   } else {
-                    return "-";
+                    return "";
                   }
                 })
               );
@@ -173,13 +174,12 @@ table, td, th {
 }
 
 table {
-
   border-collapse: collapse;
 }
 
 th,
 td {
-  padding: 0 !important;
+  padding: 0 4px !important;
   color: blue;
 }
 
@@ -206,10 +206,15 @@ tr {
   -webkit-column-count: 2; /* Chrome, Safari, Opera */
   -moz-column-count: 2; /* Firefox */
   column-count: 2;
-  column-gap: 3rem;
+  column-gap: 60px;
   margin: 0 auto;
   width: 100%;
+
 }
+.container{
+  padding: 4px !important;
+}
+
 .columna {
   column-fill: auto;
 }

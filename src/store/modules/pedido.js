@@ -122,28 +122,22 @@ function generateSemana(semana) {
       });
 
       detalle.estilo.avillos.forEach((avillo) => {
-        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity") {
+        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity" && avillo.cantidad!= undefined) {
 
           let existe = false;
           lista.avillos.forEach((avilloEnLista) => {
-            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre.includes(detalle.detalleMaterial.color) && avilloEnLista.nombre.includes(detalle.detalleMaterial.material.nombre))) {
+            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color) ) {
               avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
-              //excep
-              if (avillo.nombre.includes("durasno") || avillo.nombre.includes("durazno")) {
-                avilloEnLista.colorSegunMaterial = true;
-                avilloEnLista.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
-              }
+             
               existe = true;
             }
 
           });
 
           if (!existe) {
-            if (avillo.nombre.includes("durasno") || avillo.nombre.includes("durazno")) {
-              avillo.colorSegunMaterial = true;
-            }
+           
             let nuevoAvillo = Object.assign({}, avillo);
             nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
             nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
@@ -255,15 +249,15 @@ function generateSemana(semana) {
       }
 
 
-      let existePlantilla = false;
+      
 
       detalle.estilo.linea.plantilla.avillos.forEach(avillo => {
-  
+        let existePlantilla = false;
         
         if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity") {
-          let existePlantilla = false;
+         
           lista.avillos.forEach(avilloEnLista => {
-            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre.includes(detalle.detalleMaterial.color) && avilloEnLista.nombre.includes(detalle.detalleMaterial.material.nombre))) {
+            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color)) {
             
               avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
