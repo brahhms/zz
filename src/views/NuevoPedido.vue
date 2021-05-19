@@ -59,9 +59,9 @@
             <div v-if="clienteSeleccionado != null">
               <v-app-bar flat color="white">
                 <v-btn icon>
-                  <v-icon>mdi-account</v-icon>
+                  <v-icon :color="semanaSeleccionada.color">mdi-account</v-icon>
                 </v-btn>
-                <v-toolbar-title>{{
+                <v-toolbar-title >{{
                   clienteSeleccionado.nombre
                 }}</v-toolbar-title>
                 <v-spacer></v-spacer>

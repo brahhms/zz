@@ -29,14 +29,14 @@
                       v-for="detalle in pedido.detalle"
                       :key="detalle.index"
                     >
-                      <td v-for="item in detalle" :key="item.index">
+                      <td v-bind:style="{ color: semanaSeleccionada.color}" v-for="item in detalle" :key="item.index">
                         {{ item }}
                       </td>
                     </tr>
                     <tr class="fila" style="font-weight: bold">
                       <td colspan="12"></td>
                       <td style="font-weight: bold; color: black">Total:</td>
-                      <td style="color: blue">{{ pedido.total }}</td>
+                      <td v-bind:style="{ color: semanaSeleccionada.color}">{{ pedido.total }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -69,6 +69,7 @@ export default {
       resumenPedidos: [],
       ano: 0,
       semana: 0,
+      color:"orange"
     };
   },
   methods: {
@@ -136,10 +137,11 @@ export default {
     async loadData() {
       this.ano = Number(this.$route.query.ano);
       this.semana = Number(this.$route.query.semana);
+      this.color = this.$route.query.color;
       this.setAnoPedido(this.ano);
       this.setSemanaPedido(this.semana);
 
-      await this.getSemana();
+      await this.getSemana(this.color);
       await this.getTallas();
       this.resumirPedidos();
     },
@@ -180,7 +182,6 @@ table {
 th,
 td {
   padding: 0 4px !important;
-  color: blue;
 }
 
 

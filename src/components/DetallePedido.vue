@@ -431,6 +431,7 @@ export default {
       "suelas",
       "tallas",
       "forros",
+      "semanaSeleccionada"
     ]),
     isTacon() {
       if (this.detalle.estilo != null) {

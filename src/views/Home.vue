@@ -30,10 +30,19 @@
         >
           <template v-slot:day="{ weekday, day, month, year }">
             <v-btn
-              @click="openDialog(year, month, day)"
+              @click="openDialog(year, month, day, 'blue')"
               v-if="weekday == 1"
               block
               color="primary"
+              outlined
+              tile
+              >Semana {{ semanaDelAno(year, month, day) }}</v-btn
+            >
+            <v-btn
+              @click="openDialog(year, month, day, 'red')"
+              v-if="weekday == 2"
+              block
+              color="red"
               outlined
               tile
               >Semana {{ semanaDelAno(year, month, day) }}</v-btn
@@ -48,7 +57,7 @@
         transition="dialog-bottom-transition"
       >
         <v-card :loading="loading1">
-          <v-toolbar dark color="primary">
+          <v-toolbar dark :color="semanaSeleccionada.color">
             <v-btn icon dark @click="dialog = false">
               <v-icon>mdi-close</v-icon>
             </v-btn>
@@ -128,7 +137,8 @@ export default {
     next() {
       this.$refs.calendar.next();
     },
-    async openDialog(ano, mes, dia) {
+    async openDialog(ano, mes, dia, color) {
+
       let semana = this.semanaDelAno(ano, mes, dia);
       let siguiente = this.siguienteSemana(ano, mes, dia);
 
@@ -139,7 +149,7 @@ export default {
       let mm = mes - 1;
       this.setFechaPedido(new Date(ano, mm, dia));
       this.dialog = true;
-      const existeSemana = await this.getSemana();
+      const existeSemana = await this.getSemana(color);
       if (existeSemana) {
         this.clearPedido();
 

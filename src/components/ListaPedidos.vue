@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-tabs vertical>
+    <v-tabs :color="semanaSeleccionada.color" vertical>
       <v-tab>
         <v-icon left> mdi-format-columns </v-icon>
         Pedidos
@@ -15,7 +15,12 @@
           <v-container>
             <v-row>
               <v-col cols="2"
-                ><v-btn small @click="generarPedidosPDF" color="primary">
+                ><v-btn
+                  small
+                  dark
+                  @click="generarPedidosPDF"
+                  :color="semanaSeleccionada.color"
+                >
                   Descargar pdf
                 </v-btn>
               </v-col>
@@ -24,7 +29,8 @@
                   :disabled="!isPedidosReady"
                   small
                   @click="imprimirPedidos()"
-                  color="primary"
+                  :color="semanaSeleccionada.color"
+                  dark
                 >
                   Imprimir
                 </v-btn>
@@ -54,7 +60,12 @@
                   :key="pedido._id"
                 >
                   <template v-slot:top>
-                    <v-toolbar dense color="primary" dark flat>
+                    <v-toolbar
+                      dense
+                      :color="semanaSeleccionada.color"
+                      dark
+                      flat
+                    >
                       <v-toolbar-title>{{
                         pedido.cliente.nombre
                       }}</v-toolbar-title>
@@ -230,7 +241,12 @@
                 v-on:load="onLoadListaIframe"
               ></iframe>
               <v-col cols="2"
-                ><v-btn small @click="generarListaPDF" color="primary">
+                ><v-btn
+                  small
+                  @click="generarListaPDF"
+                  :color="semanaSeleccionada.color"
+                  dark
+                >
                   Descargar pdf
                 </v-btn>
               </v-col>
@@ -239,7 +255,8 @@
                   small
                   :disabled="!isListaReady"
                   @click="imprimirLista()"
-                  color="primary"
+                  :color="semanaSeleccionada.color"
+                  dark
                 >
                   Imprimir
                 </v-btn>
@@ -256,7 +273,7 @@
               hide-default-footer
             >
               <template v-slot:top>
-                <v-toolbar dense color="primary" dark flat>
+                <v-toolbar dense :color="semanaSeleccionada.color" dark flat>
                   <v-toolbar-title>Adornos</v-toolbar-title>
                 </v-toolbar>
               </template>
@@ -278,7 +295,7 @@
               hide-default-footer
             >
               <template v-slot:top>
-                <v-toolbar dense color="primary" dark flat>
+                <v-toolbar dense :color="semanaSeleccionada.color" dark flat>
                   <v-toolbar-title>Avillos</v-toolbar-title>
                 </v-toolbar>
               </template>
@@ -304,7 +321,7 @@
               hide-default-footer
             >
               <template v-slot:top>
-                <v-toolbar dense color="primary" dark flat>
+                <v-toolbar dense :color="semanaSeleccionada.color" dark flat>
                   <v-toolbar-title>Materiales</v-toolbar-title>
                 </v-toolbar>
               </template>
@@ -327,7 +344,7 @@
               hide-default-footer
             >
               <template v-slot:top>
-                <v-toolbar dense color="primary" dark flat>
+                <v-toolbar dense :color="semanaSeleccionada.color" dark flat>
                   <v-toolbar-title>Suelas</v-toolbar-title>
                 </v-toolbar>
               </template>
@@ -579,6 +596,8 @@ export default {
             { title: "Subtotal", dataKey: "subtotal" },
           ],
         ];
+    
+
 
         doc.autoTable({
           head,
@@ -692,15 +711,17 @@ export default {
           { title: "Nombre", dataKey: "nombre" },
           { title: "Suela", dataKey: "suela" },
           { title: "Cantidades", dataKey: "cantidades" },
-           { title: "Total", dataKey: "total" },
+          { title: "Total", dataKey: "total" },
         ],
       ];
- 
-         size = 0;
-       items = [];
+
+      size = 0;
+      items = [];
       let materiales = [...this.semanaSeleccionada.listaDeCompras.materiales];
-      materiales= materiales.concat(this.semanaSeleccionada.listaDeCompras.forros);
-      let suelas= [...this.semanaSeleccionada.listaDeCompras.suelas];
+      materiales = materiales.concat(
+        this.semanaSeleccionada.listaDeCompras.forros
+      );
+      let suelas = [...this.semanaSeleccionada.listaDeCompras.suelas];
       if (materiales.length > suelas.length) {
         size = materiales.length;
       } else {
@@ -714,24 +735,28 @@ export default {
         } else {
           material = [
             material.cantidad + " yardas",
-            material.nombre+" "+material.color,
+            material.nombre + " " + material.color,
           ];
         }
 
         let suela = suelas.pop();
-         if (suela == undefined || suela == null) {
-          suela = ["", "",""];
+        if (suela == undefined || suela == null) {
+          suela = ["", "", ""];
         } else {
           suela = [
-            suela.nombre+" "+suela.color,
-            suela.detalle.filter(s=>s.cantidad>0).map(m=>{return " "+m.cantidad+"/"+m.nombre}).join(),
-            suela.total
+            suela.nombre + " " + suela.color,
+            suela.detalle
+              .filter((s) => s.cantidad > 0)
+              .map((m) => {
+                return " " + m.cantidad + "/" + m.nombre;
+              })
+              .join(),
+            suela.total,
           ];
         }
 
-        items.push([material[0], material[1], suela[0], suela[1],suela[2]]);
+        items.push([material[0], material[1], suela[0], suela[1], suela[2]]);
       }
-
 
       doc.autoTable({
         head,
@@ -739,7 +764,6 @@ export default {
         margin: { top: 1 },
       });
       //materiales forros
-  
 
       //saving file
       doc.save(
@@ -762,8 +786,8 @@ export default {
     ...mapGettersPedido(["semanaSeleccionada"]),
   },
   created() {
-    this.srcPedidos = `http://localhost:8080/#/Imprimir?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`;
-    this.srcLista = `http://localhost:8080/#/ImprimirLista?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}`;
+    this.srcPedidos = `http://localhost:8080/#/Imprimir?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}&color=${this.semanaSeleccionada.color}`;
+    this.srcLista = `http://localhost:8080/#/ImprimirLista?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}&color=${this.semanaSeleccionada.color}`;
   },
 };
 </script>

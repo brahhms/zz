@@ -9,6 +9,7 @@
           dark
           link
           x-large
+      
 
           :to="{ name: 'Home' }"
           >Fuentes</v-btn
@@ -87,7 +88,7 @@
 </template>
 
 <script>
-import { createNamespacedHelpers, mapActions, mapState } from "vuex";
+import { createNamespacedHelpers, mapState } from "vuex";
 const { mapGetters } = createNamespacedHelpers("pedido");
 export default {
   name: "App",
@@ -112,7 +113,7 @@ export default {
   }),
   computed: {
     ...mapState(["showBar", "snackbar"]),
-    ...mapGetters(["isEmpty"]),
+    ...mapGetters(["isEmpty","semanaSeleccionada"]),
   },
   methods: {},
   created() {},

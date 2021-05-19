@@ -12,11 +12,12 @@ Date.prototype.getWeekNumber = function () {
 const urlSemana = "http://localhost:5984/zapp-semanas/";
 
 
-async function findSemanaByWeek(item) {
+async function findSemanaByWeek(pedido,semana) {
   return await axios.post(`http://localhost:5984/zapp-semanas/_find`, {
     "selector": {
-      "semana": item.semana,
-      "ano": item.ano
+      "semana": pedido.semana,
+      "ano": pedido.ano,
+      "color":semana.color
     }
   }, credentials.authentication);
 }
@@ -338,14 +339,16 @@ function generateSemana(semana) {
 }
 
 
-async function createSemana(pedido) {
+async function createSemana(pedido,color) {
   let nuevaSemana = {
     "semana": pedido.semana,
+    "color":color,
     "siguienteSemana": pedido.siguienteSemana,
     "ano": pedido.ano,
     "fecha": pedido.fecha,
     "pedidos": [pedido],
     "listaDeCompras": null
+  
   };
   nuevaSemana = generateSemana(nuevaSemana);
   return await axios.post(`${urlSemana}`, nuevaSemana, {
@@ -382,8 +385,7 @@ export default {
     clientes: [],
     hormas: [],
 
-    //docs
-    docCompras: null,
+  
 
     //var
     isValid: false
@@ -393,11 +395,9 @@ export default {
     setFechaPedido(state, fecha) {
       state.pedido.fecha = fecha;
     },
-
     setSiguienteSemana(state, semana) {
       state.pedido.siguienteSemana = semana;
     },
-
     clearStates(state) {
       state.isEditing = false;
       state.isMoving = false;
@@ -406,7 +406,6 @@ export default {
       state.pedido.semana = state.semanaSeleccionada.semana;
       state.pedido.siguienteSemana = state.semanaSeleccionada.siguienteSemana;
     },
-
     setPedido(state, pedido) {
       state.pedido = pedido;
     },
@@ -424,8 +423,6 @@ export default {
     setSemanaPedido(state, semana) {
       state.pedido.semana = semana;
     },
-
-
     setCliente(state, cliente) {
       state.pedido.cliente = cliente;
       if (cliente != null) {
@@ -435,7 +432,6 @@ export default {
       }
 
     },
-
     pushDetalle(state, detalle) {
       state.pedido.detalle.push(detalle);
     },
@@ -563,12 +559,10 @@ export default {
       };
 
     },
-
     removeDetalle(state, detalle) {
       let index = state.pedido.detalle.indexOf(detalle);
       state.pedido.detalle.splice(index, 1);
     },
-
     duplicateDetalle(state, item) {
       let detalle = Object.assign({}, item);
 
@@ -578,7 +572,9 @@ export default {
       detalle.detalleTacon = {
         ...item.detalleTacon
       };
-
+      detalle.horma = {
+        ...item.horma
+      };
       detalle.detalleForro = {
         ...item.detalleForro
       };
@@ -604,11 +600,13 @@ export default {
     async getSemana({
       commit,
       state
-    }) {
+    },color) {
+      console.log(color);
       const res = await axios.post(`${urlSemana}_find`, {
         "selector": {
           "semana": state.pedido.semana,
-          "ano": state.pedido.ano
+          "ano": state.pedido.ano,
+          "color":color
         }
       }, credentials.authentication);
       if (res.statusText == "OK") {
@@ -621,7 +619,8 @@ export default {
 
           commit('setSemanaSeleccionada', {
             semana: state.pedido.semana,
-            ano: state.pedido.ano
+            ano: state.pedido.ano,
+            color:color
           });
 
         }
@@ -637,12 +636,12 @@ export default {
       state
     }) {
 
-      const resSemana = await findSemanaByWeek(state.pedido);
+      const resSemana = await findSemanaByWeek(state.pedido,state.semanaSeleccionada);
       let semana = resSemana.data.docs[0];
       let res;
 
       if (semana == undefined || semana == null) {
-        res = await createSemana(state.pedido);
+        res = await createSemana(state.pedido,state.semanaSeleccionada.color);
       } else {
         semana.pedidos.push(state.pedido);
         semana = generateSemana(semana);
@@ -744,12 +743,12 @@ export default {
       pedido.siguienteSemana = fecha.getWeekNumber();
 
 
-      const resSemana = await findSemanaByWeek(state.pedido);
+      const resSemana = await findSemanaByWeek(pedido,semana);
       let nuevaSemana = resSemana.data.docs[0];
       let res;
 
       if (nuevaSemana == undefined || nuevaSemana == null) {
-        res = await createSemana(pedido);
+        res = await createSemana(state.pedido,state.semanaSeleccionada.color);
       } else {
         nuevaSemana.pedidos.push(pedido);
         nuevaSemana = generateSemana(nuevaSemana);
@@ -834,12 +833,11 @@ export default {
     semana: state => state.pedido.semana,
     ano: state => state.pedido.ano,
 
-    docCompras: state => state.docCompras,
-
     semanaSeleccionada: state => state.semanaSeleccionada || {
       semana: null,
       siguienteSemana: null,
-      ano: null
+      ano: null,
+      color:"gray"
     },
 
 
