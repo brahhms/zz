@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-estilos/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-    "selector": {}
+    "selector": {},"limit":500
   }, credentials.authentication);
   return response;
 }
@@ -24,10 +24,10 @@ async function createAttachment(att, id, rev) {
 async function iniciarEstilo() {
   const data = await axios.all([
     axios.post(`http://localhost:5984/zapp-lineas/_find`, {
-      "selector": {}
+      "selector": {},"limit":500
     }, credentials.authentication),
     axios.post('http://localhost:5984/zapp-adornos/_find', {
-      "selector": {}
+      "selector": {},"limit":500
     }, credentials.authentication),
   ]);
   return data
@@ -137,7 +137,7 @@ export default {
       commit
     }) {
       const res = await axios.post(`${url}_find`, {
-        "selector": {}
+        "selector": {},"limit":500
       }, credentials.authentication);
       commit('setEstilos', res.data.docs);
     },
@@ -251,7 +251,7 @@ export default {
           "nombre": {
             "$nin": state.nuevoEstilo.avillos.map(x => { return x.nombre })
           }
-        }
+        },"limit":500
       }, credentials.authentication);
 
       const res2 = await axios.post('http://localhost:5984/zapp-avillos/_find', {
@@ -259,7 +259,7 @@ export default {
           "nombre": {
             "$in": state.nuevoEstilo.avillos.map(x => { return x.nombre })
           }
-        }
+        },"limit":500
       }, credentials.authentication);
 
 
@@ -301,7 +301,7 @@ export default {
           "nombre": {
             "$nor": state.nuevoEstilo.adornos.map(x => { return x.nombre })
           }
-        }
+        },"limit":500
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {

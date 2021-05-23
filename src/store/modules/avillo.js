@@ -3,315 +3,11 @@ import credentials from "./credentials.js";
 
 const url = "http://localhost:5984/zapp-avillos/";
 
-//recalcula lista de compras y devuelve la misma semana
-function generateSemana(semana) {
-
-  let lista = {
-    adornos: [],
-    avillos: [],
-    suelas: [],
-    tacones: [],
-    estilos: [],
-    materiales: [],
-    forros: []
-  };
-
-  semana.pedidos.forEach(pedido => {
-    pedido.total = 0;
-    pedido.detalle.forEach((detalle) => {
-      detalle.estilo.adornos.forEach((adorno) => {
-        if (adorno.cantidad > 0) {
-
-          let existe = false;
-          lista.adornos.forEach((adornoEnLista) => {
-            if (adornoEnLista.nombre == adorno.nombre || (adornoEnLista._id == adorno._id && adornoEnLista.nombre.includes(detalle.detalleMaterial.color) && adornoEnLista.nombre.includes(detalle.detalleMaterial.material.nombre))) {
-              adornoEnLista.cantidad = Number(adornoEnLista.cantidad) + (Number(adorno.cantidad) * Number(detalle.subtotal));
-              adornoEnLista.cantidad = Number(adornoEnLista.cantidad.toFixed(3));
-              existe = true;
-              //xcepcion2
-              if (adornoEnLista.nombre.includes("punteras")) {
-                detalle.detalleTallas.filter(x => x.cantidad > 0).forEach(t => {
-                  let h = t.talla.nombre;
-                  if (h == '3') {
-                    adornoEnLista.punteras[0].cantidad += t.cantidad;
-                  } else if (h == '4' || h == '5') {
-                    adornoEnLista.punteras[1].cantidad += t.cantidad;
-                  } else if (h == '6' || h == '7') {
-                    adornoEnLista.punteras[2].cantidad += t.cantidad;
-                  } else {
-                    adornoEnLista.punteras[3].cantidad += t.cantidad;
-                  }
-                });
-                let total = 0;
-                let resumen = adornoEnLista.punteras.map(m => {
-                  total += m.cantidad;
-                  return " " + " " + m.cantidad + "/" + m.categoria;
-                }).join();
-
-                adornoEnLista.nombre = adorno.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color + " " + resumen;
-              }
-            }
-          });
-          if (!existe) {
-            let nuevoAdorno = { ...adorno };
-
-            nuevoAdorno.cantidad = Number(nuevoAdorno.cantidad) * Number(detalle.subtotal);
-            nuevoAdorno.cantidad = Number(nuevoAdorno.cantidad.toFixed(3));
-
-            if (adorno.colorSegunMaterial) {
-              nuevoAdorno.nombre = adorno.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
-              //excepcion1
-              if (nuevoAdorno.nombre.includes("punteras")) {
-                nuevoAdorno.punteras = [{ cantidad: 0, categoria: "[3]" }, { cantidad: 0, categoria: "[4-5]" }, { cantidad: 0, categoria: "[6-7]" }, { cantidad: 0, categoria: "[8-9]" }];
-
-                detalle.detalleTallas.filter(x => x.cantidad > 0).forEach(t => {
-                  let h = t.talla.nombre;
-                  if (h == '3') {
-                    nuevoAdorno.punteras[0].cantidad += t.cantidad;
-                  } else if (h == '4' || h == '5') {
-                    nuevoAdorno.punteras[1].cantidad += t.cantidad;
-                  } else if (h == '6' || h == '7') {
-                    nuevoAdorno.punteras[2].cantidad += t.cantidad;
-                  } else {
-                    nuevoAdorno.punteras[3].cantidad += t.cantidad;
-                  }
-                });
-                let total = 0;
-                let resumen = nuevoAdorno.punteras.map(m => {
-                  total += m.cantidad;
-                  return " " + " " + m.cantidad + "/" + m.categoria;
-                }).join();
-
-                nuevoAdorno.nombre = nuevoAdorno.nombre + "  " + resumen;
-
-              }
-            }
-
-            lista.adornos.push(nuevoAdorno);
-          }
-        }
-      });
-
-      detalle.estilo.avillos.forEach((avillo) => {
-        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity" && avillo.cantidad!= undefined) {
-
-          let existe = false;
-          lista.avillos.forEach((avilloEnLista) => {
-            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color) ) {
-              avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
-              avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
-              avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
-             
-              existe = true;
-            }
-
-          });
-
-          if (!existe) {
-           
-            let nuevoAvillo = Object.assign({}, avillo);
-            nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
-            nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
-
-            if (avillo.colorSegunMaterial) {
-              nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
-            }
-            lista.avillos.push(nuevoAvillo);
-          }
-
-
-
-
-        }
-      });
-
-      let existeMaterial = false;
-      lista.materiales.forEach((materialEnLista) => {
-
-        if (detalle.detalleMaterial.material.nombre == materialEnLista.nombre &&
-          detalle.detalleMaterial.color == materialEnLista.color) {
-          materialEnLista.cantidad = Number(materialEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial);
-          materialEnLista.cantidad = Number(materialEnLista.cantidad.toFixed(3));
-          existeMaterial = true;
-        }
-
-      });
-
-      if (!existeMaterial) {
-        let rendimientoMaterial = Number((detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial));
-        let nuevoMaterial = {
-          _id: detalle.detalleMaterial.material._id + detalle.detalleMaterial.color,
-          nombre: detalle.detalleMaterial.material.nombre,
-          color: detalle.detalleMaterial.color,
-          cantidad: Number(rendimientoMaterial.toFixed(3))
-        };
-
-        lista.materiales.push(nuevoMaterial);
-      }
-
-      let existeForro = false;
-      lista.forros.forEach((forroEnLista) => {
-
-        if (detalle.detalleForro.forro._id == forroEnLista._id &&
-          detalle.detalleForro.color == forroEnLista.color) {
-          forroEnLista.cantidad = Number(forroEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
-          forroEnLista.cantidad = Number(forroEnLista.cantidad.toFixed(3));
-          existeForro = true;
-        }
-      });
-
-      if (!existeForro) {
-        let rendimientoForro = (detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
-        let nuevoForro = {
-          _id: detalle.detalleForro.forro._id,
-          nombre: "forro " + detalle.detalleForro.forro.nombre,
-          color: detalle.detalleForro.color,
-          cantidad: Number(rendimientoForro.toFixed(3))
-        };
-
-        lista.forros.push(nuevoForro);
-      }
-
-      let existeSuela = false;
-      lista.suelas.forEach((suelaEnLista) => {
-
-        if (detalle.detalleSuela.suela.nombre == suelaEnLista.nombre &&
-          detalle.detalleSuela.color == suelaEnLista.color) {
-          suelaEnLista.total = 0;
-          detalle.detalleTallas.forEach(t => {
-            let e = false;
-            suelaEnLista.detalle.forEach(l => {
-              if (t.talla.nombre == l.nombre) {
-                l.cantidad += t.cantidad;
-                suelaEnLista.total += l.cantidad;
-                e = true
-              }
-            });
-            if (!e) {
-              suelaEnLista.detalle.push({
-                nombre: t.talla.nombre,
-                cantidad: t.cantidad
-              });
-              suelaEnLista.total += t.cantidad;
-            }
-          });
-          existeSuela = true;
-        }
-      });
-
-      if (!existeSuela) {
-        let nuevaSuela = {
-          _id: detalle.detalleSuela.suela._id + detalle.detalleSuela.color,
-          nombre: detalle.detalleSuela.suela.nombre,
-          color: detalle.detalleSuela.color,
-          detalle: detalle.detalleTallas.filter(s => s.cantidad > 0),
-          total: 0
-        };
-
-        nuevaSuela.detalle = nuevaSuela.detalle.map(s => {
-          nuevaSuela.total += s.cantidad;
-          return {
-            nombre: s.talla.nombre,
-            cantidad: s.cantidad
-          }
-        });
-
-        lista.suelas.push(nuevaSuela);
-      }
-
-
-      
-
-      detalle.estilo.linea.plantilla.avillos.forEach(avillo => {
-        let existePlantilla = false;
-        
-        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity") {
-         
-          lista.avillos.forEach(avilloEnLista => {
-            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color)) {
-            
-              avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
-              avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
-              avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
-              existePlantilla = true;
-            }
-          });
-          
-
-
-          if (!existePlantilla) {
-            let nuevoAvillo = Object.assign({}, avillo);
-            nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
-            nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
-
-            if (avillo.colorSegunMaterial) {
-              nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
-            }
-
-            lista.avillos.push(nuevoAvillo);
-
-          }
-        }
-        existePlantilla = false;
-      });
-
-
-
-      lista.estilos.push({
-        codigo: detalle.estilo.linea.nombre + detalle.estilo.correlativo,
-        rendimientoPorYarda: detalle.estilo.rendimientoPorYarda,
-        capeyada: detalle.estilo.capeyada,
-      });
-
-      if (detalle.detalleTacon.material != null) {
-        detalle.detalleTacon.cantidad = 0.1;
-        lista.tacones.push(detalle.detalleTacon);
-      }
-
-
-      pedido.total += detalle.subtotal;
-
-    });
-
-  });
-
-  lista.adornos = lista.adornos.sort((a, b) => {
-    if (a.nombre > b.nombre)
-      return 1;
-
-    if (a.nombre < b.nombre)
-      return -1;
-
-    return 0;
-  });
-  lista.avillos = lista.avillos.sort((a, b) => {
-    if (a.nombre > b.nombre)
-      return 1;
-
-    if (a.nombre < b.nombre)
-      return -1;
-
-    return 0;
-  });
-  lista.materiales = lista.materiales.sort((a, b) => {
-    if (a.nombre > b.nombre)
-      return 1;
-
-    if (a.nombre < b.nombre)
-      return -1;
-
-    return 0;
-  });
-
-  semana.listaDeCompras = lista;
-
-  return semana
-}
-
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
     "selector": {}
+    ,"limit":500
   }, credentials.authentication);
   return response;
 }
@@ -327,6 +23,7 @@ async function actualizarEnEstilo(avillo, del) {
         }
       }
     }
+    ,"limit":500
   }, credentials.authentication);
 
   let estilos = response.data.docs;
@@ -367,6 +64,7 @@ async function actualizarEnPlantilla(avillo, del) {
         }
       }
     }
+    ,"limit":500
   }, credentials.authentication);
 
   let plantillas = response.data.docs;
@@ -396,6 +94,7 @@ async function actualizarEnPlantilla(avillo, del) {
     "selector": {
       "plantilla._id": { "$in": plantillas.map(m => { return m._id }) }
     }
+    ,"limit":500
   }, credentials.authentication);
 
   let lineas = resLineas.data.docs;
@@ -415,7 +114,7 @@ async function actualizarEnPlantilla(avillo, del) {
   const resEstilos = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
     "selector": {
       "linea._id": { "$in": lineas.map(m => { return m._id }) }
-    }
+    },"limit":500
   }, credentials.authentication);
 
   let estilos = resEstilos.data.docs;
@@ -444,7 +143,7 @@ async function actualizarEnLinea(avillo, del) {
           { "nombre": avillo.nombre }]
         }
       }
-    }
+    },"limit":500
   }, credentials.authentication);
 
   let lineas = response.data.docs;
@@ -474,7 +173,7 @@ async function actualizarEnLinea(avillo, del) {
   const resEstilos = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
     "selector": {
       "linea._id": { "$in": lineas.map(m => { return m._id }) }
-    }
+    },"limit":500
   }, credentials.authentication);
 
   let estilos = resEstilos.data.docs;
@@ -495,73 +194,6 @@ async function actualizarEnLinea(avillo, del) {
   return res;
 }
 
-async function actualizarEnPedidos(avillo) {
-  const response = await axios.post(`http://localhost:5984/zapp-semanas/_find`, {
-    "selector": {
-      "pedidos": {
-        "$elemMatch": {
-          "detalle": {
-            "$elemMatch": {
-              "estilo.avillos": {
-                "$elemMatch": {
-                  "$or": [{
-                    "nombre": avillo.nombre
-                  }, {
-                    "_id": avillo._id
-                  }]
-                }
-
-              }
-            }
-          }
-        }
-      }
-    }
-  }, credentials.authentication);
-
-  let semanas = response.data.docs;
-
-  semanas.forEach(semana => {
-
-    semana.pedidos.forEach(pedido => {
-      pedido.detalle.forEach(detalle => {
-        let index = detalle.estilo.avillos.findIndex(x => x._id == avillo._id || x.nombre == avillo.nombre);
-
-
-        if (index != undefined && index != null) {
-          detalle.estilo.avillos[index].nombre = avillo.nombre;
-          detalle.estilo.avillos[index].colorSegunMaterial = avillo.colorSegunMaterial;
-        }
-
-        index = detalle.estilo.linea.avillos.findIndex(x => x._id == avillo._id || x.nombre == avillo.nombre);
-
-        if (index != undefined && index != null) {
-          detalle.estilo.linea.avillos[index].nombre = avillo.nombre;
-          detalle.estilo.linea.avillos[index].colorSegunMaterial = avillo.colorSegunMaterial;
-        }
-
-        index = detalle.estilo.linea.plantilla.avillos.findIndex(x => x._id == avillo._id || x.nombre == avillo.nombre);
-        if (index != undefined && index != null) {
-          if (detalle.estilo.linea.plantilla.avillos[index] != undefined) {
-            detalle.estilo.linea.plantilla.avillos[index].nombre = avillo.nombre;
-            detalle.estilo.linea.plantilla.avillos[index].colorSegunMaterial = avillo.colorSegunMaterial;
-
-          }
-        }
-
-      });
-    });
-
-    semana = generateSemana(semana);
-
-  });
-
-  const res = await axios.post(`http://localhost:5984/zapp-semanas/_bulk_docs`, {
-    "docs": semanas
-  }, credentials.authentication);
-
-  return res;
-}
 
 export default {
   namespaced: true,
@@ -582,6 +214,7 @@ export default {
         ]
       },
       colorSegunMaterial: false,
+      colorSegunSuela: false,
       unidadConversion: {
         nombre: "pares en pliego",
         constante: null
@@ -690,6 +323,7 @@ export default {
           ]
         },
         colorSegunMaterial: false,
+        colorSegunSuela: false,
         unidadConversion: {
           nombre: "pares en pliego",
           constante: null
@@ -706,6 +340,7 @@ export default {
     }) {
       const res = await axios.post(`${url}_find`, {
         "selector": {}
+        ,"limit":500
       }, credentials.authentication);
       commit('setAvillos', res.data.docs);
     },

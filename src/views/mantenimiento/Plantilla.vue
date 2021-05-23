@@ -161,7 +161,7 @@ export default {
         {
           text: "Nombre",
           align: "start",
-          sortable: false,
+          sortable: true,
           value: "nombre",
         },
         {

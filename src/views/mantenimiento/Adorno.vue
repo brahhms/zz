@@ -92,6 +92,9 @@
       <template v-slot:item.unidad={item}>
         {{item.unidad.nombre}}
       </template>
+      <template v-slot:item.colorSegunMaterial={item}>
+         <v-simple-checkbox v-model="item.colorSegunMaterial" disabled></v-simple-checkbox>
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -111,7 +114,7 @@ export default {
       {
         text: "Nombre",
         align: "start",
-        sortable: false,
+        sortable: true,
         value: "nombre",
       },
       {
@@ -119,6 +122,12 @@ export default {
         align: "start",
         sortable: false,
         value: "unidad",
+      },
+      {
+        text: "Color segun Material",
+        align: "start",
+        sortable: false,
+        value: "colorSegunMaterial",
       },
       { text: "Acciones", value: "actions", sortable: false },
     ],

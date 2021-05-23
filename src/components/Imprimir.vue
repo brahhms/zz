@@ -195,7 +195,7 @@ td,
 th,
 tr {
   text-align: center !important;
-  font-size:12px !important;
+  font-size:10px !important;
 }
 
 tr {

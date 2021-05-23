@@ -59,7 +59,7 @@ function generateSemana(semana) {
               adornoEnLista.cantidad = Number(adornoEnLista.cantidad.toFixed(3));
               existe = true;
               //xcepcion2
-              if (adornoEnLista.nombre.includes("punteras")) {
+              if (adornoEnLista.nombre.includes("puntera")) {
                 detalle.detalleTallas.filter(x => x.cantidad > 0).forEach(t => {
                   let h = t.talla.nombre;
                   if (h == '3') {
@@ -91,7 +91,7 @@ function generateSemana(semana) {
             if (adorno.colorSegunMaterial) {
               nuevoAdorno.nombre = adorno.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
               //excepcion1
-              if (nuevoAdorno.nombre.includes("punteras")) {
+              if (nuevoAdorno.nombre.includes("puntera")) {
                 nuevoAdorno.punteras = [{ cantidad: 0, categoria: "[3]" }, { cantidad: 0, categoria: "[4-5]" }, { cantidad: 0, categoria: "[6-7]" }, { cantidad: 0, categoria: "[8-9]" }];
 
                 detalle.detalleTallas.filter(x => x.cantidad > 0).forEach(t => {
@@ -116,7 +116,7 @@ function generateSemana(semana) {
 
               }
             }
-
+      
             lista.adornos.push(nuevoAdorno);
           }
         }
@@ -127,8 +127,12 @@ function generateSemana(semana) {
 
           let existe = false;
           lista.avillos.forEach((avilloEnLista) => {
-            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color) ) {
+            if (avilloEnLista.nombre == avillo.nombre || 
+              (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color) ||
+              (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleSuela.color)
+              ) {
               avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
+              avilloEnLista.colorSegunSuela = avilloEnLista.colorSegunSuela;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
              
@@ -146,6 +150,10 @@ function generateSemana(semana) {
             if (avillo.colorSegunMaterial) {
               nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
             }
+            if (avillo.colorSegunSuela) {
+              nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleSuela.color;
+            }
+
             lista.avillos.push(nuevoAvillo);
           }
 
@@ -261,6 +269,7 @@ function generateSemana(semana) {
             if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color)) {
             
               avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
+              avilloEnLista.colorSegunSuela = avillo.colorSegunSuela;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
               existePlantilla = true;
@@ -276,6 +285,9 @@ function generateSemana(semana) {
 
             if (avillo.colorSegunMaterial) {
               nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
+            }
+            if (avillo.colorSegunSuela) {
+              nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleSuela.color;
             }
 
             lista.avillos.push(nuevoAvillo);
@@ -572,9 +584,7 @@ export default {
       detalle.detalleTacon = {
         ...item.detalleTacon
       };
-      detalle.horma = {
-        ...item.horma
-      };
+
       detalle.detalleForro = {
         ...item.detalleForro
       };

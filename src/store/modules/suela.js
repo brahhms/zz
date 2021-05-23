@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-suelas/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-    "selector": {}
+    "selector": {},"limit":500
   }, credentials.authentication);
   return response;
 }
@@ -48,7 +48,7 @@ export default {
       commit
     }) {
       const res = await axios.post(`${url}_find`, {
-        "selector": {}
+        "selector": {},"limit":500
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {

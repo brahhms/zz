@@ -106,7 +106,11 @@
 
 <script>
 import { createNamespacedHelpers, mapMutations } from "vuex";
-const { mapGetters, mapActions, mapMutations:mapMutationsForro } = createNamespacedHelpers("forro");
+const {
+  mapGetters,
+  mapActions,
+  mapMutations: mapMutationsForro,
+} = createNamespacedHelpers("forro");
 export default {
   data: () => ({
     dialog: false,
@@ -115,14 +119,8 @@ export default {
       {
         text: "Nombre",
         align: "start",
-        sortable: false,
+        sortable: true,
         value: "nombre",
-      },
-      {
-        text: "Default color",
-        align: "start",
-        sortable: false,
-        value: "defaultColor",
       },
       {
         text: "Colores",
@@ -130,13 +128,17 @@ export default {
         sortable: false,
         value: "colores",
       },
+      {
+        text: "Default color",
+        align: "start",
+        sortable: false,
+        value: "defaultColor",
+      },
+
       { text: "Acciones", value: "actions", sortable: false },
     ],
     editedIndex: -1,
-    colores:[
-      "negro",
-      "gun"
-    ]
+    colores: ["negro", "gris", "perla", "beige"],
   }),
 
   computed: {
@@ -198,8 +200,8 @@ export default {
     async deleteItemConfirm() {
       let res = await this.deleteForro();
       if (res) {
-          this.mostrarMsj("Forro eliminado!");
-        }
+        this.mostrarMsj("Forro eliminado!");
+      }
       this.closeDelete();
     },
 

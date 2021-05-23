@@ -7,10 +7,8 @@
       disable-pagination
       hide-default-footer
     >
-
-  
-      <template v-slot:item.unidad={item}>
-        {{item.unidad.nombre}}
+      <template v-slot:item.unidad="{ item }">
+        {{ item.unidad.nombre }}
       </template>
 
       <template v-slot:top>
@@ -59,10 +57,16 @@
                         v-model="nuevo.paraTacon"
                       ></v-checkbox>
                     </v-col>
-                         <v-col>
-                       <v-checkbox
+                    <v-col>
+                      <v-checkbox
                         label="Color segun Material?"
                         v-model="nuevo.colorSegunMaterial"
+                      ></v-checkbox>
+                    </v-col>
+                    <v-col>
+                      <v-checkbox
+                        label="Color segun Suela?"
+                        v-model="nuevo.colorSegunSuela"
                       ></v-checkbox>
                     </v-col>
                   </v-row>
@@ -107,6 +111,33 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
+      <template v-slot:item.unidad="{ item }">
+        {{ item.unidad.nombre }}
+      </template>
+      <template v-slot:item.colorSegunMaterial="{ item }">
+        <v-simple-checkbox
+          v-model="item.colorSegunMaterial"
+          disabled
+        ></v-simple-checkbox>
+      </template>
+       <template v-slot:item.colorSegunSuela="{ item }">
+        <v-simple-checkbox
+          v-model="item.colorSegunSuela"
+          disabled
+        ></v-simple-checkbox>
+      </template>
+      <template v-slot:item.predeterminado="{ item }">
+        <v-simple-checkbox
+          v-model="item.predeterminado"
+          disabled
+        ></v-simple-checkbox>
+      </template>
+      <template v-slot:item.paraTacon="{ item }">
+        <v-simple-checkbox
+          v-model="item.paraTacon"
+          disabled
+        ></v-simple-checkbox>
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -126,15 +157,41 @@ export default {
       {
         text: "Nombre",
         align: "start",
-        sortable: false,
+        sortable: true,
         value: "nombre",
       },
+
       {
         text: "Unidad de Compra",
         align: "start",
         sortable: false,
         value: "unidad",
       },
+      {
+        text: "Predeterminado",
+        align: "start",
+        sortable: false,
+        value: "predeterminado",
+      },
+      {
+        text: "Tacon",
+        align: "start",
+        sortable: false,
+        value: "paraTacon",
+      },
+      {
+        text: "Color segun Material",
+        align: "start",
+        sortable: false,
+        value: "colorSegunMaterial",
+      },
+            {
+        text: "Color segun Suela",
+        align: "start",
+        sortable: false,
+        value: "colorSegunSuela",
+      },
+
       { text: "Acciones", value: "actions", sortable: false },
     ],
     editedIndex: -1,

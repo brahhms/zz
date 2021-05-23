@@ -106,7 +106,11 @@
 
 <script>
 import { createNamespacedHelpers, mapMutations } from "vuex";
-const { mapGetters, mapActions, mapMutations:mapMutationsMaterial } = createNamespacedHelpers("material");
+const {
+  mapGetters,
+  mapActions,
+  mapMutations: mapMutationsMaterial,
+} = createNamespacedHelpers("material");
 export default {
   data: () => ({
     dialog: false,
@@ -115,14 +119,8 @@ export default {
       {
         text: "Nombre",
         align: "start",
-        sortable: false,
+        sortable: true,
         value: "nombre",
-      },
-      {
-        text: "Default color",
-        align: "start",
-        sortable: false,
-        value: "defaultColor",
       },
       {
         text: "Colores",
@@ -130,13 +128,29 @@ export default {
         sortable: false,
         value: "colores",
       },
+      {
+        text: "Default color",
+        align: "start",
+        sortable: false,
+        value: "defaultColor",
+      },
+
       { text: "Acciones", value: "actions", sortable: false },
     ],
     editedIndex: -1,
-    colores:[
+    colores: [
       "negro",
-      "gun"
-    ]
+      "gena",
+      "corinto",
+      "rosa vieja",
+      "azul",
+      "rojo",
+      "beige",
+      "mostaza",
+      "uva",
+      "naranja",
+      "rosado",
+    ],
   }),
 
   computed: {
@@ -177,7 +191,12 @@ export default {
   },
 
   methods: {
-    ...mapActions(["getMateriales", "updateMaterial", "saveMaterial", "deleteMaterial"]),
+    ...mapActions([
+      "getMateriales",
+      "updateMaterial",
+      "saveMaterial",
+      "deleteMaterial",
+    ]),
     ...mapMutationsMaterial(["iniciarMaterial", "setNuevoMaterial"]),
     ...mapMutations(["mostrarMsj"]),
     async initialize() {
@@ -198,8 +217,8 @@ export default {
     async deleteItemConfirm() {
       let res = await this.deleteMaterial();
       if (res) {
-          this.mostrarMsj("Material eliminado!");
-        }
+        this.mostrarMsj("Material eliminado!");
+      }
       this.closeDelete();
     },
 

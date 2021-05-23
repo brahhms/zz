@@ -32,7 +32,7 @@
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
-                                        <v-col>
+                    <v-col>
                       <v-checkbox
                         label="Horma para tacon?"
                         v-model="nueva.paraTacon"
@@ -76,6 +76,12 @@
         <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
         <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
       </template>
+      <template v-slot:item.paraTacon="{ item }">
+        <v-simple-checkbox
+          v-model="item.paraTacon"
+          disabled
+        ></v-simple-checkbox>
+      </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
@@ -100,8 +106,14 @@ export default {
       {
         text: "Nombre",
         align: "start",
-        sortable: false,
+        sortable: true,
         value: "nombre",
+      },
+      {
+        text: "Tacon",
+        align: "start",
+        sortable: false,
+        value: "paraTacon",
       },
 
       { text: "Acciones", value: "actions", sortable: false },
@@ -169,8 +181,8 @@ export default {
     async deleteItemConfirm() {
       let res = await this.deleteHorma();
       if (res) {
-          this.mostrarMsj("Horma eliminada!");
-        }
+        this.mostrarMsj("Horma eliminada!");
+      }
       this.closeDelete();
     },
 

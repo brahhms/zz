@@ -147,10 +147,11 @@ export default {
     async loadData() {
       this.ano = Number(this.$route.query.ano);
       this.semana = Number(this.$route.query.semana);
+      this.color = this.$route.query.color;
       this.setAnoPedido(this.ano);
       this.setSemanaPedido(this.semana);
 
-      await this.getSemana();
+      await this.getSemana(this.color);
 
     },
   },

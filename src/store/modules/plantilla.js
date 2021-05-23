@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-plantillas/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-    "selector": {}
+    "selector": {},"limit":500
   }, credentials.authentication);
   return response;
 }
@@ -17,7 +17,7 @@ async function actualizarEnLinea(plantilla, del) {
         { "plantilla._id": plantilla._id },
         { "plantilla.nombre": plantilla.nombre }
       ]
-    }
+    },"limit":500
   }, credentials.authentication);
 
   let lineas = response.data.docs;
@@ -47,7 +47,7 @@ async function actualizarEnEstilo(plantilla, del) {
         { "linea.plantilla._id": plantilla._id },
         { "linea.plantilla.nombre": plantilla.nombre }
       ]
-    }
+    },"limit":500
   }, credentials.authentication);
 
   let estilos = response.data.docs;
@@ -72,7 +72,7 @@ async function actualizarEnEstilo(plantilla, del) {
 
 async function getAvillos() {
   const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
-    "selector": {}
+    "selector": {},"limit":500
   }, credentials.authentication);
   return res.data.docs;
 }
@@ -143,7 +143,7 @@ export default {
     }) {
 
       const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
-        "selector": {}
+        "selector": {},"limit":500
       }, credentials.authentication);
 
 
@@ -163,7 +163,7 @@ export default {
       commit
     }) {
       const res = await axios.post(`${url}_find`, {
-        "selector": {}
+        "selector": {},"limit":500
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {

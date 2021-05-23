@@ -328,7 +328,7 @@ export default {
         {
           text: "Codigo",
           align: "start",
-          sortable: false,
+          sortable: true,
           value: "codigo",
         },
         {

@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-lineas/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-    "selector": {}
+    "selector": {},"limit":500
   }, credentials.authentication);
   return response;
 }
@@ -18,7 +18,7 @@ async function actualizarEnEstilo(linea, del) {
         { "linea._id": linea._id },
         { "linea.nombre": linea.nombre }
       ]
-    }
+    },"limit":500
   }, credentials.authentication);
 
   let estilos = response.data.docs;
@@ -94,10 +94,10 @@ export default {
 
       const data = await axios.all([
         axios.post(`http://localhost:5984/zapp-avillos/_find`, {
-          "selector": {}
+          "selector": {},"limit":500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-plantillas/_find', {
-          "selector": {}
+          "selector": {},"limit":500
         }, credentials.authentication),
       ]);
 
@@ -123,7 +123,7 @@ export default {
       commit
     }) {
       const res = await axios.post(`${url}_find`, {
-        "selector": {}
+        "selector": {},"limit":500
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {
