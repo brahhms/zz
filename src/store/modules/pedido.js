@@ -18,7 +18,7 @@ async function findSemanaByWeek(pedido,semana) {
       "semana": pedido.semana,
       "ano": pedido.ano,
       "color":semana.color
-    }
+    },"limit":500
   }, credentials.authentication);
 }
 
@@ -617,7 +617,7 @@ export default {
           "semana": state.pedido.semana,
           "ano": state.pedido.ano,
           "color":color
-        }
+        },"limit":500
       }, credentials.authentication);
       if (res.statusText == "OK") {
         if (res.data.docs.length > 0) {
@@ -671,25 +671,25 @@ export default {
     }) {
       const data = await axios.all([
         axios.post(`http://localhost:5984/zapp-estilos/_find`, {
-          "selector": {}
+          "selector": {},"limit":500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-materiales/_find', {
-          "selector": {}
+          "selector": {},"limit":500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-tallas/_find', {
-          "selector": {}
+          "selector": {},"limit":500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-forros/_find', {
-          "selector": {}
+          "selector": {},"limit":500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-suelas/_find', {
-          "selector": {}
+          "selector": {},"limit":500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-clientes/_find', {
-          "selector": {}
+          "selector": {},"limit":500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-hormas/_find', {
-          "selector": {}
+          "selector": {},"limit":500
         }, credentials.authentication)
       ]);
 
@@ -784,7 +784,7 @@ export default {
       const res = await axios.post('http://localhost:5984/zapp-hormas/_find', {
         "selector": {
           "paraTacon": paraTacon
-        }
+        },"limit":500
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {
