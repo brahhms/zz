@@ -33,6 +33,22 @@ async function iniciarEstilo() {
   return data
 }
 
+async function existeCodigo(codigo) {
+
+  try {
+    const existe = await axios.post(`${url}_find`, {
+      "selector": {
+        "codigo": codigo
+      }, "limit": 500
+    }, credentials.authentication);
+    if (existe.data.docs.length > 0) {
+      return true
+    }
+  } catch (error) {
+  }
+  return false;
+}
+
 
 export default {
   namespaced: true,
@@ -146,7 +162,16 @@ export default {
       commit,
       state
     }) {
+
       commit('setCorrelativo', state.nuevoEstilo.correlativo);
+      let existe = await existeCodigo(state.nuevoEstilo.codigo);
+      if (existe) {
+        let response = await getAll();
+        commit('setEstilos', response.data.docs);
+
+        return "ya existe el codigo " + state.nuevoEstilo.codigo;
+      }
+
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
@@ -157,7 +182,7 @@ export default {
       let att = state.nuevoEstilo.img;
       state.nuevoEstilo.img = undefined;
       let res;
-      state.nuevoEstilo._id= state.nuevoEstilo.codigo;
+      state.nuevoEstilo._id = state.nuevoEstilo.codigo;
       try {
         res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
           params: {
@@ -177,11 +202,11 @@ export default {
           console.log("createAtt");
           await createAttachment(att, res.data.id, res.data.rev);
         }
+        let response = await getAll();
+        commit('setEstilos', response.data.docs);
         return "Estilo " + state.nuevoEstilo.codigo + " se ha editado!";
       }
 
-      const response = await getAll();
-      commit('setEstilos', response.data.docs);
 
 
     },
@@ -190,7 +215,14 @@ export default {
       commit,
       state
     }) {
+
+
       commit('setCorrelativo', state.nuevoEstilo.correlativo);
+      let existe = await existeCodigo(state.nuevoEstilo.codigo);
+      if (existe) {
+        return "ya existe el codigo " + state.nuevoEstilo.codigo;
+      }
+
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
@@ -205,6 +237,9 @@ export default {
         }, credentials.authentication);
 
       } catch (error) {
+
+        let response = await getAll();
+        commit('setEstilos', response.data.docs);
         return "Error!";
       }
 
@@ -213,12 +248,12 @@ export default {
         if (att != null && att != undefined) {
           return await createAttachment(att, res.data.id, res.data.rev);
         }
-        const response = await getAll();
+
+        let response = await getAll();
         commit('setEstilos', response.data.docs);
+
         return "Estilo " + state.nuevoEstilo.codigo + " se ha guardado!";
       }
-
-
 
 
     },
