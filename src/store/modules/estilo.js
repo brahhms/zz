@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-estilos/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-    "selector": {},"limit":500
+    "selector": {}, "limit": 500
   }, credentials.authentication);
   return response;
 }
@@ -24,10 +24,10 @@ async function createAttachment(att, id, rev) {
 async function iniciarEstilo() {
   const data = await axios.all([
     axios.post(`http://localhost:5984/zapp-lineas/_find`, {
-      "selector": {},"limit":500
+      "selector": {}, "limit": 500
     }, credentials.authentication),
     axios.post('http://localhost:5984/zapp-adornos/_find', {
-      "selector": {},"limit":500
+      "selector": {}, "limit": 500
     }, credentials.authentication),
   ]);
   return data
@@ -137,7 +137,7 @@ export default {
       commit
     }) {
       const res = await axios.post(`${url}_find`, {
-        "selector": {},"limit":500
+        "selector": {}, "limit": 500
       }, credentials.authentication);
       commit('setEstilos', res.data.docs);
     },
@@ -156,24 +156,34 @@ export default {
 
       let att = state.nuevoEstilo.img;
       state.nuevoEstilo.img = undefined;
-      const res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
-        params: {
-          "rev": state.nuevoEstilo._rev
-        },
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
+      let res;
+      state.nuevoEstilo._id= state.nuevoEstilo.codigo;
+      try {
+        res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
+          params: {
+            "rev": state.nuevoEstilo._rev
+          },
+          "auth": credentials.authentication.auth,
+          "headers": credentials.authentication.headers,
+        }, credentials.authentication);
 
+      } catch (error) {
+        return "Error";
+      }
 
+      if (res.data.ok) {
 
-      if (res.data.ok && att != null && att != undefined) {
-        console.log("createAtt");
-        await createAttachment(att, res.data.id, res.data.rev);
+        if (att != null && att != undefined) {
+          console.log("createAtt");
+          await createAttachment(att, res.data.id, res.data.rev);
+        }
+        return "Estilo " + state.nuevoEstilo.codigo + " se ha editado!";
       }
 
       const response = await getAll();
       commit('setEstilos', response.data.docs);
-    
+
+
     },
 
     async saveEstilo({
@@ -185,19 +195,32 @@ export default {
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
       state.nuevoEstilo.rendimientoMaterial = rendimientoMaterial.toFixed(4);
-      const res = await axios.post(`${url}`, state.nuevoEstilo, {
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers
-      }, credentials.authentication);
+      state.nuevoEstilo._id = state.nuevoEstilo.codigo;
 
-      let att = state.nuevoEstilo._attachments;
-      if (res.data.ok && att != null && att != undefined) {
-        await createAttachment(att, res.data.id, res.data.rev);
+      let res;
+      try {
+        res = await axios.post(`${url}`, state.nuevoEstilo, {
+          "auth": credentials.authentication.auth,
+          "headers": credentials.authentication.headers
+        }, credentials.authentication);
+
+      } catch (error) {
+        return "Error!";
+      }
+
+      if (res.data.ok) {
+        let att = state.nuevoEstilo._attachments;
+        if (att != null && att != undefined) {
+          return await createAttachment(att, res.data.id, res.data.rev);
+        }
+        const response = await getAll();
+        commit('setEstilos', response.data.docs);
+        return "Estilo " + state.nuevoEstilo.codigo + " se ha guardado!";
       }
 
 
-      const response = await getAll();
-      commit('setEstilos', response.data.docs);
+
+
     },
 
     async deleteEstilo({
@@ -251,7 +274,7 @@ export default {
           "nombre": {
             "$nin": state.nuevoEstilo.avillos.map(x => { return x.nombre })
           }
-        },"limit":500
+        }, "limit": 500
       }, credentials.authentication);
 
       const res2 = await axios.post('http://localhost:5984/zapp-avillos/_find', {
@@ -259,7 +282,7 @@ export default {
           "nombre": {
             "$in": state.nuevoEstilo.avillos.map(x => { return x.nombre })
           }
-        },"limit":500
+        }, "limit": 500
       }, credentials.authentication);
 
 
@@ -301,7 +324,7 @@ export default {
           "nombre": {
             "$nor": state.nuevoEstilo.adornos.map(x => { return x.nombre })
           }
-        },"limit":500
+        }, "limit": 500
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {

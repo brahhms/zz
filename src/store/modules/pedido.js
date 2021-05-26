@@ -12,13 +12,13 @@ Date.prototype.getWeekNumber = function () {
 const urlSemana = "http://localhost:5984/zapp-semanas/";
 
 
-async function findSemanaByWeek(pedido,semana) {
+async function findSemanaByWeek(pedido, semana) {
   return await axios.post(`http://localhost:5984/zapp-semanas/_find`, {
     "selector": {
       "semana": pedido.semana,
       "ano": pedido.ano,
-      "color":semana.color
-    },"limit":500
+      "color": semana.color
+    }, "limit": 500
   }, credentials.authentication);
 }
 
@@ -116,33 +116,33 @@ function generateSemana(semana) {
 
               }
             }
-      
+
             lista.adornos.push(nuevoAdorno);
           }
         }
       });
 
       detalle.estilo.avillos.forEach((avillo) => {
-        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity" && avillo.cantidad!= undefined) {
+        if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity" && avillo.cantidad != undefined) {
 
           let existe = false;
           lista.avillos.forEach((avilloEnLista) => {
-            if (avilloEnLista.nombre == avillo.nombre || 
-              (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color) ||
-              (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleSuela.color)
-              ) {
+            if (avilloEnLista.nombre == avillo.nombre ||
+              (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color) ||
+              (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre + " " + detalle.detalleSuela.color)
+            ) {
               avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
               avilloEnLista.colorSegunSuela = avilloEnLista.colorSegunSuela;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
-             
+
               existe = true;
             }
 
           });
 
           if (!existe) {
-           
+
             let nuevoAvillo = Object.assign({}, avillo);
             nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
             nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
@@ -257,17 +257,27 @@ function generateSemana(semana) {
         lista.suelas.push(nuevaSuela);
       }
 
+      lista.suelas.forEach(sue => {
+        sue.detalle = sue.detalle.sort((a, b) => {
+          if (Number(a.nombre) > Number(b.nombre))
+            return 1;
 
-      
+          if (Number(a.nombre) < Number(b.nombre))
+            return -1;
+
+          return 0;
+        });
+      });
+
 
       detalle.estilo.linea.plantilla.avillos.forEach(avillo => {
         let existePlantilla = false;
-        
+
         if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity") {
-         
+
           lista.avillos.forEach(avilloEnLista => {
-            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre+" "+detalle.detalleMaterial.material.nombre+" "+detalle.detalleMaterial.color)) {
-            
+            if (avilloEnLista.nombre == avillo.nombre || (avilloEnLista._id == avillo._id && avilloEnLista.nombre == avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color)) {
+
               avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
               avilloEnLista.colorSegunSuela = avillo.colorSegunSuela;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
@@ -275,7 +285,7 @@ function generateSemana(semana) {
               existePlantilla = true;
             }
           });
-          
+
 
 
           if (!existePlantilla) {
@@ -350,17 +360,16 @@ function generateSemana(semana) {
   return semana
 }
 
-
-async function createSemana(pedido,color) {
+async function createSemana(pedido, color) {
   let nuevaSemana = {
     "semana": pedido.semana,
-    "color":color,
+    "color": color,
     "siguienteSemana": pedido.siguienteSemana,
     "ano": pedido.ano,
     "fecha": pedido.fecha,
     "pedidos": [pedido],
     "listaDeCompras": null
-  
+
   };
   nuevaSemana = generateSemana(nuevaSemana);
   return await axios.post(`${urlSemana}`, nuevaSemana, {
@@ -397,7 +406,7 @@ export default {
     clientes: [],
     hormas: [],
 
-  
+
 
     //var
     isValid: false
@@ -610,14 +619,14 @@ export default {
     async getSemana({
       commit,
       state
-    },color) {
+    }, color) {
       console.log(color);
       const res = await axios.post(`${urlSemana}_find`, {
         "selector": {
           "semana": state.pedido.semana,
           "ano": state.pedido.ano,
-          "color":color
-        },"limit":500
+          "color": color
+        }, "limit": 500
       }, credentials.authentication);
       if (res.statusText == "OK") {
         if (res.data.docs.length > 0) {
@@ -630,7 +639,7 @@ export default {
           commit('setSemanaSeleccionada', {
             semana: state.pedido.semana,
             ano: state.pedido.ano,
-            color:color
+            color: color
           });
 
         }
@@ -646,12 +655,12 @@ export default {
       state
     }) {
 
-      const resSemana = await findSemanaByWeek(state.pedido,state.semanaSeleccionada);
+      const resSemana = await findSemanaByWeek(state.pedido, state.semanaSeleccionada);
       let semana = resSemana.data.docs[0];
       let res;
 
       if (semana == undefined || semana == null) {
-        res = await createSemana(state.pedido,state.semanaSeleccionada.color);
+        res = await createSemana(state.pedido, state.semanaSeleccionada.color);
       } else {
         semana.pedidos.push(state.pedido);
         semana = generateSemana(semana);
@@ -671,25 +680,25 @@ export default {
     }) {
       const data = await axios.all([
         axios.post(`http://localhost:5984/zapp-estilos/_find`, {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-materiales/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-tallas/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-forros/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-suelas/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-clientes/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-hormas/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication)
       ]);
 
@@ -753,12 +762,12 @@ export default {
       pedido.siguienteSemana = fecha.getWeekNumber();
 
 
-      const resSemana = await findSemanaByWeek(pedido,semana);
+      const resSemana = await findSemanaByWeek(pedido, semana);
       let nuevaSemana = resSemana.data.docs[0];
       let res;
 
       if (nuevaSemana == undefined || nuevaSemana == null) {
-        res = await createSemana(state.pedido,state.semanaSeleccionada.color);
+        res = await createSemana(state.pedido, state.semanaSeleccionada.color);
       } else {
         nuevaSemana.pedidos.push(pedido);
         nuevaSemana = generateSemana(nuevaSemana);
@@ -784,7 +793,7 @@ export default {
       const res = await axios.post('http://localhost:5984/zapp-hormas/_find', {
         "selector": {
           "paraTacon": paraTacon
-        },"limit":500
+        }, "limit": 500
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {
@@ -847,13 +856,10 @@ export default {
       semana: null,
       siguienteSemana: null,
       ano: null,
-      color:"gray"
+      color: "gray"
     },
 
 
   }
 
 }
-
-
-

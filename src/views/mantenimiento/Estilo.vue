@@ -269,9 +269,11 @@
             <template v-slot:no-data>
               <v-btn color="primary" @click="initialize"> Reset </v-btn>
             </template>
-            <template v-slot:item.codigo="{ item }">
-              {{ item.linea.nombre }}{{ item.correlativo }}
+
+            <template v-slot:item.correlativo="{ item }">
+              {{ item.codigo }}
             </template>
+
             <template v-slot:item.tacon="{ item }">
               <v-simple-checkbox
                 v-model="item.linea.tacon"
@@ -293,8 +295,8 @@
 
 
 <script>
-import { createNamespacedHelpers } from "vuex";
-const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers(
+import { createNamespacedHelpers, mapMutations } from "vuex";
+const { mapActions, mapGetters, mapMutations: mapMutationsEstilo } = createNamespacedHelpers(
   "estilo"
 );
 export default {
@@ -329,7 +331,7 @@ export default {
           text: "Codigo",
           align: "start",
           sortable: true,
-          value: "codigo",
+          value: "correlativo",
         },
         {
           text: "Tacon",
@@ -360,20 +362,23 @@ export default {
       "actualizarAvillos",
       "actualizarAdornos",
     ]),
-    ...mapMutations(["setNuevoEstilo", "resetAvillos"]),
+    ...mapMutationsEstilo(["setNuevoEstilo", "resetAvillos"]),
+    ...mapMutations(["mostrarMsj"]),
     changeLinea() {
       this.resetAvillos();
       this.generarCorrelativo();
       this.actualizarAvillos();
     },
     async save() {
+      let msj = "";
       if (this.editedIndex > -1) {
         //editar
-        await this.updateEstilo();
+        msj = await this.updateEstilo();
       } else {
         //guardar
-        await this.saveEstilo();
+        msj = await this.saveEstilo();
       }
+      this.mostrarMsj(msj);
       this.close();
     },
     close() {
@@ -438,7 +443,7 @@ export default {
         let styles = [];
         this.estilos.forEach((estilo) => {
           if (estilo.linea != undefined) {
-            if (estilo.linea._id == this.lineas[this.tab]._id) {
+            if (estilo.linea.nombre == this.lineas[this.tab].nombre) {
               styles.push(estilo);
             }
           }
@@ -455,12 +460,17 @@ export default {
     "nuevo.adornos": {
       handler(newVal) {
         newVal.forEach((e) => {
-          if (e.cantidadInicial != null && e.cantidadInicial != "") {
+          if (
+            e.cantidadInicial != null &&
+            e.cantidadInicial != "" &&
+            e.cantidadInicial != 0
+          ) {
             let numero =
               Number(e.cantidadInicial) * Number(e.unidadConversion.constante);
             e.cantidad = numero.toFixed(4);
           } else {
             e.cantidadInicial = 0;
+            e.cantidad = 0;
           }
         });
       },
@@ -469,7 +479,11 @@ export default {
     "nuevo.avillos": {
       handler(newVal) {
         newVal.forEach((e) => {
-          if (e.cantidadInicial != null && e.cantidadInicial != "") {
+          if (
+            e.cantidadInicial != null &&
+            e.cantidadInicial != "" &&
+            e.cantidadInicial != 0
+          ) {
             let numero = 0;
             if (e.unidadConversion.constante == null) {
               if (Number(e.cantidadInicial) > 0) {
@@ -486,6 +500,7 @@ export default {
             e.cantidad = numero.toFixed(4);
           } else {
             e.cantidadInicial = 0;
+            e.cantidad = 0;
           }
         });
       },
