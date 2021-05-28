@@ -164,14 +164,7 @@ export default {
     }) {
 
       commit('setCorrelativo', state.nuevoEstilo.correlativo);
-      let existe = await existeCodigo(state.nuevoEstilo.codigo);
-      if (existe) {
-        let response = await getAll();
-        commit('setEstilos', response.data.docs);
-
-        return "ya existe el codigo " + state.nuevoEstilo.codigo;
-      }
-
+   
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
@@ -206,8 +199,6 @@ export default {
         commit('setEstilos', response.data.docs);
         return "Estilo " + state.nuevoEstilo.codigo + " se ha editado!";
       }
-
-
 
     },
 
