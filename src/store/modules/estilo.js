@@ -169,13 +169,14 @@ export default {
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
       state.nuevoEstilo.rendimientoMaterial = rendimientoMaterial.toFixed(4);
-      state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => a.cantidad > 0);
-      state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => a.cantidad > 0);
+      state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => Number(a.cantidad) > 0);
+      state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => Number(a.cantidad) > 0);
+     
 
       let att = state.nuevoEstilo.img;
       state.nuevoEstilo.img = undefined;
       let res;
-      state.nuevoEstilo._id = state.nuevoEstilo.codigo;
+  
       try {
         res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
           params: {
@@ -219,6 +220,9 @@ export default {
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
       state.nuevoEstilo.rendimientoMaterial = rendimientoMaterial.toFixed(4);
       state.nuevoEstilo._id = state.nuevoEstilo.codigo;
+      state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => Number(a.cantidad) > 0);
+      state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => Number(a.cantidad) > 0);
+
 
       let res;
       try {
@@ -323,6 +327,7 @@ export default {
               a.predeterminado = item.predeterminado;
               a.paraTacon = item.paraTacon;
               a.colorSegunMaterial = item.colorSegunMaterial;
+              a.colorSegunSuela = item.colorSegunSuela;
               if (item.unidad.nombre != a.unidad.nombre || item.unidadConversion.nombre != a.unidadConversion.nombre) {
                 console.log(a.unidad.nombre);
                 console.log(a.unidadConversion);
