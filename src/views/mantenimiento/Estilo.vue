@@ -467,7 +467,7 @@ export default {
           ) {
             let numero =
               Number(e.cantidadInicial) * Number(e.unidadConversion.constante);
-            e.cantidad = numero.toFixed(4);
+            e.cantidad = Number(numero.toFixed(4));
           } else {
             e.cantidadInicial = 0;
             e.cantidad = 0;
@@ -497,7 +497,7 @@ export default {
                 Number(e.unidadConversion.constante);
             }
 
-            e.cantidad = numero.toFixed(4);
+            e.cantidad = Number(numero.toFixed(4));
           } else {
             e.cantidadInicial = 0;
             e.cantidad = 0;

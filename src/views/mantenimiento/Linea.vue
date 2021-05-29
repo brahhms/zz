@@ -12,7 +12,7 @@
           <v-toolbar-title>LINEAS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog persistent scrollable v-model="dialog" max-width="600px">
+          <v-dialog persistent scrollable v-model="dialog" max-width="800px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                 Nueva Linea
@@ -26,14 +26,12 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12">
+                    <v-col>
                       <v-text-field
                         v-model="nueva.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
-                  </v-row>
-                  <v-row>
                     <v-col>
                       <v-autocomplete
                         v-model="nueva.plantilla"
@@ -46,24 +44,54 @@
                     </v-col>
                   </v-row>
                   <v-row>
-                       <v-col cols="12">
+                    <v-col>
+                      <v-autocomplete
+                        v-model="nueva.horma"
+                        label="Horma"
+                        return-object
+                        item-text="nombre"
+                        :items="hormas"
+                      >
+                      </v-autocomplete>
+                    </v-col>
+                    <v-col>
+                      <v-autocomplete
+                        v-model="nueva.suela"
+                        label="Suela"
+                        return-object
+                        item-text="nombre"
+                        :items="suelas"
+                      >
+                      </v-autocomplete>
+                    </v-col>
+                    <v-col>
+                      <v-autocomplete
+                        v-model="nueva.forro"
+                        label="Forro"
+                        return-object
+                        item-text="nombre"
+                        :items="forros"
+                      >
+                      </v-autocomplete>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
                       <v-checkbox
                         label="Tacon?"
                         v-model="nueva.tacon"
                       ></v-checkbox>
                     </v-col>
                   </v-row>
+
                   <v-row>
                     <v-col>
                       <v-data-table
                         :headers="avillosHeaders"
-                        :items="avillos"
+                        :items="nueva.avillos"
                         class="elevation-1"
                         disable-pagination
                         hide-default-footer
-                        show-select
-                        item-key="nombre"
-                        v-model="nueva.avillos"
                       >
                         <template v-slot:top>
                           <v-toolbar flat>
@@ -73,8 +101,39 @@
                           </v-toolbar>
                         </template>
 
+                        <template v-slot:item.cantidad="{ item }">
+                          <v-row>
+                            <v-col cols="3">
+                              <v-text-field
+                                type="number"
+                                v-model="item.cantidadInicial"
+                                value="0"
+                              ></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                              <v-autocomplete
+                                item-text="nombre"
+                                :items="item.unidad.conversiones"
+                                return-object
+                                label="unidad de entrada"
+                                v-model="item.unidadConversion"
+                              ></v-autocomplete>
+                            </v-col>
+                            <v-col cols="3">
+                              <v-text-field
+                                disabled
+                                v-model="item.cantidad"
+                              ></v-text-field>
+                            </v-col>
+                          </v-row>
+                        </template>
+
+                        <template v-slot:item.unidad="{ item }">
+                          {{ item.unidad.nombre }}
+                        </template>
+
                         <template v-slot:no-data>
-                          <v-btn color="primary" @click="iniciarLinea">
+                          <v-btn color="primary" @click="actualizarAvillos()">
                             Reset
                           </v-btn>
                         </template>
@@ -125,7 +184,24 @@
         <v-simple-checkbox v-model="item.tacon" disabled></v-simple-checkbox>
       </template>
       <template v-slot:item.plantilla="{ item }">
-        <div v-if="item.plantilla != null && item.plantilla != undefined">{{ item.plantilla.nombre }}</div>
+        <div v-if="item.plantilla != null && item.plantilla != undefined">
+          {{ item.plantilla.nombre }}
+        </div>
+      </template>
+      <template v-slot:item.horma="{ item }">
+        <div v-if="item.horma != null && item.horma != undefined">
+          {{ item.horma.nombre }}
+        </div>
+      </template>
+      <template v-slot:item.suela="{ item }">
+        <div v-if="item.suela != null && item.suela != undefined">
+          {{ item.suela.nombre }}
+        </div>
+      </template>
+      <template v-slot:item.forro="{ item }">
+        <div v-if="item.forro != null && item.forro != undefined">
+          {{ item.forro.nombre }}
+        </div>
       </template>
     </v-data-table>
   </div>
@@ -158,6 +234,24 @@ export default {
         value: "plantilla",
       },
       {
+        text: "Horma",
+        align: "start",
+        sortable: false,
+        value: "horma",
+      },
+      {
+        text: "Suela",
+        align: "start",
+        sortable: false,
+        value: "suela",
+      },
+      {
+        text: "Forro",
+        align: "start",
+        sortable: false,
+        value: "forro",
+      },
+      {
         text: "Tacon",
         align: "start",
         sortable: false,
@@ -170,8 +264,21 @@ export default {
       {
         text: "Nombre",
         align: "start",
-        sortable: false,
+        sortable: true,
         value: "nombre",
+      },
+      {
+        text: "Cantidad",
+        align: "start",
+        sortable: false,
+        value: "cantidad",
+        width: "50%",
+      },
+      {
+        text: "Unidad de Compra",
+        align: "start",
+        sortable: false,
+        value: "unidad",
       },
     ],
     editedIndex: -1,
@@ -181,7 +288,14 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Nueva Linea" : "Editar Linea";
     },
-    ...mapGetters(["lineas", "nuevaLinea", "avillos", "plantillas"]),
+    ...mapGetters([
+      "lineas",
+      "nuevaLinea",
+      "plantillas",
+      "hormas",
+      "suelas",
+      "forros"
+    ]),
     allLineas: {
       set(lineas) {
         return lineas;
@@ -208,6 +322,29 @@ export default {
     dialogDelete(val) {
       val || this.closeDelete();
     },
+    "nueva.avillos": {
+      handler(newVal) {
+        newVal.forEach((e) => {
+          if (e.cantidadInicial != null) {
+            let numero = 0;
+            if (e.unidadConversion.constante == null) {
+              if (e.cantidadInicial != 0) {
+                numero = Number(1 / e.cantidadInicial);
+              } else {
+                numero = 0;
+              }
+            } else {
+              numero =
+                Number(e.cantidadInicial) *
+                Number(e.unidadConversion.constante);
+            }
+
+            e.cantidad = Number(numero.toFixed(4));
+          }
+        });
+      },
+      deep: true,
+    },
   },
 
   created() {
@@ -221,17 +358,21 @@ export default {
       "saveLinea",
       "deleteLinea",
       "iniciarLinea",
+      "actualizarAvillos"
     ]),
     ...mapMutationsLinea(["setNuevaLinea"]),
     ...mapMutations(["mostrarMsj"]),
     async initialize() {
       await this.getLineas();
       await this.iniciarLinea();
+      await this.actualizarAvillos();
     },
 
     editItem(item) {
+      
       this.editedIndex = this.lineas.indexOf(item);
       this.nueva = Object.assign({}, item);
+      this.actualizarAvillos();
       this.dialog = true;
     },
 

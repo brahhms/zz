@@ -22,7 +22,6 @@
               return-object
               @change="changeEstilo()"
             >
-            
               <template v-slot:selection="data">
                 {{ data.item.linea.nombre }}{{ data.item.correlativo }}
               </template>
@@ -51,7 +50,7 @@
               v-model="detalle.detalleMaterial.material"
               required
               label="material"
-              :items="materiales"   
+              :items="materiales"
               dense
               filled
               rounded
@@ -85,9 +84,13 @@
 
     <td>
       <v-edit-dialog v-if="isTacon">
-        <span v-if="detalle.detalleTacon.material != null && detalle.detalleTacon.material !=''">{{
-          detalle.detalleTacon.material.nombre
-        }}</span>
+        <span
+          v-if="
+            detalle.detalleTacon.material != null &&
+            detalle.detalleTacon.material != ''
+          "
+          >{{ detalle.detalleTacon.material.nombre }}</span
+        >
         <span v-else>[material] : </span>
         <span v-if="detalle.detalleTacon.color != null">
           {{ detalle.detalleTacon.color }}</span
@@ -119,7 +122,6 @@
               v-model="detalle.detalleTacon.color"
               label="color"
               :items="detalle.detalleTacon.material.colores"
-             
               dense
               filled
               rounded
@@ -183,7 +185,7 @@
       </v-edit-dialog>
     </td>
 
-<!--forro-->
+    <!--forro-->
     <td>
       <v-edit-dialog>
         <span v-if="detalle.detalleForro.forro != null">{{
@@ -229,7 +231,7 @@
       </v-edit-dialog>
     </td>
 
-<!--suela-->
+    <!--suela-->
     <td>
       <v-edit-dialog>
         <span v-if="detalle.detalleSuela.suela != null">
@@ -305,20 +307,36 @@ export default {
   },
   data: () => ({
     notNull: [(v) => !!v || "" || "Este campo es requerido"],
-
     hormasSegunTacon: [],
   }),
   methods: {
     ...mapMutations(["validarPedido", "removeDetalle", "duplicateDetalle"]),
     ...mapActions(["actualizarHormas"]),
     async changeEstilo() {
-
       await this.validarPedido();
       if (this.detalle.estilo != null) {
         this.hormasSegunTacon = await this.actualizarHormas(
           this.detalle.estilo.linea.tacon
         );
-        this.detalle.horma = this.hormasSegunTacon[0];
+        //this.detalle.horma = this.hormasSegunTacon[0];
+        if (
+          this.detalle.estilo.linea.horma != undefined &&
+          this.detalle.estilo.linea.horma != null
+        ) {
+          this.detalle.horma = this.detalle.estilo.linea.horma;
+        }
+        if (
+          this.detalle.estilo.linea.suela != undefined &&
+          this.detalle.estilo.linea.suela != null
+        ) {
+          this.detalle.detalleSuela.suela = this.detalle.estilo.linea.suela;
+
+          if (this.detalle.detalleMaterial.color == "negro") {
+            this.detalle.detalleSuela.color = "negro";
+          } else {
+            this.detalle.detalleSuela.color = this.detalle.estilo.linea.suela.defaultColor;
+          }
+        }
       }
     },
   },
@@ -338,6 +356,27 @@ export default {
       try {
         if (newVal._id != oldVal._id) {
           this.detalle.detalleMaterial.color = newVal.defaultColor;
+          if (this.detalle.detalleMaterial.color == "negro") {
+            this.detalle.detalleSuela.color = "negro";
+          } else {
+            this.detalle.detalleSuela.color = this.detalle.detalleSuela.suela.defaultColor;
+          }
+        }
+      } catch (error) {
+        console.log("material null");
+      }
+      if (newVal == null) {
+        this.detalle.detalleMaterial.color = null;
+      }
+    },
+    "detalle.detalleMaterial.color"(newVal, oldVal) {
+      try {
+        if (newVal != oldVal) {
+          if (newVal == "negro") {
+            this.detalle.detalleSuela.color = "negro";
+          } else {
+            this.detalle.detalleSuela.color = this.detalle.detalleSuela.suela.defaultColor;
+          }
         }
       } catch (error) {
         console.log("material null");
@@ -374,7 +413,11 @@ export default {
     "detalle.detalleSuela.suela"(newVal, oldVal) {
       try {
         if (newVal._id != oldVal._id) {
-          this.detalle.detalleSuela.color = newVal.defaultColor;
+          if (this.detalleMaterial.color =="negro") {
+            this.detalle.detalleSuela.color == "negro";
+          } else {
+            this.detalle.detalleSuela.color = newVal.defaultColor;
+          }
         }
       } catch (error) {
         console.log("suela null");
@@ -416,9 +459,6 @@ export default {
           this.detalle.detalleSuela.color =
             newVal.detalleSuela.suela.defaultColor;
         }
-
-
-        
       },
       deep: true,
     },
@@ -431,7 +471,7 @@ export default {
       "suelas",
       "tallas",
       "forros",
-      "semanaSeleccionada"
+      "semanaSeleccionada",
     ]),
     isTacon() {
       if (this.detalle.estilo != null) {

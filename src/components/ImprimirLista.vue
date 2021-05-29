@@ -23,8 +23,8 @@
                 v-for="adorno in semanaSeleccionada.listaDeCompras.adornos"
                 :key="adorno.index"
               >
-                <td>{{ adorno.cantidad }} {{ adorno.unidad.nombre }}</td>
-                <td>{{ adorno.nombre }}</td>
+                <td v-bind:style="{ color: semanaSeleccionada.color}">{{ adorno.cantidad }} {{ adorno.unidad.nombre }}</td>
+                <td v-bind:style="{ color: semanaSeleccionada.color}">{{ adorno.nombre }}</td>
               </tr>
             </tbody>
           </template>
@@ -48,8 +48,8 @@
                 v-for="avillo in semanaSeleccionada.listaDeCompras.avillos"
                 :key="avillo.index"
               >
-                <td>{{ avillo.cantidad }} {{ avillo.unidad.nombre }}</td>
-                <td>{{ avillo.nombre }}</td>
+                <td v-bind:style="{ color: semanaSeleccionada.color}">{{ avillo.cantidad }} {{ avillo.unidad.nombre }}</td>
+                <td v-bind:style="{ color: semanaSeleccionada.color}">{{ avillo.nombre }}</td>
               </tr>
             </tbody>
           </template>
@@ -75,8 +75,8 @@
                 )"
                 :key="material._id"
               >
-                <td>{{ material.cantidad }} yardas</td>
-                <td>{{ material.nombre }} {{ material.color }}</td>
+                <td v-bind:style="{ color: semanaSeleccionada.color}">{{ material.cantidad }} yardas</td>
+                <td v-bind:style="{ color: semanaSeleccionada.color}">{{ material.nombre }} {{ material.color }}</td>
               </tr>
             </tbody>
           </template>
@@ -101,8 +101,8 @@
                 v-for="suela in semanaSeleccionada.listaDeCompras.suelas"
                 :key="suela._rev"
               >
-                <td>{{ suela.nombre }} {{ suela.color }}</td>
-                <td>
+                <td v-bind:style="{ color: semanaSeleccionada.color}">{{ suela.nombre }} {{ suela.color }}</td>
+                <td v-bind:style="{ color: semanaSeleccionada.color}">
                   <span
                     v-for="detalle in suela.detalle.filter(
                       (x) => x.cantidad > 0
@@ -111,7 +111,7 @@
                     >{{ detalle.cantidad }}/{{ detalle.nombre }},
                   </span>
                 </td>
-                <td>{{ suela.total }}</td>
+                <td v-bind:style="{ color: semanaSeleccionada.color}">{{ suela.total }}</td>
               </tr>
             </tbody>
           </template>
@@ -137,6 +137,7 @@ export default {
     return {
       ano: 0,
       semana: 0,
+      color:"black"
     };
   },
   methods: {
@@ -181,6 +182,13 @@ td {
   font-size: 12px !important;
   padding: 0px 3px !important;
 }
+
+td,
+th,
+tr {
+  text-align: center !important;
+}
+
 .contenedor {
   -webkit-column-count: 2; /* Chrome, Safari, Opera */
   -moz-column-count: 2; /* Firefox */

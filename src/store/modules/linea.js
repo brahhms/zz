@@ -51,11 +51,18 @@ export default {
       nombre: null,
       tacon: false,
       plantilla: null,
-      avillos: []
+      avillos: [],
+      horma:undefined,
+      suela:undefined,
+      forro:undefined
     },
     lineas: [],
-    avillos: [],
-    plantillas: []
+ 
+
+    plantillas: [],
+    hormas:[],
+    suelas:[],
+    forros:[]
   },
   mutations: {
     setLineas(state, data) {
@@ -73,14 +80,27 @@ export default {
         nombre: null,
         tacon: false,
         plantilla: null,
-        avillos: []
+        avillos: [],
+        horma:undefined,
+        suela:undefined,
+        forro:undefined
       };
     },
 
     setData(state, data) {
-      state.avillos = data[0].data.docs;
-      state.plantillas = data[1].data.docs;
+
+      state.plantillas = data[0].data.docs;
+      state.hormas = data[1].data.docs;
+      state.suelas = data[2].data.docs;
+      state.forros = data[3].data.docs;
       state.nuevaLinea.plantilla = state.plantillas[0];
+      state.nuevaLinea.horma = state.hormas[0];
+      state.nuevaLinea.suela = state.suelas[0];
+      state.nuevaLinea.forro = state.forros[0];
+    },
+
+    setAvillosDeLinea(state, avillos) {
+      state.nuevaLinea.avillos = state.nuevaLinea.avillos.concat(avillos);
     },
 
 
@@ -93,10 +113,17 @@ export default {
       commit('initialize');
 
       const data = await axios.all([
-        axios.post(`http://localhost:5984/zapp-avillos/_find`, {
+
+        axios.post('http://localhost:5984/zapp-plantillas/_find', {
           "selector": {},"limit":500
         }, credentials.authentication),
-        axios.post('http://localhost:5984/zapp-plantillas/_find', {
+        axios.post('http://localhost:5984/zapp-hormas/_find', {
+          "selector": {},"limit":500
+        }, credentials.authentication),
+        axios.post('http://localhost:5984/zapp-suelas/_find', {
+          "selector": {},"limit":500
+        }, credentials.authentication),
+        axios.post('http://localhost:5984/zapp-forros/_find', {
           "selector": {},"limit":500
         }, credentials.authentication),
       ]);
@@ -118,6 +145,19 @@ export default {
 
     },
 
+    async actualizarAvillos({
+      commit,state}){
+      const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
+        "selector": {
+          "nombre": {
+            "$nin": state.nuevaLinea.avillos.map(x => { return x.nombre })
+          }
+        },"limit":500
+      }, credentials.authentication);
+
+
+      commit('setAvillosDeLinea', res.data.docs);
+    },
 
     async getLineas({
       commit
@@ -139,6 +179,7 @@ export default {
     }) {
       let nueva = state.nuevaLinea;
       nueva.nombre = nueva.nombre.toUpperCase();
+      nueva.avillos = nueva.avillos.filter(a=>Number(a.cantidad)>0);
       let res = await axios.put(`${url}${nueva._id}/`, nueva, {
         params: {
           "rev": nueva._rev
@@ -161,6 +202,7 @@ export default {
       state
     }) {
       let nueva = state.nuevaLinea;
+      nueva.avillos = nueva.avillos.filter(a=>Number(a.cantidad)>0);
       nueva.nombre = nueva.nombre.toUpperCase();
       let res = await axios.post(`${url}`, nueva, {
         "auth": credentials.authentication.auth,
@@ -199,8 +241,11 @@ export default {
   },
   getters: {
     lineas: state => state.lineas,
-    avillos: state => state.avillos,
+ 
     plantillas: state => state.plantillas,
+    hormas: state => state.hormas,
+    suelas: state => state.suelas,
+    forros: state => state.forros,
 
     nuevaLinea: state => state.nuevaLinea
   }

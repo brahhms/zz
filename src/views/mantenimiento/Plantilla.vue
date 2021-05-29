@@ -232,7 +232,7 @@ export default {
                 Number(e.unidadConversion.constante);
             }
 
-            e.cantidad = numero.toFixed(4);
+            e.cantidad = Number(numero.toFixed(4));
           }
         });
       },

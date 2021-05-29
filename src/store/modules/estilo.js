@@ -164,19 +164,25 @@ export default {
     }) {
 
       commit('setCorrelativo', state.nuevoEstilo.correlativo);
-   
+
+      if (Number(state.nuevoEstilo.rendimientoForro) < 1) {
+        state.nuevoEstilo.rendimientoForro = 1;
+      }
+      if (Number(state.nuevoEstilo.rendimientoMaterial) < 1) {
+        state.nuevoEstilo.rendimientoForro = 1;
+      }
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
       state.nuevoEstilo.rendimientoMaterial = rendimientoMaterial.toFixed(4);
       state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => Number(a.cantidad) > 0);
       state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => Number(a.cantidad) > 0);
-     
+
 
       let att = state.nuevoEstilo.img;
       state.nuevoEstilo.img = undefined;
       let res;
-  
+
       try {
         res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
           params: {
@@ -213,6 +219,12 @@ export default {
       let existe = await existeCodigo(state.nuevoEstilo.codigo);
       if (existe) {
         return "ya existe el codigo " + state.nuevoEstilo.codigo;
+      }
+      if (Number(state.nuevoEstilo.rendimientoForro) < 1) {
+        state.nuevoEstilo.rendimientoForro = 1;
+      }
+      if (Number(state.nuevoEstilo.rendimientoMaterial) < 1) {
+        state.nuevoEstilo.rendimientoForro = 1;
       }
 
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
@@ -282,13 +294,21 @@ export default {
       commit, state
     }) {
 
-      let condiciones = [
-        {
-          "nombre": {
-            "$in":
-              state.nuevoEstilo.linea.avillos.map(x => { return x.nombre }),
+      state.nuevoEstilo.linea.avillos.forEach(avilloDeLinea => {
+        let existe = false;
+        state.nuevoEstilo.avillos.forEach(avillo => {
+          if (avillo.nombre == avilloDeLinea.nombre) {
+            existe = true;
           }
-        },
+        });
+        if (!existe) {
+          state.nuevoEstilo.avillos.push(avilloDeLinea);
+        }
+      });
+
+
+      let condiciones = [
+
         {
           "predeterminado": true
         }
@@ -315,8 +335,6 @@ export default {
         }, "limit": 500
       }, credentials.authentication);
 
-
-
       if (res2.statusText == 'OK') {
 
         res2.data.docs.forEach(item => {
@@ -329,8 +347,6 @@ export default {
               a.colorSegunMaterial = item.colorSegunMaterial;
               a.colorSegunSuela = item.colorSegunSuela;
               if (item.unidad.nombre != a.unidad.nombre || item.unidadConversion.nombre != a.unidadConversion.nombre) {
-                console.log(a.unidad.nombre);
-                console.log(a.unidadConversion);
                 a.cantidad = 0;
                 a.cantidadInicial = 0;
                 a.unidad = item.unidad;
@@ -342,8 +358,13 @@ export default {
 
         });
 
-        commit('setAvillosDeLinea', res.data.docs);
+
       }
+
+
+
+      commit('setAvillosDeLinea', res.data.docs);
+
 
     },
 
