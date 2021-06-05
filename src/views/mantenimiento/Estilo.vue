@@ -296,9 +296,11 @@
 
 <script>
 import { createNamespacedHelpers, mapMutations } from "vuex";
-const { mapActions, mapGetters, mapMutations: mapMutationsEstilo } = createNamespacedHelpers(
-  "estilo"
-);
+const {
+  mapActions,
+  mapGetters,
+  mapMutations: mapMutationsEstilo,
+} = createNamespacedHelpers("estilo");
 export default {
   data() {
     return {
@@ -407,11 +409,11 @@ export default {
       this.closeDelete();
     },
     editItem(item) {
-      this.editedIndex = this.estilos.indexOf(item);
-      item.rendimientoForro = Math.round(Number(1 / item.rendimientoForro));
+      item.rendimientoForro = Math.round(1 / Number(item.rendimientoForro));
       item.rendimientoMaterial = Math.round(
-        Number(1 / item.rendimientoMaterial)
+        1 / Number(item.rendimientoMaterial)
       );
+      this.editedIndex = this.estilos.indexOf(item);
       this.nuevo = item;
       this.dialog = true;
     },
@@ -467,7 +469,7 @@ export default {
           ) {
             let numero =
               Number(e.cantidadInicial) * Number(e.unidadConversion.constante);
-            e.cantidad = Number(numero.toFixed(4));
+            e.cantidad = Number(numero.toFixed(6));
           } else {
             e.cantidadInicial = 0;
             e.cantidad = 0;
@@ -497,7 +499,7 @@ export default {
                 Number(e.unidadConversion.constante);
             }
 
-            e.cantidad = Number(numero.toFixed(4));
+            e.cantidad = Number(numero.toFixed(6));
           } else {
             e.cantidadInicial = 0;
             e.cantidad = 0;

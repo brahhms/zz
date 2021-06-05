@@ -498,7 +498,7 @@ export default {
       let p = Object.assign({}, pedido);
       p.isEditing = false;
       p.isMoving = true;
-      p.semana = this.semanaSeleccionada.siguienteSemana;
+    //  p.semana = this.semanaSeleccionada.siguienteSemana;
       this.setPedido(p);
     },
     async mover() {

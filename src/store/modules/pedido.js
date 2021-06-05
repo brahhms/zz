@@ -1,4 +1,5 @@
 import axios from 'axios'
+
 import credentials from "./credentials.js";
 
 Date.prototype.getWeekNumber = function () {
@@ -752,15 +753,21 @@ export default {
     }) {
       let semana = state.semanaSeleccionada;
       let pedido = Object.assign({}, semana.pedidos.find(x => x._id == state.pedido._id));
-      pedido.semana = state.pedido.semana;
-      pedido.ano = state.pedido.ano;
+      //pedido.semana = state.pedido.semana;
+      //pedido.ano = state.pedido.ano;
 
       let fecha = new Date(state.pedido.fecha);
       fecha.setDate(fecha.getDate() + 7);
       pedido.fecha = fecha + "";
+      state.pedido.fecha = pedido.fecha;
+      pedido.semana = fecha.getWeekNumber();
+      state.pedido.semana = pedido.semana;
+      pedido.ano = fecha.getFullYear();
+      state.pedido.ano = pedido.ano;
+
       fecha.setDate(fecha.getDate() + 7);
       pedido.siguienteSemana = fecha.getWeekNumber();
-
+      state.pedido.siguienteSemana = pedido.siguienteSemana;
 
       const resSemana = await findSemanaByWeek(pedido, semana);
       let nuevaSemana = resSemana.data.docs[0];

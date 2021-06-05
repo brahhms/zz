@@ -14,7 +14,14 @@
           <v-spacer></v-spacer>
           <v-dialog persistent scrollable v-model="dialog" max-width="800px">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
+              <v-btn
+                @click="actualizarAvillos()"
+                color="primary"
+                dark
+                class="mb-2"
+                v-bind="attrs"
+                v-on="on"
+              >
                 Nueva Linea
               </v-btn>
             </template>
@@ -108,6 +115,8 @@
                                 type="number"
                                 v-model="item.cantidadInicial"
                                 value="0"
+                             
+                                :append-outer-icon="item.icon"
                               ></v-text-field>
                             </v-col>
                             <v-col cols="6">
@@ -294,7 +303,7 @@ export default {
       "plantillas",
       "hormas",
       "suelas",
-      "forros"
+      "forros",
     ]),
     allLineas: {
       set(lineas) {
@@ -304,6 +313,7 @@ export default {
         return this.lineas;
       },
     },
+
     nueva: {
       set(linea) {
         this.setNuevaLinea(linea);
@@ -358,7 +368,7 @@ export default {
       "saveLinea",
       "deleteLinea",
       "iniciarLinea",
-      "actualizarAvillos"
+      "actualizarAvillos",
     ]),
     ...mapMutationsLinea(["setNuevaLinea"]),
     ...mapMutations(["mostrarMsj"]),
@@ -369,7 +379,6 @@ export default {
     },
 
     editItem(item) {
-      
       this.editedIndex = this.lineas.indexOf(item);
       this.nueva = Object.assign({}, item);
       this.actualizarAvillos();
@@ -396,6 +405,7 @@ export default {
         this.iniciarLinea();
         this.editedIndex = -1;
       });
+      this.actualizarAvillos();
     },
 
     closeDelete() {

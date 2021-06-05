@@ -169,12 +169,12 @@ export default {
         state.nuevoEstilo.rendimientoForro = 1;
       }
       if (Number(state.nuevoEstilo.rendimientoMaterial) < 1) {
-        state.nuevoEstilo.rendimientoForro = 1;
+        state.nuevoEstilo.rendimientoMaterial = 1;
       }
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
-      state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
-      state.nuevoEstilo.rendimientoMaterial = rendimientoMaterial.toFixed(4);
+      state.nuevoEstilo.rendimientoForro = Number(rendimientoForro);
+      state.nuevoEstilo.rendimientoMaterial = Number(rendimientoMaterial);
       state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => Number(a.cantidad) > 0);
       state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => Number(a.cantidad) > 0);
 
@@ -229,8 +229,8 @@ export default {
 
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
-      state.nuevoEstilo.rendimientoForro = rendimientoForro.toFixed(4);
-      state.nuevoEstilo.rendimientoMaterial = rendimientoMaterial.toFixed(4);
+      state.nuevoEstilo.rendimientoForro = Number(rendimientoForro);
+      state.nuevoEstilo.rendimientoMaterial = Number(rendimientoMaterial);
       state.nuevoEstilo._id = state.nuevoEstilo.codigo;
       state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => Number(a.cantidad) > 0);
       state.nuevoEstilo.avillos = state.nuevoEstilo.avillos.filter(a => Number(a.cantidad) > 0);

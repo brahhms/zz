@@ -70,6 +70,11 @@ export default {
     },
 
     setNuevaLinea(state, linea) {
+      if (linea !=null) {
+        linea.avillos.forEach(element => {
+          element.icon="mdi-check";
+        });
+      }
       state.nuevaLinea = linea;
     },
 
@@ -203,6 +208,7 @@ export default {
     }) {
       let nueva = state.nuevaLinea;
       nueva.avillos = nueva.avillos.filter(a=>Number(a.cantidad)>0);
+      
       nueva.nombre = nueva.nombre.toUpperCase();
       let res = await axios.post(`${url}`, nueva, {
         "auth": credentials.authentication.auth,
