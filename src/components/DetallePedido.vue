@@ -745,12 +745,19 @@ export default {
         if (newVal != oldVal) {
           if (newVal == "negro") {
             this.detalle.detalleSuela.color = "negro";
-          } else {
+          } else if (this.detalle.detalleSuela.suela.defaultColor != "negro") {
             this.detalle.detalleSuela.color =
               this.detalle.detalleSuela.suela.defaultColor;
+          } else {
+            console.log("a");
+            this.detalle.detalleSuela.suela.colores.forEach((color) => {
+              if (color != "negro") {
+                this.detalle.detalleSuela.color = color;
+              }
+            });
           }
           if (this.detalle.estilo.linea.tacon) {
-            this.detalle.detalleTacon.color =newVal;
+            this.detalle.detalleTacon.color = newVal;
           }
         }
       } catch (error) {
