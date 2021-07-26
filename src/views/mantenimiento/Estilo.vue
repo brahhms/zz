@@ -35,7 +35,7 @@
               <v-toolbar-title>{{ formTitle }} Estilo</v-toolbar-title>
               <v-spacer></v-spacer>
               <v-toolbar-items>
-                <v-btn dark text @click="save"> Guardar </v-btn>
+                <v-btn dark text @click="save" :disabled="!isValid"> Guardar </v-btn>
               </v-toolbar-items>
             </v-toolbar>
 
@@ -53,7 +53,7 @@
                       @change="changeLinea(nuevo.linea)"
                     ></v-autocomplete>
                   </v-col>
-                  <v-col cols="10">
+                  <v-col cols="6">
                     <v-text-field
                       label="correlativo"
                       v-model="nuevo.correlativo"
@@ -64,9 +64,18 @@
                       oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
+                                    <v-col cols="4">
+                    <v-file-input
+                      label="Imagen"
+                      show-size
+                      small-chips
+                      truncate-length="9"
+                      v-model="nuevo.img"
+                    ></v-file-input>
+                  </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="4">
+                  <v-col cols="6">
                     <v-text-field
                       label="Pares en yarda de Material"
                       v-model="nuevo.rendimientoMaterial"
@@ -77,7 +86,8 @@
                       oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="4">
+                  
+                  <v-col cols="6">
                     <v-text-field
                       label="Pares en yarda de Forro"
                       v-model="nuevo.rendimientoForro"
@@ -88,135 +98,21 @@
                       oninput="this.value=this.value.replace(/[^0-9]/g,'');"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="4">
-                    <v-file-input
-                      label="Imagen"
-                      show-size
-                      small-chips
-                      truncate-length="9"
-                      v-model="nuevo.img"
-                    ></v-file-input>
-                  </v-col>
+
                 </v-row>
 
                 <v-row v-if="nuevo.avillos.length > 0">
                   <v-col>
-                    <v-data-table
-                      :headers="adornoHeaders"
-                      :items="nuevo.avillos"
-                      class="elevation-1"
-                      disable-pagination
-                      hide-default-footer
-                    >
-                      <template v-slot:top>
-                        <v-toolbar dense color="primary" dark flat>
-                          <v-toolbar-title>Avillos</v-toolbar-title>
-                          <v-divider class="mx-4" inset vertical></v-divider>
-                          <v-spacer></v-spacer>
-                        </v-toolbar>
-                      </template>
-
-                      <template v-slot:item.cantidad="{ item }">
-                        <v-row>
-                          <v-col cols="3">
-                            <v-text-field
-                              v-model="item.cantidadInicial"
-                              hide-details
-                              min="0"
-                              max="99"
-                              step="1"
-                              type="number"
-                              oninput="this.value=this.value.replace(/[^0-9]/g,'');"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="6">
-                            <v-autocomplete
-                              item-text="nombre"
-                              :items="item.unidad.conversiones"
-                              return-object
-                              label="unidad de entrada"
-                              v-model="item.unidadConversion"
-                            ></v-autocomplete>
-                          </v-col>
-                          <v-col cols="3">
-                            <v-text-field
-                              disabled
-                              v-model="item.cantidad"
-                            ></v-text-field>
-                          </v-col>
-                        </v-row>
-                      </template>
-
-                      <template v-slot:item.unidad="{ item }">
-                        {{ item.unidad.nombre }}
-                      </template>
-
-                      <template v-slot:no-data>
-                        <v-btn color="primary" @click="iniciarEstilo">
-                          Reset
-                        </v-btn>
-                      </template>
-                    </v-data-table>
+                    <conversor :title="'Avillos'" :items="nuevo.avillos" :update="iniciarEstilo">
+              
+                    </conversor>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col>
-                    <v-data-table
-                      :headers="adornoHeaders"
-                      :items="nuevo.adornos"
-                      class="elevation-1"
-                      disable-pagination
-                      hide-default-footer
-                    >
-                      <template v-slot:top>
-                        <v-toolbar dense color="primary" dark flat>
-                          <v-toolbar-title>Adornos</v-toolbar-title>
-                          <v-divider class="mx-4" inset vertical></v-divider>
-                          <v-spacer></v-spacer>
-                        </v-toolbar>
-                      </template>
-
-                      <template v-slot:item.cantidad="{ item }">
-                        <v-row>
-                          <v-col cols="3">
-                            <v-text-field
-                              v-model="item.cantidadInicial"
-                              hide-details
-                              min="0"
-                              max="99"
-                              step="1"
-                              type="number"
-                              oninput="this.value=this.value.replace(/[^0-9]/g,'');"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="6">
-                            <v-autocomplete
-                              item-text="nombre"
-                              :items="item.unidad.conversiones"
-                              return-object
-                              label="unidad de entrada"
-                              v-model="item.unidadConversion"
-                            ></v-autocomplete>
-                          </v-col>
-                          <v-col cols="3">
-                            <v-text-field
-                              disabled
-                              v-model="item.cantidad"
-                            ></v-text-field>
-                          </v-col>
-                        </v-row>
-                      </template>
-
-                      <template v-slot:item.unidad="{ item }">
-                        {{ item.unidad.nombre }}
-                      </template>
-
-                      <template v-slot:no-data>
-                        <v-btn color="primary" @click="iniciarEstilo">
-                          Reset
-                        </v-btn>
-                      </template>
-                    </v-data-table>
+                    <conversor :title="'Adornos'" :items="nuevo.adornos" :update="iniciarEstilo">
+                     
+                    </conversor>
                   </v-col>
                 </v-row>
               </v-container>
@@ -301,33 +197,18 @@ const {
   mapGetters,
   mapMutations: mapMutationsEstilo,
 } = createNamespacedHelpers("estilo");
+
+import Conversor from "../../components/Conversor.vue";
+
 export default {
+    components: {
+    Conversor,
+  },
   data() {
     return {
       tab: 0,
       dialog: false,
       dialogDelete: false,
-      adornoHeaders: [
-        {
-          text: "Nombre",
-          align: "start",
-          sortable: false,
-          value: "nombre",
-        },
-        {
-          text: "Cantidad",
-          align: "start",
-          sortable: false,
-          value: "cantidad",
-          width: "50%",
-        },
-        {
-          text: "Unidad de Compra",
-          align: "start",
-          sortable: false,
-          value: "unidad",
-        },
-      ],
       estiloHeaders: [
         {
           text: "Codigo",
@@ -424,7 +305,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["nuevoEstilo", "lineas", "estilos"]),
+    ...mapGetters(["nuevoEstilo", "lineas", "estilos","isValid"]),
     nuevo: {
       set(estilo) {
         estilo.linea = this.lineas.find((l) => l._id == estilo.linea._id);
@@ -458,57 +339,7 @@ export default {
     },
   },
 
-  watch: {
-    "nuevo.adornos": {
-      handler(newVal) {
-        newVal.forEach((e) => {
-          if (
-            e.cantidadInicial != null &&
-            e.cantidadInicial != "" &&
-            e.cantidadInicial != 0
-          ) {
-            let numero =
-              Number(e.cantidadInicial) * Number(e.unidadConversion.constante);
-            e.cantidad = Number(numero.toFixed(6));
-          } else {
-            e.cantidadInicial = 0;
-            e.cantidad = 0;
-          }
-        });
-      },
-      deep: true,
-    },
-    "nuevo.avillos": {
-      handler(newVal) {
-        newVal.forEach((e) => {
-          if (
-            e.cantidadInicial != null &&
-            e.cantidadInicial != "" &&
-            e.cantidadInicial != 0
-          ) {
-            let numero = 0;
-            if (e.unidadConversion.constante == null) {
-              if (Number(e.cantidadInicial) > 0) {
-                numero = Number(1 / e.cantidadInicial);
-              } else {
-                numero = 0;
-              }
-            } else {
-              numero =
-                Number(e.cantidadInicial) *
-                Number(e.unidadConversion.constante);
-            }
 
-            e.cantidad = Number(numero.toFixed(6));
-          } else {
-            e.cantidadInicial = 0;
-            e.cantidad = 0;
-          }
-        });
-      },
-      deep: true,
-    },
-  },
   created() {
     this.initialize();
   },

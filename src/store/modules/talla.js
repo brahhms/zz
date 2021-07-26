@@ -155,6 +155,15 @@ export default {
       return 0;
     }),
 
-    nuevaTalla: state => state.nuevaTalla
+    nuevaTalla: state => state.nuevaTalla,
+    isValid: state => {
+      if (state.nuevaTalla.nombre != null &&
+        state.nuevaTalla.nombre != '' &&
+        state.nuevaTalla.nombre != ' ') {
+        return true;
+      } else {
+        return false
+      }
+    },
   }
 }

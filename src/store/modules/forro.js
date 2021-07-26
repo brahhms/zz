@@ -120,6 +120,19 @@ export default {
   getters: {
     forros: state => state.forros,
 
-    nuevoForro: state => state.nuevoForro
+    nuevoForro: state => state.nuevoForro,
+    isValid: state => {
+      if (state.nuevoForro.nombre != null &&
+        state.nuevaForro.nombre != '' &&
+        state.nuevoForro.nombre != ' ' &&
+        state.nuevoForro.colores.length >0 &&
+        state.nuevoForro.defaultColor !=null
+        ) {
+        return true;
+      } else {
+        return false
+      }
+
+    },
   }
 }

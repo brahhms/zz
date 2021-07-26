@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-lineas/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-    "selector": {},"limit":500
+    "selector": {}, "limit": 500
   }, credentials.authentication);
   return response;
 }
@@ -18,7 +18,7 @@ async function actualizarEnEstilo(linea, del) {
         { "linea._id": linea._id },
         { "linea.nombre": linea.nombre }
       ]
-    },"limit":500
+    }, "limit": 500
   }, credentials.authentication);
 
   let estilos = response.data.docs;
@@ -42,6 +42,13 @@ async function actualizarEnEstilo(linea, del) {
 }
 
 
+async function getAvillos() {
+  const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
+    "selector": {}, "limit": 500
+  }, credentials.authentication);
+  return res.data.docs;
+}
+
 export default {
   namespaced: true,
   state: {
@@ -52,30 +59,41 @@ export default {
       tacon: false,
       plantilla: null,
       avillos: [],
-      horma:undefined,
-      suela:undefined,
-      forro:undefined
+      horma: undefined,
+      suela: undefined,
+      forro: undefined
     },
     lineas: [],
- 
+
 
     plantillas: [],
-    hormas:[],
-    suelas:[],
-    forros:[]
+    hormas: [],
+    suelas: [],
+    forros: []
   },
   mutations: {
     setLineas(state, data) {
       state.lineas = data;
     },
 
-    setNuevaLinea(state, linea) {
-      if (linea !=null) {
-        linea.avillos.forEach(element => {
-          element.icon="mdi-check";
-        });
-      }
+    async setNuevaLinea(state, linea) {
       state.nuevaLinea = linea;
+      if (linea._id !== undefined && linea._id !== null) {
+        let avillos = await getAvillos();
+        avillos.forEach(avillo => {
+          linea.avillos.forEach(a => {
+            if (a.nombre == avillo.nombre || a._id == avillo._id) {
+              avillo.cantidad = a.cantidad;
+              avillo.cantidadInicial = a.cantidadInicial;
+              avillo.unidad = a.unidad;
+              avillo.unidadConversion = a.unidadConversion;
+              avillo.icon = "mdi-check";
+            }
+          });
+        });
+        state.nuevaLinea.avillos = avillos;
+      }
+
     },
 
     initialize(state) {
@@ -86,9 +104,9 @@ export default {
         tacon: false,
         plantilla: null,
         avillos: [],
-        horma:undefined,
-        suela:undefined,
-        forro:undefined
+        horma: undefined,
+        suela: undefined,
+        forro: undefined
       };
     },
 
@@ -120,16 +138,16 @@ export default {
       const data = await axios.all([
 
         axios.post('http://localhost:5984/zapp-plantillas/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-hormas/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-suelas/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
         axios.post('http://localhost:5984/zapp-forros/_find', {
-          "selector": {},"limit":500
+          "selector": {}, "limit": 500
         }, credentials.authentication),
       ]);
 
@@ -151,13 +169,14 @@ export default {
     },
 
     async actualizarAvillos({
-      commit,state}){
+      commit, state }) {
+      //state.nuevaLinea.avillos = state.nuevaLinea.plantilla.avillos;
       const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
         "selector": {
           "nombre": {
             "$nin": state.nuevaLinea.avillos.map(x => { return x.nombre })
           }
-        },"limit":500
+        }, "limit": 500
       }, credentials.authentication);
 
 
@@ -168,7 +187,7 @@ export default {
       commit
     }) {
       const res = await axios.post(`${url}_find`, {
-        "selector": {},"limit":500
+        "selector": {}, "limit": 500
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {
@@ -184,7 +203,7 @@ export default {
     }) {
       let nueva = state.nuevaLinea;
       nueva.nombre = nueva.nombre.toUpperCase();
-      nueva.avillos = nueva.avillos.filter(a=>Number(a.cantidad)>0);
+      nueva.avillos = nueva.avillos.filter(a => Number(a.cantidad) > 0);
       let res = await axios.put(`${url}${nueva._id}/`, nueva, {
         params: {
           "rev": nueva._rev
@@ -195,7 +214,7 @@ export default {
       if (res.data.ok) {
         const response = await getAll();
         commit('setLineas', response.data.docs);
-        actualizarEnEstilo(nueva,false);
+        actualizarEnEstilo(nueva, false);
       } else {
         console.log('errorUPDATE');
       }
@@ -207,8 +226,8 @@ export default {
       state
     }) {
       let nueva = state.nuevaLinea;
-      nueva.avillos = nueva.avillos.filter(a=>Number(a.cantidad)>0);
-      
+      nueva.avillos = nueva.avillos.filter(a => Number(a.cantidad) > 0);
+
       nueva.nombre = nueva.nombre.toUpperCase();
       let res = await axios.post(`${url}`, nueva, {
         "auth": credentials.authentication.auth,
@@ -247,11 +266,26 @@ export default {
   },
   getters: {
     lineas: state => state.lineas,
- 
+
     plantillas: state => state.plantillas,
     hormas: state => state.hormas,
     suelas: state => state.suelas,
     forros: state => state.forros,
+
+    isValid: state => {
+
+      if (state.nuevaLinea.nombre != null &&
+        state.nuevaLinea.nombre != '' &&
+        state.nuevaLinea.nombre != ' ' &&
+        state.nuevaLinea.plantilla != null &&
+        state.nuevaLinea.horma != undefined &&
+        state.nuevaLinea.suela != undefined &&
+        state.nuevaLinea.forro != undefined) {
+        return true;
+      } else {
+        return false
+      }
+    },
 
     nuevaLinea: state => state.nuevaLinea
   }

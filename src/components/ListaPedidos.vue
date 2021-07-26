@@ -537,7 +537,8 @@ export default {
           "Semana " +
             this.semanaSeleccionada.semana +
             " " +
-            this.semanaSeleccionada.ano,
+            this.semanaSeleccionada.ano+
+            " - "+this.semanaSeleccionada.color,
           0.5,
           0.8
         );
@@ -624,7 +625,8 @@ export default {
           "Semana " +
             this.semanaSeleccionada.semana +
             " " +
-            this.semanaSeleccionada.ano,
+            this.semanaSeleccionada.ano+
+            " - "+this.semanaSeleccionada.color,
           0.5,
           0.8
         );
@@ -788,6 +790,7 @@ export default {
   created() {
     this.srcPedidos = `http://localhost:8080/#/Imprimir?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}&color=${this.semanaSeleccionada.color}`;
     this.srcLista = `http://localhost:8080/#/ImprimirLista?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}&color=${this.semanaSeleccionada.color}`;
+
   },
 };
 </script>

@@ -50,6 +50,8 @@ function generateSemana(semana) {
   semana.pedidos.forEach(pedido => {
     pedido.total = 0;
     pedido.detalle.forEach((detalle) => {
+      detalle.cloned=false;
+      
       detalle.estilo.adornos.forEach((adorno) => {
         if (adorno.cantidad > 0) {
 
@@ -57,7 +59,7 @@ function generateSemana(semana) {
           lista.adornos.forEach((adornoEnLista) => {
             if (adornoEnLista.nombre == adorno.nombre || (adornoEnLista._id == adorno._id && adornoEnLista.nombre.includes(detalle.detalleMaterial.color) && adornoEnLista.nombre.includes(detalle.detalleMaterial.material.nombre))) {
               adornoEnLista.cantidad = Number(adornoEnLista.cantidad) + (Number(adorno.cantidad) * Number(detalle.subtotal));
-              adornoEnLista.cantidad = Number(adornoEnLista.cantidad.toFixed(3));
+              adornoEnLista.cantidad = Number(adornoEnLista.cantidad.toFixed(5));
               existe = true;
               //xcepcion2
               if (adornoEnLista.nombre.includes("puntera")) {
@@ -87,7 +89,7 @@ function generateSemana(semana) {
             let nuevoAdorno = { ...adorno };
 
             nuevoAdorno.cantidad = Number(nuevoAdorno.cantidad) * Number(detalle.subtotal);
-            nuevoAdorno.cantidad = Number(nuevoAdorno.cantidad.toFixed(3));
+            nuevoAdorno.cantidad = Number(nuevoAdorno.cantidad.toFixed(5));
 
             if (adorno.colorSegunMaterial) {
               nuevoAdorno.nombre = adorno.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
@@ -123,6 +125,7 @@ function generateSemana(semana) {
         }
       });
 
+
       detalle.estilo.avillos.forEach((avillo) => {
         if (avillo.cantidad > 0 && avillo.cantidad != null && avillo.cantidad != "Infinity" && avillo.cantidad != undefined) {
 
@@ -135,7 +138,7 @@ function generateSemana(semana) {
               avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
               avilloEnLista.colorSegunSuela = avilloEnLista.colorSegunSuela;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
-              avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
+              avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(5));
 
               existe = true;
             }
@@ -146,7 +149,7 @@ function generateSemana(semana) {
 
             let nuevoAvillo = Object.assign({}, avillo);
             nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
-            nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
+            nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(5));
 
             if (avillo.colorSegunMaterial) {
               nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
@@ -170,8 +173,9 @@ function generateSemana(semana) {
         if (detalle.detalleMaterial.material.nombre == materialEnLista.nombre &&
           detalle.detalleMaterial.color == materialEnLista.color) {
           materialEnLista.cantidad = Number(materialEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial);
-          materialEnLista.cantidad = Number(materialEnLista.cantidad.toFixed(3));
+          materialEnLista.cantidad = Number(materialEnLista.cantidad.toFixed(5));
           existeMaterial = true;
+
         }
 
       });
@@ -182,7 +186,7 @@ function generateSemana(semana) {
           _id: detalle.detalleMaterial.material._id + detalle.detalleMaterial.color,
           nombre: detalle.detalleMaterial.material.nombre,
           color: detalle.detalleMaterial.color,
-          cantidad: Number(rendimientoMaterial.toFixed(3))
+          cantidad: Number(rendimientoMaterial.toFixed(5))
         };
 
         lista.materiales.push(nuevoMaterial);
@@ -194,7 +198,7 @@ function generateSemana(semana) {
         if (detalle.detalleForro.forro._id == forroEnLista._id &&
           detalle.detalleForro.color == forroEnLista.color) {
           forroEnLista.cantidad = Number(forroEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
-          forroEnLista.cantidad = Number(forroEnLista.cantidad.toFixed(3));
+          forroEnLista.cantidad = Number(forroEnLista.cantidad.toFixed(5));
           existeForro = true;
         }
       });
@@ -205,7 +209,7 @@ function generateSemana(semana) {
           _id: detalle.detalleForro.forro._id,
           nombre: "forro " + detalle.detalleForro.forro.nombre,
           color: detalle.detalleForro.color,
-          cantidad: Number(rendimientoForro.toFixed(3))
+          cantidad: Number(rendimientoForro.toFixed(5))
         };
 
         lista.forros.push(nuevoForro);
@@ -282,7 +286,7 @@ function generateSemana(semana) {
               avilloEnLista.colorSegunMaterial = avillo.colorSegunMaterial;
               avilloEnLista.colorSegunSuela = avillo.colorSegunSuela;
               avilloEnLista.cantidad = Number(avilloEnLista.cantidad) + Number(avillo.cantidad) * detalle.subtotal;
-              avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(3));
+              avilloEnLista.cantidad = Number(avilloEnLista.cantidad.toFixed(5));
               existePlantilla = true;
             }
           });
@@ -292,7 +296,7 @@ function generateSemana(semana) {
           if (!existePlantilla) {
             let nuevoAvillo = Object.assign({}, avillo);
             nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
-            nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(3));
+            nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(5));
 
             if (avillo.colorSegunMaterial) {
               nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
@@ -395,6 +399,7 @@ export default {
       isMoving: false,
       total: 0
     },
+
 
     semanaSeleccionada: null,
 
@@ -521,6 +526,8 @@ export default {
           color: null,
         },
         subtotal: 0,
+
+        clonedFrom: null
       };
       detalleDefault.detalleTallas = state.tallas.map((t) => {
         return {
@@ -561,7 +568,7 @@ export default {
       });
       state.forros = data[3].data.docs;
       state.suelas = data[4].data.docs;
-      state.clientes = data[5].data.docs;
+      state.clientes = data[5].data.docs.map(item => { return { nombre: item.nombre } });
       state.hormas = data[6].data.docs;
 
     },
@@ -587,6 +594,8 @@ export default {
     },
     duplicateDetalle(state, item) {
       let detalle = Object.assign({}, item);
+      detalle.cloned = true;
+      detalle.clonedFrom = {...item};
 
       detalle.detalleMaterial = {
         ...item.detalleMaterial
@@ -609,7 +618,8 @@ export default {
         }
       });
 
-      let index = state.pedido.detalle.indexOf(detalle);
+      let index = state.pedido.detalle.indexOf(item);
+      index++;
       state.pedido.detalle.splice(index, 0, detalle);
       return item
     }
@@ -753,8 +763,7 @@ export default {
     }) {
       let semana = state.semanaSeleccionada;
       let pedido = Object.assign({}, semana.pedidos.find(x => x._id == state.pedido._id));
-      //pedido.semana = state.pedido.semana;
-      //pedido.ano = state.pedido.ano;
+
 
       let fecha = new Date(state.pedido.fecha);
       fecha.setDate(fecha.getDate() + 7);

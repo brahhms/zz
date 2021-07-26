@@ -3,14 +3,16 @@
     <v-app-bar v-if="showBar" app color="primary" dark>
       <div class="d-flex align-center">
         <v-btn
-          style="text-transform: none !important;font-size:32px; font-weight: bold;"
+          style="
+            text-transform: none !important;
+            font-size: 32px;
+            font-weight: bold;
+          "
           plain
           text
           dark
           link
           x-large
-      
-
           :to="{ name: 'Home' }"
           >Fuentes</v-btn
         >
@@ -98,22 +100,22 @@ export default {
   data: () => ({
     drawer: null,
     items: [
-      { name: "Estilo", title: "Estilos", icon: "mdi-shoe-heel" },
-      { name: "Forro", title: "Forros", icon: "mdi-layers-triple" },
-      { name: "Material", title: "Materiales", icon: "mdi-layers-outline" },
-      { name: "Suela", title: "Suelas", icon: "mdi-shoe-print" },
-      { name: "Cliente", title: "Clientes", icon: "mdi-account-box-multiple" },
-      { name: "Horma", title: "Hormas", icon: "mdi-shoe-formal" },
       { name: "Adorno", title: "Adornos", icon: "mdi-scatter-plot" },
       { name: "Avillo", title: "Avillos", icon: "mdi-scatter-plot-outline" },
-      { name: "Talla", title: "Tallas", icon: "mdi-format-list-numbered" },
+      { name: "Cliente", title: "Clientes", icon: "mdi-account-box-multiple" },
+      { name: "Estilo", title: "Estilos", icon: "mdi-shoe-heel" },
+      { name: "Forro", title: "Forros", icon: "mdi-layers-triple" },
+      { name: "Horma", title: "Hormas", icon: "mdi-shoe-formal" },
       { name: "Linea", title: "Lineas", icon: "mdi-equal" },
+      { name: "Material", title: "Materiales", icon: "mdi-layers-outline" },
       { name: "Plantilla", title: "Plantillas", icon: "mdi-shore" },
+      { name: "Suela", title: "Suelas", icon: "mdi-shoe-print" },
+      { name: "Talla", title: "Tallas", icon: "mdi-format-list-numbered" },
     ],
   }),
   computed: {
     ...mapState(["showBar", "snackbar"]),
-    ...mapGetters(["isEmpty","semanaSeleccionada"]),
+    ...mapGetters(["isEmpty", "semanaSeleccionada"]),
   },
   methods: {},
   created() {},

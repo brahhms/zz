@@ -229,6 +229,18 @@ export default {
     adornos: state => state.adornos,
     unidades: state => state.unidades,
 
-    nuevoAdorno: state => state.nuevoAdorno
+    nuevoAdorno: state => state.nuevoAdorno,
+    isValid: state => {
+      if (state.nuevoAdorno.nombre != null &&
+        state.nuevoAdorno.nombre != ''&&
+        state.nuevoAdorno.nombre != ' '&&
+        state.nuevoAdorno.unidad !=null 
+        ) {
+        return true;
+      } else {
+        return false
+      }
+
+    },
   }
 }

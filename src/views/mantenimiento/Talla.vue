@@ -1,95 +1,38 @@
 <template>
-  <div class="talla">
-    <v-data-table
-      :headers="headers"
-      :items="allTallas"
-      class="elevation-1"
-      disable-pagination
-      hide-default-footer
-    >
-      <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>TALLAS</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
-          <v-dialog persistent v-model="dialog" max-width="300px">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nueva Talla
-              </v-btn>
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
-              </v-card-title>
-
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12">
-                      <v-text-field
-                        v-model="nueva.nombre"
-                        label="Nombre"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">
-                  Cancelar
-                </v-btn>
-                <v-btn color="blue darken-1" text @click="save">
-                  Guardar
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-          <v-dialog v-model="dialogDelete" max-width="500px">
-            <v-card>
-              <v-card-title class="headline"
-                >Desea eliminar esta talla?</v-card-title
-              >
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="closeDelete"
-                  >Cancelar</v-btn
-                >
-                <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                  >SI</v-btn
-                >
-                <v-spacer></v-spacer>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-toolbar>
-      </template>
-      <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
-        <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
-      </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize"> Reset </v-btn>
-      </template>
-    </v-data-table>
-  </div>
+  <vista
+    :viewName="'Tallas'"
+    :title="'talla'"
+    :headers="headers"
+    :initialize="initialize"
+    :items="tallas"
+    :saveItem="saveTalla"
+    :updateItem="updateTalla"
+    :deleteItem="deleteTalla"
+    :iniciar="iniciarTalla"
+    :setNuevoItem="setNuevaTalla"
+    :isValid="isValid"
+  >
+    <v-container>
+      <v-row>
+        <v-col cols="12">
+          <v-text-field v-model="nueva.nombre" label="Nombre"></v-text-field>
+        </v-col>
+      </v-row>
+    </v-container>
+  </vista>
 </template>
 
-
-
 <script>
-import { createNamespacedHelpers, mapMutations } from "vuex";
-const {
-  mapGetters,
-  mapActions,
-  mapMutations: mapMutationsTalla,
-} = createNamespacedHelpers("talla");
+import Vista from "../../components/Vista.vue";
+import { createNamespacedHelpers } from "vuex";
+const { mapGetters, mapActions, mapMutations } =
+  createNamespacedHelpers("talla");
+
 export default {
+  components: {
+    Vista,
+  },
   data: () => ({
-    dialog: false,
-    dialogDelete: false,
     headers: [
       {
         text: "Nombre",
@@ -100,31 +43,11 @@ export default {
 
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    editedIndex: -1,
   }),
 
   computed: {
-    formTitle() {
-      return this.editedIndex === -1 ? "Nueva Talla" : "Editar Talla";
-    },
-    ...mapGetters(["tallas", "nuevaTalla"]),
-    allTallas: {
-      set(tallas) {
-        return tallas;
-      },
-      get() {
-        return this.tallas.sort(function (a, b) {
-        if (Number(a.nombre) > Number(b.nombre)) {
-          return 1;
-        }
-        if (Number(a.nombre) < Number(b.nombre)) {
-          return -1;
-        }
-        // a must be equal to b
-        return 0;
-      });
-      },
-    },
+    ...mapGetters(["tallas", "nuevaTalla","isValid"]),
+
     nueva: {
       set(talla) {
         this.setNuevaTalla(talla);
@@ -136,14 +59,7 @@ export default {
     },
   },
 
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-    dialogDelete(val) {
-      val || this.closeDelete();
-    },
-  },
+  watch: {},
 
   created() {
     this.initialize();
@@ -151,61 +67,10 @@ export default {
 
   methods: {
     ...mapActions(["getTallas", "updateTalla", "saveTalla", "deleteTalla"]),
-    ...mapMutationsTalla(["iniciarTalla", "setNuevaTalla"]),
-    ...mapMutations(["mostrarMsj"]),
+    ...mapMutations(["iniciarTalla", "setNuevaTalla"]),
+
     async initialize() {
       await this.getTallas();
-    },
-
-    editItem(item) {
-      this.editedIndex = this.tallas.indexOf(item);
-      this.nueva = Object.assign({}, item);
-      this.dialog = true;
-    },
-
-    deleteItem(item) {
-      this.editedIndex = this.tallas.indexOf(item);
-      this.nueva = Object.assign({}, item);
-      this.dialogDelete = true;
-    },
-
-    async deleteItemConfirm() {
-      let res = await this.deleteTalla();
-      if (res) {
-        this.mostrarMsj("Talla eliminada!");
-      }
-      this.closeDelete();
-    },
-
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.iniciarTalla();
-        this.editedIndex = -1;
-      });
-    },
-
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.iniciarTalla();
-        this.editedIndex = -1;
-      });
-    },
-
-    async save() {
-      if (this.editedIndex > -1) {
-        //editar
-        let res = await this.updateTalla();
-        if (res) {
-          this.mostrarMsj("Talla modificada!");
-        }
-      } else {
-        //guardar
-        let msj = await this.saveTalla();
-        this.mostrarMsj("" + msj);
-      }
-      this.close();
     },
   },
 };

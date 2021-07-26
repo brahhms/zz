@@ -120,6 +120,19 @@ export default {
   getters: {
     suelas: state => state.suelas,
 
-    nuevaSuela: state => state.nuevaSuela
+    nuevaSuela: state => state.nuevaSuela,
+    isValid: state => {
+      if (state.nuevaSuela.nombre != null &&
+        state.nuevaSuela.nombre != '' &&
+        state.nuevaSuela.nombre != ' ' &&
+        state.nuevaSuela.colores.length >0 &&
+        state.nuevaSuela.defaultColor !=null
+        ) {
+        return true;
+      } else {
+        return false
+      }
+
+    },
   }
 }

@@ -134,6 +134,17 @@ export default {
     clientes: state => state.clientes,
     codigos: state => state.codigos,
 
-    nuevoCliente: state => state.nuevoCliente
+    nuevoCliente: state => state.nuevoCliente,
+    isValid: state => {
+      if (state.nuevoCliente.nombre != null &&
+        state.nuevoCliente.nombre != ''&&
+        state.nuevoCliente.nombre != ' '
+        ) {
+        return true;
+      } else {
+        return false
+      }
+
+    },
   }
 }

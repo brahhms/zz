@@ -5,7 +5,7 @@ const url = "http://localhost:5984/zapp-plantillas/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
-    "selector": {},"limit":500
+    "selector": {}, "limit": 500
   }, credentials.authentication);
   return response;
 }
@@ -17,7 +17,7 @@ async function actualizarEnLinea(plantilla, del) {
         { "plantilla._id": plantilla._id },
         { "plantilla.nombre": plantilla.nombre }
       ]
-    },"limit":500
+    }, "limit": 500
   }, credentials.authentication);
 
   let lineas = response.data.docs;
@@ -47,7 +47,7 @@ async function actualizarEnEstilo(plantilla, del) {
         { "linea.plantilla._id": plantilla._id },
         { "linea.plantilla.nombre": plantilla.nombre }
       ]
-    },"limit":500
+    }, "limit": 500
   }, credentials.authentication);
 
   let estilos = response.data.docs;
@@ -72,7 +72,7 @@ async function actualizarEnEstilo(plantilla, del) {
 
 async function getAvillos() {
   const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
-    "selector": {},"limit":500
+    "selector": {}, "limit": 500
   }, credentials.authentication);
   return res.data.docs;
 }
@@ -96,11 +96,8 @@ export default {
     },
 
     async setNuevaPlantilla(state, plantilla) {
-
-      if (plantilla._id == undefined || plantilla._id == null) {
-        state.nuevaPlantilla = plantilla;
-      } else {
-        state.nuevaPlantilla = plantilla;
+      state.nuevaPlantilla = plantilla;
+      if (plantilla._id != undefined && plantilla._id != null) {
         let avillos = await getAvillos();
         avillos.forEach(avillo => {
           plantilla.avillos.forEach(a => {
@@ -109,11 +106,11 @@ export default {
               avillo.cantidadInicial = a.cantidadInicial;
               avillo.unidad = a.unidad;
               avillo.unidadConversion = a.unidadConversion;
-
+              avillo.icon = "mdi-check";
             }
           });
         });
-        state.nuevaPlantilla.avillos=avillos;
+        state.nuevaPlantilla.avillos = avillos;
       }
 
     },
@@ -143,7 +140,7 @@ export default {
     }) {
 
       const res = await axios.post(`http://localhost:5984/zapp-avillos/_find`, {
-        "selector": {},"limit":500
+        "selector": {}, "limit": 500
       }, credentials.authentication);
 
 
@@ -163,7 +160,7 @@ export default {
       commit
     }) {
       const res = await axios.post(`${url}_find`, {
-        "selector": {},"limit":500
+        "selector": {}, "limit": 500
       }, credentials.authentication);
 
       if (res.statusText == 'OK') {
@@ -178,10 +175,10 @@ export default {
       state
     }) {
 
-      let nueva = {...state.nuevaPlantilla};
-      nueva.avillos = nueva.avillos.filter(a=>Number(a.cantidad)>0);
+      let nueva = { ...state.nuevaPlantilla };
+      nueva.avillos = nueva.avillos.filter(a => Number(a.cantidad) > 0);
 
-      let res = await axios.put(`${url}${nueva._id}/`,nueva, {
+      let res = await axios.put(`${url}${nueva._id}/`, nueva, {
         params: {
           "rev": state.nuevaPlantilla._rev
         },
@@ -203,8 +200,8 @@ export default {
       commit,
       state
     }) {
-      let nueva = {...state.nuevaPlantilla};
-      nueva.avillos = nueva.avillos.filter(a=>Number(a.cantidad)>0);
+      let nueva = { ...state.nuevaPlantilla };
+      nueva.avillos = nueva.avillos.filter(a => Number(a.cantidad) > 0);
 
       let res = await axios.post(`${url}`, nueva, {
         "auth": credentials.authentication.auth,
@@ -224,6 +221,7 @@ export default {
       commit,
       state
     }) {
+
       let res = await axios.delete(`${url}${state.nuevaPlantilla._id}`, {
         params: {
           "rev": state.nuevaPlantilla._rev
@@ -232,11 +230,15 @@ export default {
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
+
       if (res.data.ok) {
         const response = await getAll();
         commit('setPlantillas', response.data.docs);
+
+        let nueva = { ...state.nuevaPlantilla };
         await actualizarEnLinea(nueva, true);
         await actualizarEnEstilo(nueva, true);
+
       } else {
         console.log('errorDelete');
       }
@@ -246,7 +248,19 @@ export default {
   getters: {
     plantillas: state => state.plantillas,
 
+    nuevaPlantilla: state => state.nuevaPlantilla,
 
-    nuevaPlantilla: state => state.nuevaPlantilla
+    isValid: state => {
+
+      if (state.nuevaPlantilla.nombre != null &&
+        state.nuevaPlantilla.nombre != '' &&
+        state.nuevaPlantilla.nombre != ' ' &&
+        state.nuevaPlantilla.nombre != '  ' &&
+        state.nuevaPlantilla.nombre != '   ') {
+        return true;
+      } else {
+        return false
+      }
+    }
   }
 }

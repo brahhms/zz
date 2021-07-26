@@ -165,12 +165,7 @@ export default {
 
       commit('setCorrelativo', state.nuevoEstilo.correlativo);
 
-      if (Number(state.nuevoEstilo.rendimientoForro) < 1) {
-        state.nuevoEstilo.rendimientoForro = 1;
-      }
-      if (Number(state.nuevoEstilo.rendimientoMaterial) < 1) {
-        state.nuevoEstilo.rendimientoMaterial = 1;
-      }
+
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = Number(rendimientoForro);
@@ -214,18 +209,12 @@ export default {
       state
     }) {
 
-
       commit('setCorrelativo', state.nuevoEstilo.correlativo);
       let existe = await existeCodigo(state.nuevoEstilo.codigo);
       if (existe) {
         return "ya existe el codigo " + state.nuevoEstilo.codigo;
       }
-      if (Number(state.nuevoEstilo.rendimientoForro) < 1) {
-        state.nuevoEstilo.rendimientoForro = 1;
-      }
-      if (Number(state.nuevoEstilo.rendimientoMaterial) < 1) {
-        state.nuevoEstilo.rendimientoForro = 1;
-      }
+
 
       let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
       let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
@@ -298,8 +287,10 @@ export default {
         let existe = false;
         state.nuevoEstilo.avillos.forEach(avillo => {
           if (avillo.nombre == avilloDeLinea.nombre) {
+            avillo.icon = "mdi-check";
             existe = true;
           }
+          avilloDeLinea.icon = "mdi-check";
         });
         if (!existe) {
           state.nuevoEstilo.avillos.push(avilloDeLinea);
@@ -390,6 +381,18 @@ export default {
     estilos: state => state.estilos,
 
     lineas: state => state.lineas,
-    nuevoEstilo: state => state.nuevoEstilo
+    nuevoEstilo: state => state.nuevoEstilo,
+
+    isValid: state => {
+
+      if (state.nuevoEstilo.rendimientoMaterial > 0 &&
+        state.nuevoEstilo.rendimientoForro > 0 &&
+        state.nuevoEstilo.linea !=null &&
+        state.nuevoEstilo.correlativo >0) {
+        return true;
+      } else {
+        return false
+      }
+    }
   }
 }

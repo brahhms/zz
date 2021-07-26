@@ -121,6 +121,19 @@ export default {
   getters: {
     materiales: state => state.materiales,
 
-    nuevoMaterial: state => state.nuevoMaterial
+    nuevoMaterial: state => state.nuevoMaterial,
+    isValid: state => {
+      if (state.nuevoMaterial.nombre != null &&
+        state.nuevaMaterial.nombre != '' &&
+        state.nuevoMaterial.nombre != ' ' &&
+        state.nuevoMaterial.colores.length >0 &&
+        state.nuevoMaterial.defaultColor !=null
+        ) {
+        return true;
+      } else {
+        return false
+      }
+
+    },
   }
 }

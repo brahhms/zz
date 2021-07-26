@@ -118,6 +118,17 @@ export default {
   getters: {
     hormas: state => state.hormas,
 
-    nuevaHorma: state => state.nuevaHorma
+    nuevaHorma: state => state.nuevaHorma,
+    isValid: state => {
+      if (state.nuevaHorma.nombre != null &&
+        state.nuevaHorma.nombre != ''&&
+        state.nuevaHorma.nombre != ' '
+        ) {
+        return true;
+      } else {
+        return false
+      }
+
+    },
   }
 }

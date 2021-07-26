@@ -19,14 +19,18 @@ import Imagenes from '../components/Imagenes.vue';
 import Imprimir from "../components/Imprimir.vue";
 import ImprimirLista from "../components/ImprimirLista.vue";
 
+
+
 Vue.use(VueRouter)
 
 const routes = [
+
   {
     path: '/',
     name: 'Home',
     component: Home
   },
+
   {
     path: '/plantilla',
     name: 'Plantilla',

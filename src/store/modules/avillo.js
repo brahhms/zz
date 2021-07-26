@@ -413,6 +413,18 @@ export default {
     avillos: state => state.avillos,
     unidades: state => state.unidades,
 
-    nuevoAvillo: state => state.nuevoAvillo
+    nuevoAvillo: state => state.nuevoAvillo,
+    isValid: state => {
+      if (state.nuevoAvillo.nombre != null &&
+        state.nuevoAvillo.nombre != ''&&
+        state.nuevoAvillo.nombre != ' '&&
+        state.nuevoAvillo.unidad !=null 
+        ) {
+        return true;
+      } else {
+        return false
+      }
+
+    },
   }
 }

@@ -1,158 +1,72 @@
 <template>
-  <div class="avillo">
-    <v-data-table
-      :headers="headers"
-      :items="allAvillos"
-      class="elevation-1"
-      disable-pagination
-      hide-default-footer
-    >
-      <template v-slot:item.unidad="{ item }">
-        {{ item.unidad.nombre }}
-      </template>
-
-      <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>AVILLOS</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
-          <v-dialog persistent v-model="dialog" max-width="550px" scrollable>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nuevo Avillo
-              </v-btn>
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
-              </v-card-title>
-
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12">
-                      <v-text-field
-                        v-model="nuevo.nombre"
-                        label="Nombre"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-autocomplete
-                        v-model="nuevo.unidad"
-                        :items="unidades"
-                        label="Unidades"
-                        item-text="nombre"
-                        return-object
-                      ></v-autocomplete>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-checkbox
-                        label="Predeterminado"
-                        v-model="nuevo.predeterminado"
-                      ></v-checkbox>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-checkbox
-                        label="Para Tacon?"
-                        v-model="nuevo.paraTacon"
-                      ></v-checkbox>
-                    </v-col>
-                    <v-col>
-                      <v-checkbox
-                        label="Color segun Material?"
-                        v-model="nuevo.colorSegunMaterial"
-                      ></v-checkbox>
-                    </v-col>
-                    <v-col>
-                      <v-checkbox
-                        label="Color segun Suela?"
-                        v-model="nuevo.colorSegunSuela"
-                      ></v-checkbox>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">
-                  Cancelar
-                </v-btn>
-                <v-btn color="blue darken-1" text @click="save">
-                  Guardar
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-          <v-dialog v-model="dialogDelete" max-width="500px">
-            <v-card>
-              <v-card-title class="headline"
-                >Desea eliminar esta avillo?</v-card-title
-              >
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="closeDelete"
-                  >Cancelar</v-btn
-                >
-                <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                  >SI</v-btn
-                >
-                <v-spacer></v-spacer>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-toolbar>
-      </template>
-
-      <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
-        <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
-      </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize"> Reset </v-btn>
-      </template>
-      <template v-slot:item.unidad="{ item }">
-        {{ item.unidad.nombre }}
-      </template>
-      <template v-slot:item.colorSegunMaterial="{ item }">
-        <v-simple-checkbox
-          v-model="item.colorSegunMaterial"
-          disabled
-        ></v-simple-checkbox>
-      </template>
-       <template v-slot:item.colorSegunSuela="{ item }">
-        <v-simple-checkbox
-          v-model="item.colorSegunSuela"
-          disabled
-        ></v-simple-checkbox>
-      </template>
-      <template v-slot:item.predeterminado="{ item }">
-        <v-simple-checkbox
-          v-model="item.predeterminado"
-          disabled
-        ></v-simple-checkbox>
-      </template>
-      <template v-slot:item.paraTacon="{ item }">
-        <v-simple-checkbox
-          v-model="item.paraTacon"
-          disabled
-        ></v-simple-checkbox>
-      </template>
-    </v-data-table>
-  </div>
+  <vista
+    :viewName="'Avillos'"
+    :title="'avillo'"
+    :headers="headers"
+    :initialize="initialize"
+    :items="avillos"
+    :saveItem="saveAvillo"
+    :updateItem="updateAvillo"
+    :deleteItem="deleteAvillo"
+    :iniciar="iniciarAvillo"
+    :setNuevoItem="setNuevoAvillo"
+    :isValid="isValid"
+  >
+    <v-container>
+      <v-row>
+        <v-col cols="12">
+          <v-text-field v-model="nuevo.nombre" label="Nombre"></v-text-field>
+        </v-col>
+        <v-col cols="12">
+          <v-autocomplete
+            v-model="nuevo.unidad"
+            :items="unidades"
+            label="Unidades"
+            item-text="nombre"
+            return-object
+          ></v-autocomplete>
+        </v-col>
+        <v-col cols="12">
+          <v-checkbox
+            label="Predeterminado"
+            v-model="nuevo.predeterminado"
+          ></v-checkbox>
+        </v-col>
+        <v-col cols="12">
+          <v-checkbox
+            label="Para Tacon?"
+            v-model="nuevo.paraTacon"
+          ></v-checkbox>
+        </v-col>
+        <v-col>
+          <v-checkbox
+            label="Color segun Material?"
+            v-model="nuevo.colorSegunMaterial"
+          ></v-checkbox>
+        </v-col>
+        <v-col>
+          <v-checkbox
+            label="Color segun Suela?"
+            v-model="nuevo.colorSegunSuela"
+          ></v-checkbox>
+        </v-col>
+      </v-row>
+    </v-container>
+  </vista>
 </template>
 
 
-
 <script>
+import Vista from "../../components/Vista.vue";
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers(
-  "avillo"
-);
+const { mapGetters, mapActions, mapMutations } =
+  createNamespacedHelpers("avillo");
+
 export default {
+  components: {
+    Vista,
+  },
   data: () => ({
-    dialog: false,
-    dialogDelete: false,
     headers: [
       {
         text: "Nombre",
@@ -185,7 +99,7 @@ export default {
         sortable: false,
         value: "colorSegunMaterial",
       },
-            {
+      {
         text: "Color segun Suela",
         align: "start",
         sortable: false,
@@ -194,22 +108,10 @@ export default {
 
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    editedIndex: -1,
   }),
 
   computed: {
-    formTitle() {
-      return this.editedIndex === -1 ? "Nuevo Avillo" : "Editar Avillo";
-    },
-    ...mapGetters(["avillos", "unidades", "nuevoAvillo"]),
-    allAvillos: {
-      set(avillos) {
-        return avillos;
-      },
-      get() {
-        return this.avillos;
-      },
-    },
+    ...mapGetters(["avillos", "unidades", "nuevoAvillo","isValid"]),
     nuevo: {
       set(avillo) {
         this.setNuevoAvillo(avillo);
@@ -221,14 +123,7 @@ export default {
     },
   },
 
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-    dialogDelete(val) {
-      val || this.closeDelete();
-    },
-  },
+  watch: {},
 
   created() {
     this.initialize();
@@ -237,52 +132,9 @@ export default {
   methods: {
     ...mapActions(["getAvillos", "updateAvillo", "saveAvillo", "deleteAvillo"]),
     ...mapMutations(["iniciarAvillo", "setNuevoAvillo"]),
+
     async initialize() {
       await this.getAvillos();
-    },
-
-    editItem(item) {
-      this.editedIndex = this.avillos.indexOf(item);
-      this.nuevo = Object.assign({}, item);
-      this.dialog = true;
-    },
-
-    deleteItem(item) {
-      this.editedIndex = this.avillos.indexOf(item);
-      this.nuevo = Object.assign({}, item);
-      this.dialogDelete = true;
-    },
-
-    deleteItemConfirm() {
-      this.deleteAvillo();
-      this.closeDelete();
-    },
-
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.iniciarAvillo();
-        this.editedIndex = -1;
-      });
-    },
-
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.iniciarAvillo();
-        this.editedIndex = -1;
-      });
-    },
-
-    async save() {
-      if (this.editedIndex > -1) {
-        //editar
-        await this.updateAvillo();
-      } else {
-        //guardar
-        await this.saveAvillo();
-      }
-      this.close();
     },
   },
 };
