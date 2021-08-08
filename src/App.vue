@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import { createNamespacedHelpers, mapState } from "vuex";
+import { createNamespacedHelpers, mapState ,mapActions} from "vuex";
 const { mapGetters } = createNamespacedHelpers("pedido");
 export default {
   name: "App",
@@ -117,8 +117,10 @@ export default {
     ...mapState(["showBar", "snackbar"]),
     ...mapGetters(["isEmpty", "semanaSeleccionada"]),
   },
-  methods: {},
-  created() {},
+
+  created() {
+
+  },
 };
 </script>
 

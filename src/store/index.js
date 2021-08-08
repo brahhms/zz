@@ -14,7 +14,6 @@ import lineaStore from "./modules/linea";
 import plantillaStore from "./modules/plantilla";
 
 
-
 Vue.use(Vuex)
 
 
@@ -33,12 +32,13 @@ export default new Vuex.Store({
     ocultarBarra(state) {
       state.showBar = false;
     },
-    mostrarMsj(state,msj) {
+    mostrarMsj(state, msj) {
       state.snackbar.msj = msj;
       state.snackbar.show = true;
     },
   },
   actions: {
+
   },
   modules: {
     cliente: clienteStore,
@@ -52,6 +52,6 @@ export default new Vuex.Store({
     adorno: adornoStore,
     avillo: avilloStore,
     linea: lineaStore,
-    plantilla:plantillaStore
+    plantilla: plantillaStore
   }
 })

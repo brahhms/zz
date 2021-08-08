@@ -128,12 +128,22 @@
                             <v-btn
                               dark
                               text
-                              @click="setPedidoAMover(pedido)"
+                              @click="setPedidoAMover(pedido, true)"
                               v-bind="attrs"
                               v-on="on"
                             >
-                              <v-icon dark>mdi-file-move </v-icon>Mover a
+                              <v-icon dark>mdi-arrow-right-bold-box</v-icon>Mover a
                               siguiente semana
+                            </v-btn>
+                            <v-btn
+                              dark
+                              text
+                              @click="setPedidoAMover(pedido, false)"
+                              v-bind="attrs"
+                              v-on="on"
+                            >
+                              <v-icon dark>mdi-arrow-left-bold-box</v-icon>Mover a semana
+                              anterior
                             </v-btn>
                           </template>
                           <v-card>
@@ -494,17 +504,17 @@ export default {
       this.setPedido(p);
     },
 
-    setPedidoAMover(pedido) {
+    setPedidoAMover(pedido, moveForward) {
       let p = Object.assign({}, pedido);
       p.isEditing = false;
       p.isMoving = true;
-    //  p.semana = this.semanaSeleccionada.siguienteSemana;
+      p.moveForward = moveForward;
       this.setPedido(p);
     },
     async mover() {
       let res = await this.moverPedido();
       if (res.status == 201 || res.status == 200) {
-        this.mostrarMsj("Se ha movido el pedido a la siguiente semana ");
+        this.mostrarMsj("Se ha movido el pedido");
       }
     },
     async eliminar() {
@@ -537,8 +547,9 @@ export default {
           "Semana " +
             this.semanaSeleccionada.semana +
             " " +
-            this.semanaSeleccionada.ano+
-            " - "+this.semanaSeleccionada.color,
+            this.semanaSeleccionada.ano +
+            " - " +
+            this.semanaSeleccionada.color,
           0.5,
           0.8
         );
@@ -597,8 +608,6 @@ export default {
             { title: "Subtotal", dataKey: "subtotal" },
           ],
         ];
-    
-
 
         doc.autoTable({
           head,
@@ -625,8 +634,9 @@ export default {
           "Semana " +
             this.semanaSeleccionada.semana +
             " " +
-            this.semanaSeleccionada.ano+
-            " - "+this.semanaSeleccionada.color,
+            this.semanaSeleccionada.ano +
+            " - " +
+            this.semanaSeleccionada.color,
           0.5,
           0.8
         );
@@ -790,7 +800,6 @@ export default {
   created() {
     this.srcPedidos = `http://localhost:8080/#/Imprimir?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}&color=${this.semanaSeleccionada.color}`;
     this.srcLista = `http://localhost:8080/#/ImprimirLista?ano=${this.semanaSeleccionada.ano}&semana=${this.semanaSeleccionada.semana}&color=${this.semanaSeleccionada.color}`;
-
   },
 };
 </script>

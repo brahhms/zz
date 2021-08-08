@@ -41,8 +41,6 @@ function generateSemana(semana) {
     adornos: [],
     avillos: [],
     suelas: [],
-    tacones: [],
-    estilos: [],
     materiales: [],
     forros: []
   };
@@ -50,8 +48,84 @@ function generateSemana(semana) {
   semana.pedidos.forEach(pedido => {
     pedido.total = 0;
     pedido.detalle.forEach((detalle) => {
-      detalle.cloned=false;
-      
+      detalle.cloned = false;
+
+
+      let rendimientoForro = (detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
+      let rendimientoMaterial = (detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial);
+      let enLista;
+      let nuevo = {
+        forro: {
+          _id: detalle.detalleForro.forro._id,
+          nombre: "forro " + detalle.detalleForro.forro.nombre,
+          color: detalle.detalleForro.color,
+          cantidad: Number(rendimientoForro.toFixed(5))
+        },
+        material: {
+          _id: detalle.detalleMaterial.material._id + detalle.detalleMaterial.color,
+          nombre: detalle.detalleMaterial.material.nombre,
+          color: detalle.detalleMaterial.color,
+          cantidad: Number(rendimientoMaterial.toFixed(5))
+        },
+        suela: {
+          _id: detalle.detalleSuela.suela._id + detalle.detalleSuela.color,
+          nombre: detalle.detalleSuela.suela.nombre,
+          color: detalle.detalleSuela.color,
+          detalle: detalle.detalleTallas.filter(s => s.cantidad > 0),
+          total: 0
+        }
+      };
+      nuevo.suela.detalle = nuevo.suela.detalle.map(s => {
+        nuevo.suela.total += s.cantidad;
+        return {
+          nombre: s.talla.nombre,
+          cantidad: s.cantidad
+        }
+      });
+
+      enLista = lista.suelas.find(sue => sue.nombre === nuevo.suela.nombre && nuevo.suela.color === sue.color);
+      if (enLista) {
+
+        enLista.total = 0;
+        detalle.detalleTallas.forEach(t => {
+
+          let tallaEnLista = enLista.detalle.find(l => l.nombre == t.talla.nombre);
+          if (tallaEnLista) {
+            tallaEnLista.cantidad += t.cantidad;
+            enLista.total += tallaEnLista.cantidad;
+          } else {
+            enLista.detalle.push({
+              nombre: t.talla.nombre,
+              cantidad: t.cantidad
+            });
+            enLista.total += t.cantidad;
+          }
+
+        });
+
+      } else {
+        lista.suelas.push(nuevo.suela);
+      }
+
+
+      enLista = lista.forros.find(forr => forr._id === nuevo.forro._id && nuevo.forro.color === forr.color);
+      if (enLista) {
+        enLista.cantidad = Number(enLista.cantidad) + rendimientoForro;
+        enLista.cantidad = Number(enLista.cantidad.toFixed(5));
+      } else {
+        lista.forros.push(nuevo.forro);
+      }
+
+      enLista = lista.materiales.find(mat => mat._id === nuevo.material._id && nuevo.material.color === mat.color);
+      if (enLista) {
+        enLista.cantidad = Number(enLista.cantidad) + rendimientoMaterial;
+        enLista.cantidad = Number(enLista.cantidad.toFixed(5));
+      } else {
+        lista.materiales.push(nuevo.material);
+      }
+
+
+
       detalle.estilo.adornos.forEach((adorno) => {
         if (adorno.cantidad > 0) {
 
@@ -63,6 +137,7 @@ function generateSemana(semana) {
               existe = true;
               //xcepcion2
               if (adornoEnLista.nombre.includes("puntera")) {
+
                 detalle.detalleTallas.filter(x => x.cantidad > 0).forEach(t => {
                   let h = t.talla.nombre;
                   if (h == '3') {
@@ -75,9 +150,9 @@ function generateSemana(semana) {
                     adornoEnLista.punteras[3].cantidad += t.cantidad;
                   }
                 });
-                let total = 0;
+
                 let resumen = adornoEnLista.punteras.map(m => {
-                  total += m.cantidad;
+
                   return " " + " " + m.cantidad + "/" + m.categoria;
                 }).join();
 
@@ -109,9 +184,9 @@ function generateSemana(semana) {
                     nuevoAdorno.punteras[3].cantidad += t.cantidad;
                   }
                 });
-                let total = 0;
+                //let total = 0;
                 let resumen = nuevoAdorno.punteras.map(m => {
-                  total += m.cantidad;
+                  //total += m.cantidad;
                   return " " + " " + m.cantidad + "/" + m.categoria;
                 }).join();
 
@@ -147,9 +222,14 @@ function generateSemana(semana) {
 
           if (!existe) {
 
-            let nuevoAvillo = Object.assign({}, avillo);
-            nuevoAvillo.cantidad = nuevoAvillo.cantidad * detalle.subtotal;
-            nuevoAvillo.cantidad = Number(nuevoAvillo.cantidad.toFixed(5));
+            let nuevoAvillo = {
+              _id: avillo._id,
+              nombre: avillo.nombre,
+              cantidad: Number(avillo.cantidad * detalle.subtotal).toFixed(5),
+              unidad: {
+                nombre: avillo.unidad.nombre
+              }
+            };
 
             if (avillo.colorSegunMaterial) {
               nuevoAvillo.nombre = avillo.nombre + " " + detalle.detalleMaterial.material.nombre + " " + detalle.detalleMaterial.color;
@@ -166,115 +246,6 @@ function generateSemana(semana) {
 
         }
       });
-
-      let existeMaterial = false;
-      lista.materiales.forEach((materialEnLista) => {
-
-        if (detalle.detalleMaterial.material.nombre == materialEnLista.nombre &&
-          detalle.detalleMaterial.color == materialEnLista.color) {
-          materialEnLista.cantidad = Number(materialEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial);
-          materialEnLista.cantidad = Number(materialEnLista.cantidad.toFixed(5));
-          existeMaterial = true;
-
-        }
-
-      });
-
-      if (!existeMaterial) {
-        let rendimientoMaterial = Number((detalle.subtotal) * Number(detalle.estilo.rendimientoMaterial));
-        let nuevoMaterial = {
-          _id: detalle.detalleMaterial.material._id + detalle.detalleMaterial.color,
-          nombre: detalle.detalleMaterial.material.nombre,
-          color: detalle.detalleMaterial.color,
-          cantidad: Number(rendimientoMaterial.toFixed(5))
-        };
-
-        lista.materiales.push(nuevoMaterial);
-      }
-
-      let existeForro = false;
-      lista.forros.forEach((forroEnLista) => {
-
-        if (detalle.detalleForro.forro._id == forroEnLista._id &&
-          detalle.detalleForro.color == forroEnLista.color) {
-          forroEnLista.cantidad = Number(forroEnLista.cantidad) + Number(detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
-          forroEnLista.cantidad = Number(forroEnLista.cantidad.toFixed(5));
-          existeForro = true;
-        }
-      });
-
-      if (!existeForro) {
-        let rendimientoForro = (detalle.subtotal) * Number(detalle.estilo.rendimientoForro);
-        let nuevoForro = {
-          _id: detalle.detalleForro.forro._id,
-          nombre: "forro " + detalle.detalleForro.forro.nombre,
-          color: detalle.detalleForro.color,
-          cantidad: Number(rendimientoForro.toFixed(5))
-        };
-
-        lista.forros.push(nuevoForro);
-      }
-
-      let existeSuela = false;
-      lista.suelas.forEach((suelaEnLista) => {
-
-        if (detalle.detalleSuela.suela.nombre == suelaEnLista.nombre &&
-          detalle.detalleSuela.color == suelaEnLista.color) {
-          suelaEnLista.total = 0;
-          detalle.detalleTallas.forEach(t => {
-            let e = false;
-            suelaEnLista.detalle.forEach(l => {
-              if (t.talla.nombre == l.nombre) {
-                l.cantidad += t.cantidad;
-                suelaEnLista.total += l.cantidad;
-                e = true
-              }
-            });
-            if (!e) {
-              suelaEnLista.detalle.push({
-                nombre: t.talla.nombre,
-                cantidad: t.cantidad
-              });
-              suelaEnLista.total += t.cantidad;
-            }
-          });
-          existeSuela = true;
-        }
-      });
-
-      if (!existeSuela) {
-        let nuevaSuela = {
-          _id: detalle.detalleSuela.suela._id + detalle.detalleSuela.color,
-          nombre: detalle.detalleSuela.suela.nombre,
-          color: detalle.detalleSuela.color,
-          detalle: detalle.detalleTallas.filter(s => s.cantidad > 0),
-          total: 0
-        };
-
-        nuevaSuela.detalle = nuevaSuela.detalle.map(s => {
-          nuevaSuela.total += s.cantidad;
-          return {
-            nombre: s.talla.nombre,
-            cantidad: s.cantidad
-          }
-        });
-
-        lista.suelas.push(nuevaSuela);
-      }
-
-      lista.suelas.forEach(sue => {
-        sue.detalle = sue.detalle.sort((a, b) => {
-          if (Number(a.nombre) > Number(b.nombre))
-            return 1;
-
-          if (Number(a.nombre) < Number(b.nombre))
-            return -1;
-
-          return 0;
-        });
-      });
-
-
       detalle.estilo.linea.plantilla.avillos.forEach(avillo => {
         let existePlantilla = false;
 
@@ -312,55 +283,46 @@ function generateSemana(semana) {
         existePlantilla = false;
       });
 
-
-
-      lista.estilos.push({
-        codigo: detalle.estilo.linea.nombre + detalle.estilo.correlativo,
-        rendimientoPorYarda: detalle.estilo.rendimientoPorYarda,
-        capeyada: detalle.estilo.capeyada,
-      });
-
-      if (detalle.detalleTacon.material != null) {
-        detalle.detalleTacon.cantidad = 0.1;
-        lista.tacones.push(detalle.detalleTacon);
-      }
-
-
       pedido.total += detalle.subtotal;
 
     });
 
   });
 
+  lista.suelas.forEach(sue => {
+    sue.detalle = sue.detalle.sort((a, b) => {
+      if (Number(a.nombre) > Number(b.nombre))
+        return 1;
+      if (Number(a.nombre) < Number(b.nombre))
+        return -1;
+      return 0;
+    });
+  });
+
+
   lista.adornos = lista.adornos.sort((a, b) => {
     if (a.nombre > b.nombre)
       return 1;
-
     if (a.nombre < b.nombre)
       return -1;
-
     return 0;
   });
   lista.avillos = lista.avillos.sort((a, b) => {
     if (a.nombre > b.nombre)
       return 1;
-
     if (a.nombre < b.nombre)
       return -1;
-
     return 0;
   });
   lista.materiales = lista.materiales.sort((a, b) => {
     if (a.nombre > b.nombre)
       return 1;
-
     if (a.nombre < b.nombre)
       return -1;
-
     return 0;
   });
 
-  semana.listaDeCompras = lista;
+  semana.listaDeCompras = { ...lista };
 
   return semana
 }
@@ -370,6 +332,7 @@ async function createSemana(pedido, color) {
     "semana": pedido.semana,
     "color": color,
     "siguienteSemana": pedido.siguienteSemana,
+    "anteriorSemana": pedido.anteriorSemana,
     "ano": pedido.ano,
     "fecha": pedido.fecha,
     "pedidos": [pedido],
@@ -394,6 +357,7 @@ export default {
       fecha: null,
       semana: null,
       siguienteSemana: null,
+      anteriorSemana: null,
       detalle: [],
       isEditing: false,
       isMoving: false,
@@ -425,6 +389,9 @@ export default {
     setSiguienteSemana(state, semana) {
       state.pedido.siguienteSemana = semana;
     },
+    setAnteriorSemana(state, semana) {
+      state.pedido.anteriorSemana = semana;
+    },
     clearStates(state) {
       state.isEditing = false;
       state.isMoving = false;
@@ -432,6 +399,7 @@ export default {
       state.pedido.fecha = state.semanaSeleccionada.fecha;
       state.pedido.semana = state.semanaSeleccionada.semana;
       state.pedido.siguienteSemana = state.semanaSeleccionada.siguienteSemana;
+      state.pedido.anteriorSemana = state.semanaSeleccionada.anteriorSemana;
     },
     setPedido(state, pedido) {
       state.pedido = pedido;
@@ -439,11 +407,7 @@ export default {
     setRevSemana(state, rev) {
       state.semanaSeleccionada._rev = rev;
     },
-    actualizarPedidos(state, pedidos) {
-      //borrame?
-      state.semanaSeleccionada.pedidos = pedidos;
-      console.log("actualizando");
-    },
+
     setAnoPedido(state, year) {
       state.pedido.ano = year;
     },
@@ -452,12 +416,6 @@ export default {
     },
     setCliente(state, cliente) {
       state.pedido.cliente = cliente;
-      if (cliente != null) {
-        console.log("cliente seleccionado en pedido:" + state.pedido.cliente.nombre);
-      } else {
-        console.log("no ha seleccionado ningun cliente");
-      }
-
     },
     pushDetalle(state, detalle) {
       state.pedido.detalle.push(detalle);
@@ -563,7 +521,6 @@ export default {
         if (Number(a.nombre) < Number(b.nombre)) {
           return -1;
         }
-        // a must be equal to b
         return 0;
       });
       state.forros = data[3].data.docs;
@@ -581,6 +538,7 @@ export default {
         fecha: state.pedido.fecha,
         semana: state.pedido.semana,
         siguienteSemana: state.pedido.siguienteSemana,
+        anteriorSemana: state.pedido.anteriorSemana,
         detalle: [],
         isEditing: false,
         isMoving: false,
@@ -595,7 +553,7 @@ export default {
     duplicateDetalle(state, item) {
       let detalle = Object.assign({}, item);
       detalle.cloned = true;
-      detalle.clonedFrom = {...item};
+      detalle.clonedFrom = { ...item };
 
       detalle.detalleMaterial = {
         ...item.detalleMaterial
@@ -766,17 +724,31 @@ export default {
 
 
       let fecha = new Date(state.pedido.fecha);
-      fecha.setDate(fecha.getDate() + 7);
+
+
+      if (state.pedido.moveForward) {
+        fecha.setDate(fecha.getDate() + 7);
+      } else {
+        fecha.setDate(fecha.getDate() - 7);
+      }
+
+
       pedido.fecha = fecha + "";
       state.pedido.fecha = pedido.fecha;
       pedido.semana = fecha.getWeekNumber();
-      state.pedido.semana = pedido.semana;
+      state.pedido.semana = fecha.getWeekNumber();
       pedido.ano = fecha.getFullYear();
-      state.pedido.ano = pedido.ano;
+      state.pedido.ano = fecha.getFullYear();
 
       fecha.setDate(fecha.getDate() + 7);
       pedido.siguienteSemana = fecha.getWeekNumber();
-      state.pedido.siguienteSemana = pedido.siguienteSemana;
+      state.pedido.siguienteSemana = fecha.getWeekNumber();
+
+      fecha.setDate(fecha.getDate() - 14);
+      pedido.anteriorSemana = fecha.getWeekNumber();
+      state.pedido.anteriorSemana = fecha.getWeekNumber();
+
+
 
       const resSemana = await findSemanaByWeek(pedido, semana);
       let nuevaSemana = resSemana.data.docs[0];
@@ -871,6 +843,7 @@ export default {
     semanaSeleccionada: state => state.semanaSeleccionada || {
       semana: null,
       siguienteSemana: null,
+      anteriorSemana: null,
       ano: null,
       color: "gray"
     },

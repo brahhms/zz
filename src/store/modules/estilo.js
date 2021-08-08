@@ -165,9 +165,15 @@ export default {
 
       commit('setCorrelativo', state.nuevoEstilo.correlativo);
 
+      let rendimientoForro = 0;
+      let rendimientoMaterial = 0;
+      if (Number(state.nuevoEstilo.rendimientoForro) > 0) {
+        rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
+      }
+      if (Number(state.nuevoEstilo.rendimientoMaterial) > 0) {
+        rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
+      }
 
-      let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
-      let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
       state.nuevoEstilo.rendimientoForro = Number(rendimientoForro);
       state.nuevoEstilo.rendimientoMaterial = Number(rendimientoMaterial);
       state.nuevoEstilo.adornos = state.nuevoEstilo.adornos.filter(a => Number(a.cantidad) > 0);
@@ -216,8 +222,16 @@ export default {
       }
 
 
-      let rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
-      let rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
+      let rendimientoForro = 0;
+      let rendimientoMaterial = 0;
+      if (Number(state.nuevoEstilo.rendimientoForro) > 0) {
+        rendimientoForro = 1 / Number(state.nuevoEstilo.rendimientoForro);
+      }
+      if (Number(state.nuevoEstilo.rendimientoMaterial) > 0) {
+        rendimientoMaterial = 1 / Number(state.nuevoEstilo.rendimientoMaterial);
+      }
+
+  
       state.nuevoEstilo.rendimientoForro = Number(rendimientoForro);
       state.nuevoEstilo.rendimientoMaterial = Number(rendimientoMaterial);
       state.nuevoEstilo._id = state.nuevoEstilo.codigo;
@@ -385,10 +399,10 @@ export default {
 
     isValid: state => {
 
-      if (state.nuevoEstilo.rendimientoMaterial > 0 &&
-        state.nuevoEstilo.rendimientoForro > 0 &&
-        state.nuevoEstilo.linea !=null &&
-        state.nuevoEstilo.correlativo >0) {
+      if (Number(state.nuevoEstilo.rendimientoMaterial) >= 0 &&
+        Number(state.nuevoEstilo.rendimientoForro) >= 0 &&
+        state.nuevoEstilo.linea != null &&
+        state.nuevoEstilo.correlativo > 0) {
         return true;
       } else {
         return false

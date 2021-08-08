@@ -716,9 +716,6 @@ export default {
         });
         this.detalle.subtotal = subtotal;
 
-        if (this.detalle.cloned === true) {
-          console.log("world");
-        }
       },
       deep: true,
     },

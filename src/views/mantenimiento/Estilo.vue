@@ -290,10 +290,10 @@ export default {
       this.closeDelete();
     },
     editItem(item) {
-      item.rendimientoForro = Math.round(1 / Number(item.rendimientoForro));
-      item.rendimientoMaterial = Math.round(
-        1 / Number(item.rendimientoMaterial)
-      );
+      if (item.rendimientoForro <1 && item.rendimientoMaterial <1 ) {
+        item.rendimientoForro = Math.round(1 / Number(item.rendimientoForro));
+      item.rendimientoMaterial = Math.round(1 / Number(item.rendimientoMaterial));
+      }
       this.editedIndex = this.estilos.indexOf(item);
       this.nuevo = item;
       this.dialog = true;

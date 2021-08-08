@@ -92,7 +92,8 @@ import { createNamespacedHelpers } from "vuex";
 const {
   mapMutations: mapMutationsPedido,
   mapGetters: mapGettersPedido,
-  mapActions: mapActionsPedido,
+  mapActions
+
 } = createNamespacedHelpers("pedido");
 
 Date.prototype.getWeekNumber = function () {
@@ -125,8 +126,10 @@ export default {
       "actualizarPedidos",
       "clearPedido",
       "setSiguienteSemana",
+      "setAnteriorSemana"
     ]),
-    ...mapActionsPedido(["getSemana"]),
+    ...mapActions(["getSemana"]),
+ 
 
     setToday() {
       this.focus = "";
@@ -141,9 +144,11 @@ export default {
 
       let semana = this.semanaDelAno(ano, mes, dia);
       let siguiente = this.siguienteSemana(ano, mes, dia);
+      let anterior = this.anteriorSemana(ano, mes, dia);
 
       this.setSemanaPedido(semana);
       this.setSiguienteSemana(siguiente);
+      this.setAnteriorSemana(anterior);
       this.setAnoPedido(ano);
 
       let mm = mes - 1;
@@ -168,6 +173,12 @@ export default {
       mes--;
       let fecha = new Date(year, mes, dia);
       fecha.setDate(fecha.getDate() + 7);
+      return fecha.getWeekNumber();
+    },
+    anteriorSemana(year, mes, dia) {
+      mes--;
+      let fecha = new Date(year, mes, dia);
+      fecha.setDate(fecha.getDate() - 7);
       return fecha.getWeekNumber();
     },
 
