@@ -1,25 +1,25 @@
 <template>
   <vista
-    :viewName="'Avillos'"
-    :title="'avillo'"
+    viewName="Avillos"
+    title="avillo"
     :headers="headers"
-    :initialize="initialize"
-    :items="avillos"
-    :saveItem="saveAvillo"
-    :updateItem="updateAvillo"
-    :deleteItem="deleteAvillo"
-    :iniciar="iniciarAvillo"
-    :setNuevoItem="setNuevoAvillo"
+    :initialize="findAll"
+    :items="items"
+    :saveItem="save"
+    :updateItem="updateOne"
+    :deleteItem="deleteOne"
+    :iniciar="resetModel"
+    :setNuevoItem="setModel"
     :isValid="isValid"
   >
     <v-container>
       <v-row>
         <v-col cols="12">
-          <v-text-field v-model="nuevo.nombre" label="Nombre"></v-text-field>
+          <v-text-field v-model="model.nombre" label="Nombre"></v-text-field>
         </v-col>
         <v-col cols="12">
           <v-autocomplete
-            v-model="nuevo.unidad"
+            v-model="model.unidad"
             :items="unidades"
             label="Unidades"
             item-text="nombre"
@@ -29,25 +29,25 @@
         <v-col cols="12">
           <v-checkbox
             label="Predeterminado"
-            v-model="nuevo.predeterminado"
+            v-model="model.predeterminado"
           ></v-checkbox>
         </v-col>
         <v-col cols="12">
           <v-checkbox
             label="Para Tacon?"
-            v-model="nuevo.paraTacon"
+            v-model="model.paraTacon"
           ></v-checkbox>
         </v-col>
         <v-col>
           <v-checkbox
             label="Color segun Material?"
-            v-model="nuevo.colorSegunMaterial"
+            v-model="model.colorSegunMaterial"
           ></v-checkbox>
         </v-col>
         <v-col>
           <v-checkbox
             label="Color segun Suela?"
-            v-model="nuevo.colorSegunSuela"
+            v-model="model.colorSegunSuela"
           ></v-checkbox>
         </v-col>
       </v-row>
@@ -55,12 +55,15 @@
   </vista>
 </template>
 
-
 <script>
 import Vista from "../../components/Vista.vue";
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions, mapMutations } =
-  createNamespacedHelpers("avillo");
+const {
+  mapGetters,
+  mapActions,
+  mapMutations,
+  mapState,
+} = createNamespacedHelpers("avillo");
 
 export default {
   components: {
@@ -111,31 +114,26 @@ export default {
   }),
 
   computed: {
-    ...mapGetters(["avillos", "unidades", "nuevoAvillo","isValid"]),
-    nuevo: {
-      set(avillo) {
-        this.setNuevoAvillo(avillo);
-        return avillo;
+    ...mapGetters(["unidades", "avillo", "isValid"]),
+    ...mapState(["items"]),
+    model: {
+      set(value) {
+        this.setModel(value);
+        return value;
       },
       get() {
-        return this.nuevoAvillo;
+        return this.avillo;
       },
     },
   },
 
-  watch: {},
-
-  created() {
-    this.initialize();
+  async created() {
+    await this.findAll();
   },
 
   methods: {
-    ...mapActions(["getAvillos", "updateAvillo", "saveAvillo", "deleteAvillo"]),
-    ...mapMutations(["iniciarAvillo", "setNuevoAvillo"]),
-
-    async initialize() {
-      await this.getAvillos();
-    },
+    ...mapActions(["findAll", "updateOne", "save", "deleteOne"]),
+    ...mapMutations(["setModel", "resetModel"]),
   },
 };
 </script>

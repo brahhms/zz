@@ -37,9 +37,6 @@ export default new Vuex.Store({
       state.snackbar.show = true;
     },
   },
-  actions: {
-
-  },
   modules: {
     cliente: clienteStore,
     pedido: pedidoStore,

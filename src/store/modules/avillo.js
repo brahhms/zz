@@ -1,59 +1,48 @@
-import axios from 'axios'
+import axios from "axios";
 import credentials from "./credentials.js";
 
 const url = "http://localhost:5984/zapp-avillos/";
 
+// async function actualizarEnEstilo(avillo, del) {
+//   const response = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
+//     "selector": {
+//       "avillos": {
+//         "$elemMatch": {
+//           "$or": [{ "_id": avillo._id },
+//           { "nombre": avillo.nombre }]
+//         }
+//       }
+//     }
+//     ,"limit":500
+//   }, credentials.authentication);
 
-async function getAll() {
-  const response = await axios.post(`${url}_find`, {
-    "selector": {}
-    ,"limit":500
-  }, credentials.authentication);
-  return response;
-}
+//   let estilos = response.data.docs;
 
+//   estilos.forEach(estilo => {
+//     let index = estilo.avillos.findIndex(x => x._id == avillo._id || x.nombre == avillo.nombre);
+//     if (index != undefined && index != null) {
+//       estilo.avillos[index].nombre = avillo.nombre;
+//       estilo.avillos[index].colorSegunMaterial = avillo.colorSegunMaterial;
+//       if (estilo.avillos[index].unidad.nombre != avillo.unidad.nombre) {
+//         estilo.avillos[index].unidad = avillo.unidad;
+//         estilo.avillos[index].unidadConversion = avillo.unidadConversion;
+//         estilo.avillos[index].cantidadInicial = 0;
+//         estilo.avillos[index].cantidad = 0;
+//       }
+//       if (del) {
+//         estilo.avillos.splice(index, 1);
+//       }
+//     }
 
-async function actualizarEnEstilo(avillo, del) {
-  const response = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
-    "selector": {
-      "avillos": {
-        "$elemMatch": {
-          "$or": [{ "_id": avillo._id },
-          { "nombre": avillo.nombre }]
-        }
-      }
-    }
-    ,"limit":500
-  }, credentials.authentication);
+//   });
 
-  let estilos = response.data.docs;
+//   const res = await axios.post(`http://localhost:5984/zapp-estilos/_bulk_docs`, {
+//     "docs": estilos
+//   }, credentials.authentication);
 
-  estilos.forEach(estilo => {
-    let index = estilo.avillos.findIndex(x => x._id == avillo._id || x.nombre == avillo.nombre);
-    if (index != undefined && index != null) {
-      estilo.avillos[index].nombre = avillo.nombre;
-      estilo.avillos[index].colorSegunMaterial = avillo.colorSegunMaterial;
-      if (estilo.avillos[index].unidad.nombre != avillo.unidad.nombre) {
-        estilo.avillos[index].unidad = avillo.unidad;
-        estilo.avillos[index].unidadConversion = avillo.unidadConversion;
-        estilo.avillos[index].cantidadInicial = 0;
-        estilo.avillos[index].cantidad = 0;
-      }
-      if (del) {
-        estilo.avillos.splice(index, 1);
-      }
-    }
-
-  });
-
-  const res = await axios.post(`http://localhost:5984/zapp-estilos/_bulk_docs`, {
-    "docs": estilos
-  }, credentials.authentication);
-
-
-  return res;
-}
-
+//   return res;
+// }
+/*
 async function actualizarEnPlantilla(avillo, del) {
   const response = await axios.post(`http://localhost:5984/zapp-plantillas/_find`, {
     "selector": {
@@ -132,7 +121,9 @@ async function actualizarEnPlantilla(avillo, del) {
 
 
   return res;
-}
+}*/
+
+/*
 
 async function actualizarEnLinea(avillo, del) {
   const response = await axios.post(`http://localhost:5984/zapp-lineas/_find`, {
@@ -193,80 +184,82 @@ async function actualizarEnLinea(avillo, del) {
 
   return res;
 }
+*/
 
+const defaultModel = {
+  _id: undefined,
+  _rev: undefined,
+  nombre: null,
+  cantidad: 0,
+  cantidadInicial: 0,
+  unidad: {
+    nombre: "pares",
+    conversiones: [
+      {
+        nombre: "pares",
+        constante: Number(1),
+      },
+    ],
+  },
+  colorSegunMaterial: false,
+  colorSegunSuela: false,
+  unidadConversion: {
+    nombre: "pares en pliego",
+    constante: null,
+  },
+  predeterminado: false,
+  paraTacon: false,
+};
 
 export default {
   namespaced: true,
   state: {
-    nuevoAvillo: {
-      _id: undefined,
-      _rev: undefined,
-      nombre: null,
-      cantidad: 0,
-      cantidadInicial: 0,
-      unidad: {
-        nombre: "pares",
-        conversiones: [
-          {
-            nombre: "pares",
-            constante: Number(1)
-          }
-        ]
-      },
-      colorSegunMaterial: false,
-      colorSegunSuela: false,
-      unidadConversion: {
-        nombre: "pares en pliego",
-        constante: null
-      },
-      predeterminado: false,
-      paraTacon: false
-    },
-    avillos: [],
+    model: { ...defaultModel },
+    items: [],
     unidades: [
       {
         nombre: "galones",
         conversiones: [
           {
             nombre: "pares en galon",
-            constante: null
-          }
-        ]
+            constante: null,
+          },
+        ],
       },
       {
         nombre: "pares",
         conversiones: [
           {
             nombre: "pares",
-            constante: Number(1)
-          }
-        ]
+            constante: Number(1),
+          },
+        ],
       },
       {
         nombre: "pliegos",
         conversiones: [
           {
             nombre: "pares en pliego",
-            constante: null
-          }
-        ]
+            constante: null,
+          },
+        ],
       },
       {
         nombre: "yardas",
         conversiones: [
           {
             nombre: "pares en yardas",
-            constante: null
+            constante: null,
           },
           {
             nombre: "centimetros",
-            constante: Number(1 / 91.44)
+            constante: Number(1 / 91.44),
           },
           {
             nombre: "pulgadas",
-            constante: Number(1 / 36)
+            constante: Number(1 / 36),
           },
-        ]
+        ],
       },
 
       {
@@ -274,157 +267,127 @@ export default {
         conversiones: [
           {
             nombre: "pares en metros",
-            constante: null
+            constante: null,
           },
           {
             nombre: "yardas",
-            constante: Number(1 / 1.094)
+            constante: Number(1 / 1.094),
           },
           {
             nombre: "metros",
-            constante: Number(1)
+            constante: Number(1),
           },
           {
             nombre: "centimetros",
-            constante: Number(1 / 100)
+            constante: Number(1 / 100),
           },
           {
             nombre: "pulgadas",
-            constante: Number(1 / 39.37)
+            constante: Number(1 / 39.37),
           },
-        ]
+        ],
       },
-    ]
+    ],
   },
   mutations: {
-    setAvillos(state, data) {
-      state.avillos = data;
-      console.log("setAvillos");
+    setItems(state, items) {
+      state.items = items;
     },
 
-    setNuevoAvillo(state, avillo) {
-      state.nuevoAvillo = avillo;
+    setModel(state, model) {
+      state.model = model;
     },
 
-    iniciarAvillo(state) {
-      state.nuevoAvillo = {
-        _id: undefined,
-        _rev: undefined,
-        nombre: null,
-        cantidad: 0,
-        cantidadInicial: 0,
-        unidad: {
-          nombre: "pares",
-          conversiones: [
-            {
-              nombre: "pares",
-              constante: Number(1)
-            }
-          ]
-        },
-        colorSegunMaterial: false,
-        colorSegunSuela: false,
-        unidadConversion: {
-          nombre: "pares en pliego",
-          constante: null
-        },
-        predeterminado: false,
-        paraTacon: false
-      };
-    }
-
+    resetModel(state) {
+      state.model = { ...defaultModel };
+    },
   },
   actions: {
-    async getAvillos({
-      commit
-    }) {
-      const res = await axios.post(`${url}_find`, {
-        "selector": {}
-        ,"limit":500
-      }, credentials.authentication);
-      commit('setAvillos', res.data.docs);
+    async findAll({ commit }) {
+      const res = await axios.post(
+        `${url}_find`,
+        {
+          selector: {},
+          limit: 500,
+        },
+        credentials.authentication
+      );
+      if (res.statusText === "OK") commit("setItems", res.data.docs);
     },
 
-    async updateAvillo({
-      commit,
-      state
-    }) {
-
-      let update = state.nuevoAvillo;
-      //excep
-
+    async updateOne({ dispatch, state }) {
+      let update = state.model;
       update.unidadConversion = update.unidad.conversiones[0];
-      await axios.put(`${url}${update._id}/`, update, {
-        params: {
-          "rev": update._rev
+      const res = await axios.put(
+        `${url}${update._id}/`,
+        update,
+        {
+          params: {
+            rev: update._rev,
+          },
+          auth: credentials.authentication.auth,
+          headers: credentials.authentication.headers,
         },
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-      const response = await getAll();
-      commit('setAvillos', response.data.docs);
-      await actualizarEnPlantilla(update, false);
-      await actualizarEnLinea(update, false);
-      await actualizarEnEstilo(update, false);
+        credentials.authentication
+      );
+      if (res.data.ok) await dispatch("findAll");
+      //await actualizarEnPlantilla(update, false);
+      //await actualizarEnLinea(update, false);
+      //await actualizarEnEstilo(update, false);
       //await actualizarEnPedidos(update);
     },
 
-    async saveAvillo({
-      commit,
-      state
-    }) {
-      let nuevo = state.nuevoAvillo;
+    async save({ dispatch, state }) {
+      let nuevo = state.model;
       nuevo.unidadConversion = nuevo.unidad.conversiones[0];
-      let res = await axios.post(`${url}`, nuevo, {
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-      if (res.data.ok) {
-        console.log("ok");
-        const response = await getAll();
-        commit('setAvillos', response.data.docs);
-      }
-
-
+      const res = await axios.post(
+        `${url}`,
+        nuevo,
+        {
+          auth: credentials.authentication.auth,
+          headers: credentials.authentication.headers,
+        },
+        credentials.authentication
+      );
+      if (res.data.ok) await dispatch("findAll");
     },
 
-    async deleteAvillo({
-      commit,
-      state
-    }) {
-      let del = state.nuevoAvillo;
-      await axios.delete(`${url}${del._id}`, {
-        params: {
-          "rev": del._rev
+    async deleteOne({ dispatch, state }) {
+      let del = state.model;
+      const res = await axios.delete(
+        `${url}${del._id}`,
+        {
+          params: {
+            rev: del._rev,
+          },
+          auth: credentials.authentication.auth,
+          headers: credentials.authentication.headers,
         },
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
+        credentials.authentication
+      );
 
-      const response = await getAll();
-      commit('setAvillos', response.data.docs);
-      await actualizarEnPlantilla(del, true);
-      await actualizarEnLinea(del, true);
-      await actualizarEnEstilo(del, true);
+      if (res.data.ok) await dispatch("findAll");
+      //await actualizarEnPlantilla(del, true);
+      //await actualizarEnLinea(del, true);
+      //await actualizarEnEstilo(del, true);
       // await actualizarEnPedidos(del);
-    }
+    },
   },
   getters: {
-    avillos: state => state.avillos,
-    unidades: state => state.unidades,
-
-    nuevoAvillo: state => state.nuevoAvillo,
-    isValid: state => {
-      if (state.nuevoAvillo.nombre != null &&
-        state.nuevoAvillo.nombre != ''&&
-        state.nuevoAvillo.nombre != ' '&&
-        state.nuevoAvillo.unidad !=null 
-        ) {
+    avillos: (state) => state.items,
+    unidades: (state) => state.unidades,
+    avillo: (state) => state.model,
+    isValid: (state) => {
+      if (
+        state.model.nombre != null &&
+        state.model.nombre != "" &&
+        state.model.nombre != " " &&
+        state.model.unidad != null
+      ) {
         return true;
       } else {
-        return false
+        return false;
       }
-
     },
-  }
-}
+  },
+};

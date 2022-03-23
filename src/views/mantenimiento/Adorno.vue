@@ -1,25 +1,25 @@
 <template>
   <vista
-    :viewName="'Adornos'"
-    :title="'adorno'"
+    viewName='Adornos'
+    title='adorno'
     :headers="headers"
-    :initialize="initialize"
-    :items="adornos"
-    :saveItem="saveAdorno"
-    :updateItem="updateAdorno"
-    :deleteItem="deleteAdorno"
-    :iniciar="iniciarAdorno"
-    :setNuevoItem="setNuevoAdorno"
+    :initialize="findAll"
+    :items="items"
+    :saveItem="save"
+    :updateItem="updateOne"
+    :deleteItem="deleteOne"
+    :iniciar="resetModel"
+    :setNuevoItem="setModel"
     :isValid="isValid"
   >
     <v-container>
       <v-row>
         <v-col cols="12">
-          <v-text-field v-model="nuevo.nombre" label="Nombre"></v-text-field>
+          <v-text-field v-model="model.nombre" label="Nombre"></v-text-field>
         </v-col>
         <v-col cols="12">
           <v-autocomplete
-            v-model="nuevo.unidad"
+            v-model="model.unidad"
             :items="unidades"
             label="Unidades"
             item-text="nombre"
@@ -29,7 +29,7 @@
         <v-col>
           <v-checkbox
             label="Color segun Material?"
-            v-model="nuevo.colorSegunMaterial"
+            v-model="model.colorSegunMaterial"
           ></v-checkbox>
         </v-col>
       </v-row>
@@ -40,7 +40,7 @@
 <script>
 import Vista from "../../components/Vista.vue";
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions, mapMutations } =
+const { mapGetters, mapActions, mapMutations, mapState } =
   createNamespacedHelpers("adorno");
 
 export default {
@@ -72,32 +72,26 @@ export default {
   }),
 
   computed: {
-    ...mapGetters(["adornos", "nuevoAdorno", "unidades","isValid"]),
-
-    nuevo: {
-      set(adorno) {
-        this.setNuevoAdorno(adorno);
-        return adorno;
+    ...mapGetters(["adorno", "unidades", "isValid"]),
+    ...mapState(["items"]),
+    model: {
+      set(value) {
+        this.setModel(value);
+        return value;
       },
       get() {
-        return this.nuevoAdorno;
+        return this.adorno;
       },
     },
   },
 
-  watch: {},
-
-  created() {
-    this.initialize();
+  async created() {
+    await this.findAll();
   },
 
   methods: {
-    ...mapActions(["getAdornos", "updateAdorno", "saveAdorno", "deleteAdorno"]),
-    ...mapMutations(["setNuevoAdorno", "iniciarAdorno"]),
-
-    async initialize() {
-      await this.getAdornos();
-    },
+    ...mapActions(["findAll", "updateOne", "save", "deleteOne"]),
+    ...mapMutations(["setModel", "resetModel"]),
   },
 };
 </script>
