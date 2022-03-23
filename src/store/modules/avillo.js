@@ -1,7 +1,7 @@
-import axios from "axios";
+import { axios_client } from "../../plugins/axios.js";
 import credentials from "./credentials.js";
 
-const url = "http://localhost:5984/zapp-avillos/";
+const uri = "zapp-avillos/";
 
 // async function actualizarEnEstilo(avillo, del) {
 //   const response = await axios.post(`http://localhost:5984/zapp-estilos/_find`, {
@@ -304,32 +304,15 @@ export default {
   },
   actions: {
     async findAll({ commit }) {
-      const res = await axios.post(
-        `${url}_find`,
-        {
-          selector: {},
-          limit: 500,
-        },
-        credentials.authentication
-      );
+      const res = await axios_client(`${uri}_find`);
       if (res.statusText === "OK") commit("setItems", res.data.docs);
     },
 
     async updateOne({ dispatch, state }) {
       let update = state.model;
       update.unidadConversion = update.unidad.conversiones[0];
-      const res = await axios.put(
-        `${url}${update._id}/`,
-        update,
-        {
-          params: {
-            rev: update._rev,
-          },
-          auth: credentials.authentication.auth,
-          headers: credentials.authentication.headers,
-        },
-        credentials.authentication
-      );
+      const res = await axios_client.put(`${uri}${update._id}/`, update);
+
       if (res.data.ok) await dispatch("findAll");
       //await actualizarEnPlantilla(update, false);
       //await actualizarEnLinea(update, false);
@@ -340,31 +323,17 @@ export default {
     async save({ dispatch, state }) {
       let nuevo = state.model;
       nuevo.unidadConversion = nuevo.unidad.conversiones[0];
-      const res = await axios.post(
-        `${url}`,
-        nuevo,
-        {
-          auth: credentials.authentication.auth,
-          headers: credentials.authentication.headers,
-        },
-        credentials.authentication
-      );
+      const res = await axios_client.post(`${uri}`, nuevo);
       if (res.data.ok) await dispatch("findAll");
     },
 
     async deleteOne({ dispatch, state }) {
       let del = state.model;
-      const res = await axios.delete(
-        `${url}${del._id}`,
-        {
-          params: {
-            rev: del._rev,
-          },
-          auth: credentials.authentication.auth,
-          headers: credentials.authentication.headers,
+      const res = await axios_client.delete(`${uri}${del._id}`, {
+        params: {
+          rev: del._rev,
         },
-        credentials.authentication
-      );
+      });
 
       if (res.data.ok) await dispatch("findAll");
       //await actualizarEnPlantilla(del, true);
