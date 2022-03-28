@@ -1,6 +1,4 @@
 import { axios_client } from "../../plugins/axios.js";
-import credentials from "./credentials.js";
-
 const uri = "zapp-avillos/";
 
 // async function actualizarEnEstilo(avillo, del) {

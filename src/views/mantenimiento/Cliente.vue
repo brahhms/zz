@@ -1,31 +1,31 @@
 <template>
   <vista
     :viewName="'Clientes'"
-    :title="'cliente'"
+    title='cliente'
     :headers="headers"
-    :initialize="initialize"
-    :items="clientes"
-    :saveItem="saveCliente"
-    :updateItem="updateCliente"
-    :deleteItem="deleteCliente"
-    :iniciar="iniciarCliente"
-    :setNuevoItem="setNuevoCliente"
+    :initialize="findAll"
+    :items="items"
+    :saveItem="save"
+    :updateItem="updateOne"
+    :deleteItem="deleteOne"
+    :iniciar="resetModel"
+    :setNuevoItem="setModel"
     :isValid="isValid"
   >
     <v-container>
       <v-row>
         <v-col cols="12">
-          <v-text-field v-model="nuevo.nombre" label="Nombre"></v-text-field>
+          <v-text-field v-model="model.nombre" label="Nombre"></v-text-field>
         </v-col>
         <v-col cols="12">
           <v-text-field
-            v-model="nuevo.documento"
+            v-model="model.documento"
             label="Documento"
           ></v-text-field>
         </v-col>
         <v-col cols="4">
           <v-autocomplete
-            v-model="nuevo.codigoPais"
+            v-model="model.codigoPais"
             :items="codigos"
             label="Codigo"
             return-object
@@ -34,13 +34,13 @@
         </v-col>
         <v-col cols="8">
           <v-text-field
-            v-model="nuevo.telefono"
+            v-model="model.telefono"
             label="Telefono"
           ></v-text-field>
         </v-col>
         <v-col cols="12">
           <v-text-field
-            v-model="nuevo.direccion"
+            v-model="model.direccion"
             label="Direccion"
           ></v-text-field>
         </v-col>
@@ -49,12 +49,12 @@
   </vista>
 </template>
 
-
 <script>
 import Vista from "../../components/Vista.vue";
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions, mapMutations } =
-  createNamespacedHelpers("cliente");
+const { mapGetters, mapActions, mapMutations, mapState } = createNamespacedHelpers(
+  "cliente"
+);
 
 export default {
   components: {
@@ -89,40 +89,31 @@ export default {
 
       { text: "Acciones", value: "actions", sortable: false },
     ],
-
   }),
 
   computed: {
-    ...mapGetters(["clientes", "nuevoCliente", "codigos","isValid"]),
-    nuevo: {
-      set(cliente) {
-        this.setNuevoCliente(cliente);
-        return cliente;
+    ...mapGetters(["cliente", "codigos", "isValid"]),
+    ...mapState(["items"]),
+    model: {
+      set(value) {
+        this.setModel(value);
+        return value;
       },
       get() {
-        return this.nuevoCliente;
+        return this.cliente;
       },
     },
   },
 
   watch: {},
 
-  created() {
-    this.initialize();
+  async created() {
+    await this.findAll();
   },
 
   methods: {
-    ...mapActions([
-      "getClientes",
-      "updateCliente",
-      "saveCliente",
-      "deleteCliente",
-    ]),
-    ...mapMutations(["iniciarCliente", "setNuevoCliente"]),
-
-    async initialize() {
-      await this.getClientes();
-    },
+    ...mapActions(["findAll", "updateOne", "save", "deleteOne"]),
+    ...mapMutations(["resetModel", "setModel"]),
   },
 };
 </script>

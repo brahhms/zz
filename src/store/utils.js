@@ -1,6 +1,3 @@
-
-
-
 function (doc, req) {
   if (!doc) {
     let datos = JSON.parse(req.body);

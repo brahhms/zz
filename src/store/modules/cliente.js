@@ -1,150 +1,123 @@
-import axios from 'axios'
-import credentials from "./credentials.js";
-
-const url = "http://localhost:5984/zapp-clientes/";
+import { axios_client } from "../../plugins/axios.js";
+const uri = "zapp-items/";
 
 async function getAll() {
-  const response = await axios.post(`${url}_find`, {
-    "selector": {},"limit":500
-  }, credentials.authentication);
+  const response = await axios.post(
+    `${url}_find`,
+    {
+      selector: {},
+      limit: 500,
+    },
+    credentials.authentication
+  );
   return response;
 }
 
+const defaultModel = {
+  _id: undefined,
+  _rev: undefined,
+  nombre: null,
+  codigoPais: null,
+  telefono: null,
+  direccion: null,
+  documento: null,
+};
 
 export default {
   namespaced: true,
   state: {
-    nuevoCliente: {
-      _id: undefined,
-      _rev: undefined,
-      nombre: null,
-      codigoPais: null,
-      telefono: null,
-      direccion: null,
-      documento: null
-    },
-    clientes: [],
+    model: { ...defaultModel },
+    items: [],
     codigos: [
       {
         codigo: "+501",
-        pais: "Belice"
-      }, {
+        pais: "Belice",
+      },
+      {
         codigo: "+502",
-        pais: "Guatemala"
-      }, {
+        pais: "Guatemala",
+      },
+      {
         codigo: "+503",
-        pais: "El Salvador"
+        pais: "El Salvador",
       },
       {
         codigo: "+504",
-        pais: "Honduras"
+        pais: "Honduras",
       },
       {
         codigo: "+505",
-        pais: "Nicaragua"
+        pais: "Nicaragua",
       },
       {
         codigo: "+506",
-        pais: "Costa Rica"
+        pais: "Costa Rica",
       },
       {
         codigo: "+507",
-        pais: "Panama"
+        pais: "Panama",
       },
-    ]
+    ],
   },
   mutations: {
-    setClientes(state, data) {
-      state.clientes = data;
-      console.log("setClientes");
+    setItems(state, data) {
+      state.items = data;
     },
 
-    setNuevoCliente(state, cliente) {
-      state.nuevoCliente = cliente;
+    setModel(state, val) {
+      state.model = val;
     },
 
-    iniciarCliente(state) {
-      state.nuevoCliente = {
-        _id: undefined,
-        _rev: undefined,
-        nombre: null
-      };
-    }
-
+    resetModel(state) {
+      state.model = { ...defaultModel };
+    },
   },
   actions: {
-    async getClientes({
-      commit
-    }) {
-      const res = await axios.post(`${url}_find`, {
-        "selector": {},"limit":500
-      }, credentials.authentication);
-      commit('setClientes', res.data.docs);
+    async findAll({ commit }) {
+      const res = await axios_client(`${uri}_find`);
+      if (res.statusText === "OK") commit("setItems", res.data.docs);
     },
 
-    async updateCliente({
-      commit,
-      state
-    }) {
-      await axios.put(`${url}${state.nuevoCliente._id}/`, state.nuevoCliente, {
+    async updateOne({ dispatch, state }) {
+      let update = state.model;
+      update.unidadConversion = update.unidad.conversiones[0];
+      const res = await axios_client.put(`${uri}${update._id}/`, update);
+
+      if (res.data.ok) await dispatch("findAll");
+    },
+
+    async save({ dispatch, state }) {
+      let nuevo = state.model;
+      const res = await axios_client.post(`${uri}`, nuevo);
+      if (res.data.ok) await dispatch("findAll");
+    },
+
+    async deleteOne({ dispatch, state }) {
+      let del = state.model;
+      const res = await axios_client.delete(`${uri}${del._id}`, {
         params: {
-          "rev": state.nuevoCliente._rev
+          rev: del._rev,
         },
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-      const response = await getAll();
-      commit('setClientes', response.data.docs);
+      });
+
+      if (res.data.ok) await dispatch("findAll");
     },
-
-    async saveCliente({
-      commit,
-      state
-    }) {
-      let res = await axios.post(`${url}`, state.nuevoCliente, {
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-      if (res.data.ok) {
-        console.log("ok");
-        const response = await getAll();
-        commit('setClientes', response.data.docs);
-      }
-
-
-    },
-
-    async deleteCliente({
-      commit,
-      state
-    }) {
-      await axios.delete(`${url}${state.nuevoCliente._id}`, {
-        params: {
-          "rev": state.nuevoCliente._rev
-        },
-        "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
-      }, credentials.authentication);
-
-      const response = await getAll();
-      commit('setClientes', response.data.docs);
-    }
   },
   getters: {
-    clientes: state => state.clientes,
-    codigos: state => state.codigos,
+    clientes: (state) => state.items,
+    codigos: (state) => state.codigos,
 
-    nuevoCliente: state => state.nuevoCliente,
-    isValid: state => {
-      if (state.nuevoCliente.nombre != null &&
-        state.nuevoCliente.nombre != ''&&
-        state.nuevoCliente.nombre != ' '
-        ) {
+    cliente: (state) => state.model,
+    isValid: (state) => {
+      if (
+        state.model.nombre != null &&
+        state.model.nombre != "" &&
+        state.model.nombre != " "
+      ) {
         return true;
       } else {
-        return false
+        return false;
       }
-
     },
-  }
-}
+  },
+};
